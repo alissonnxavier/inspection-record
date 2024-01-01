@@ -7,6 +7,11 @@ body,
 :root{
   height: 100%;
 }
+
+::selection{
+  background-color: aqua;
+  text: white
+}
  
 @layer base {
   :root {

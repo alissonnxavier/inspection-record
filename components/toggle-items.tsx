@@ -26,6 +26,7 @@ export const ToggleItems: React.FC<ToggleItemsProps> = ({ prefixResult }) => {
 
     return (
         <ToggleGroup
+            value=""
             type="single"
             onValueChange={(value) => { setPrefix(value) }}
         >

@@ -3,7 +3,6 @@
 import * as React from "react"
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons"
 import { useTheme } from "next-themes"
-
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -13,29 +12,45 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { signOut } from "next-auth/react"
 import toast from "react-hot-toast"
+import { Badge } from "./ui/badge";
+import { useSession } from "next-auth/react";
 
 export const Navbar = () => {
     const { setTheme } = useTheme();
+    const { data: session } = useSession();
 
-    const handleLogOut = ()=>{
-        signOut();
-        toast.success(' Usuario deslogado.', {
-            style: {
-              border: '3px solid white',
-              padding: '30px',
-              color: 'white',
-              backgroundColor: '#020d04'
-  
-            },
-            iconTheme: {
-              primary: 'white',
-              secondary: '#020d04',
-            },
-          });
+    const handleLogOut = () => {
+
+        try {
+            toast.success(' Usuario deslogado.', {
+                style: {
+                    border: '3px solid white',
+                    padding: '30px',
+                    color: 'white',
+                    backgroundColor: '#020d04'
+
+                },
+                iconTheme: {
+                    primary: 'white',
+                    secondary: '#020d04',
+                },
+            });
+            signOut();
+        } catch (error) {
+
+        }
     }
 
     return (
         <div className="flex">
+
+            <Badge 
+            variant='destructive'
+                className="mr-5"
+            >
+                Inspetor {session?.user?.name}
+            </Badge>
+
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">
@@ -56,9 +71,9 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <Button 
-            onClick={() => { signOut() }}
-            className="ml-5"
+            <Button
+                onClick={() => { handleLogOut() }}
+                className="ml-5"
             >
                 Sair
             </Button>

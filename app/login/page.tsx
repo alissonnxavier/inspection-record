@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import toast from 'react-hot-toast';
+import { ToasterProvider } from '@/components/providers/toast-provider';
 
 const LoginForm = () => {
 
@@ -81,7 +82,7 @@ const LoginForm = () => {
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Fazer Login</CardTitle>
-          <CardDescription>Faça login para fazer os registros de inspeção.</CardDescription>
+          <CardDescription>Faça login para fazer registros de inspeção.</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
