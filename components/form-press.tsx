@@ -204,9 +204,9 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <div className='flex justify-center m-4'>
-                                                            <FormLabel>Resultado:</FormLabel>
+                                                                <FormLabel>Resultado:</FormLabel>
                                                             </div>
-                                                                                                                        <ToggleGroup
+                                                            <ToggleGroup
                                                                 type="single"
                                                                 onValueChange={field.onChange} defaultValue={field.value}>
                                                                 <ToggleGroupItem
@@ -235,13 +235,13 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
 
                             </CardContent>
                             <CardFooter>
-                                <div className='flex w-[390px] justify-center'>
-                                <Button 
-                                type='submit'
-                                className='flex w-[370px]'
-                                >
-                                    Registrar
-                                </Button>
+                                <div className='flex w-[390px] justify-center '>
+                                    <Button
+                                        type='submit'
+                                        className='flex w-[320px] '
+                                    >
+                                        Registrar
+                                    </Button>
                                 </div>
                             </CardFooter>
                         </Card>

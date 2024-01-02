@@ -34,10 +34,10 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-    const body = await req.json();
-    const { name } = body;
+    
+    const res = await db.press.findMany();
 
-    return NextResponse.json(name);
+    return NextResponse.json(res);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
