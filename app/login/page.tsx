@@ -46,12 +46,12 @@ const LoginForm = () => {
             border: '3px solid white',
             padding: '30px',
             color: 'white',
-            backgroundColor: '#b80f3c'
+            backgroundColor: '#109c2e'
 
           },
           iconTheme: {
             primary: 'white',
-            secondary: '#b80f3c',
+            secondary: '#109c2e',
           },
         });
 

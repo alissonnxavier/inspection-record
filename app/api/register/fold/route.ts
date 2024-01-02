@@ -9,20 +9,18 @@ export async function POST(
     const body = await req.json();
     const { prefix, item, version, odf, amount, qtd, result } = body;
     const product = prefix + item;
-
-
-    const press = await db.press.create({
+    const res = await db.fold.create({
       data: {
         item: product,
         version,
         odf,
         amount,
         qtd,
-        result
+        result,
       }
     });
 
-    return NextResponse.json(press);
+    return NextResponse.json(res);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
@@ -34,8 +32,8 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-    
-    const res = await db.press.findMany();
+
+    const res = await db.fold.findMany();
 
     return NextResponse.json(res);
   } catch (error) {

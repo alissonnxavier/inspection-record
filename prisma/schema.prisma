@@ -37,4 +37,48 @@ model Punching {
   createdAt DateTime @default(now()) @db.Date
 }
 
+model Threader {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  version   String
+  odf       String
+  amount    String
+  qtd       String
+  result    String
+  createdAt DateTime @default(now()) @db.Date
+  process   String
+}
 
+model Soldier {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  version   String
+  odf       String
+  amount    String
+  qtd       String
+  result    String
+  createdAt DateTime @default(now()) @db.Date
+  process   String
+}
+
+model Fold {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  version   String
+  odf       String
+  amount    String
+  qtd       String
+  result    String
+  createdAt DateTime @default(now()) @db.Date
+}
+
+model Finishing {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  version   String
+  odf       String
+  amount    String
+  qtd       String
+  result    String
+  createdAt DateTime @default(now()) @db.Date
+}

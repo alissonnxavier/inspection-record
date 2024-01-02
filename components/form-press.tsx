@@ -83,12 +83,12 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                     border: '3px solid white',
                     padding: '30px',
                     color: 'white',
-                    backgroundColor: '#a80d1a'
+                    backgroundColor: '#a80a1f'
 
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#a80d1a',
+                    secondary: '#a80a1f',
                 },
             });
         }

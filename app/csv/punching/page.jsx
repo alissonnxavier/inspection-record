@@ -11,6 +11,7 @@ import { columns } from "@/components/dataTable/colums";
 import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { GridLoader } from 'react-spinners';
 
 const Table = () => {
 
@@ -31,7 +32,7 @@ const Table = () => {
 
   // Contains the column headers and table data in the required format for CSV
   const csvData = [
-    ["ID", "item", "version", "thickness",  "odf", "amount", "qtd", "result", "createdAt"],
+    ["ID", "item", "version", "thickness", "odf", "amount", "qtd", "result", "createdAt"],
     ...usersData.map(({ id, item, version, thickness, odf, amount, qtd, result, createdAt }) => [
       id,
       item,
@@ -46,11 +47,19 @@ const Table = () => {
   ];
 
   if (status === "loading") {
-    return <div>Loading</div>
+    return (
+      <>
+        <div className="flex justify-center p-10">
+          <Navbar />
+        </div>
+        <div className="flex h-5/6 justify-center items-center">
+          <GridLoader color="#9e0837" size={100} />
+        </div>
+      </>
+    )
   }
   if (status === 'authenticated') {
-
-  }else{
+  } else {
     redirect('/login')
   }
 

@@ -31,6 +31,15 @@ import {
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
 import { redirect, useRouter } from 'next/navigation';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -40,6 +49,7 @@ const formSchema = z.object({
     qtd: z.string().min(1),
     result: z.string().min(1),
     prefix: z.string().min(1),
+    process: z.string().min(1),
 
 });
 
@@ -57,7 +67,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
 
     const onSubmit = async (data: PressFormValues) => {
         try {
-            const res = await axios.post('/api/register', data);
+            const res = await axios.post('/api/register/soldier', data);
             toast.success('Registro salvo com sucesso!!!', {
                 style: {
                     border: '3px solid white',
@@ -83,12 +93,12 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                     border: '3px solid white',
                     padding: '30px',
                     color: 'white',
-                    backgroundColor: '#109c2e'
+                    backgroundColor: '#a80a1f'
 
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#109c2e',
+                    secondary: '#a80a1f',
                 },
             });
         }
@@ -104,7 +114,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                 <div className="flex justify-between">
                                     <CardTitle>
                                         <Badge className="p-1 text-2xl">
-                                            Prensa
+                                            Solda
                                         </Badge>
                                     </CardTitle>
                                     <div>
@@ -129,13 +139,16 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <ToggleGroup type="single" onValueChange={field.onChange} defaultValue={field.value}>
-                                                                    <ToggleGroupItem value="ME." aria-label="Toggle bold">
+                                                                    <ToggleGroupItem value="ER." aria-label="Toggle ">
+                                                                        ER.
+                                                                    </ToggleGroupItem>
+                                                                    <ToggleGroupItem value="ME." aria-label="Toggle ">
                                                                         ME.
                                                                     </ToggleGroupItem>
-                                                                    <ToggleGroupItem value="PU." aria-label="Toggle italic">
+                                                                    <ToggleGroupItem value="PU." aria-label="Toggle ">
                                                                         PU.
                                                                     </ToggleGroupItem>
-                                                                    <ToggleGroupItem value="ENP." aria-label="Toggle strikethrough">
+                                                                    <ToggleGroupItem value="ENP." aria-label="Toggle ">
                                                                         ENP.
                                                                     </ToggleGroupItem>
                                                                 </ToggleGroup>
@@ -151,7 +164,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                             <FormLabel>Item:</FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    type='number' placeholder='Codigo do item' {...field}
+                                                                    type='number' placeholder='_,_,_,_,_' {...field}
                                                                 />
                                                             </FormControl>
                                                         </FormItem>
@@ -167,8 +180,36 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                             <FormLabel>Versao:</FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    type='number' placeholder='Versao do item' {...field}
+                                                                    type='number' placeholder='Revisão' {...field}
                                                                 />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name='process'
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Processo:</FormLabel>
+                                                            <FormControl>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    value={field.value}
+                                                                    defaultValue={field.value}
+                                                                >
+                                                                    <SelectTrigger className="w-[150px]">
+                                                                        <SelectValue placeholder="Selecione o processo" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectGroup>
+                                                                            <SelectLabel>Selecione o processo</SelectLabel>
+                                                                            <SelectItem value="Solda ponto">Solda ponto</SelectItem>
+                                                                            <SelectItem value="Solda MIG">Solda MIG</SelectItem>
+                                                                            <SelectItem value="Solda TIG">Solda TIG</SelectItem>
+                                                                        </SelectGroup>
+                                                                    </SelectContent>
+                                                                </Select>
                                                             </FormControl>
                                                         </FormItem>
                                                     )}

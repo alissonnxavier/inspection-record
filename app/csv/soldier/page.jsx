@@ -11,6 +11,7 @@ import { columns } from "@/components/dataTable/colums";
 import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { GridLoader } from 'react-spinners';
 
 const Table = () => {
 
@@ -18,7 +19,7 @@ const Table = () => {
   const [usersData, setUsersData] = useState([]);
   const handleSubmit = async () => {
     try {
-      axios.get('/api/register')
+      axios.get('/api/register/soldier')
         .then((response) => { setUsersData(response.data) });
     } catch (error) {
       console.error(error);
@@ -45,11 +46,20 @@ const Table = () => {
   ];
 
   if (status === "loading") {
-    return <div>Loading</div>
+    return (
+      <>
+        <div className="flex justify-center p-10">
+          <Navbar />
+        </div>
+        <div className="flex h-5/6 justify-center items-center">
+          <GridLoader color="#9e0837" size={100} />
+        </div>
+      </>
+    )
   }
   if (status === 'authenticated') {
 
-  }else{
+  } else {
     redirect('/login')
   }
 

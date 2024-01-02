@@ -7,22 +7,21 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, odf, amount, qtd, result } = body;
+    const { prefix, item, version, odf, amount, qtd, result, process } = body;
     const product = prefix + item;
-
-
-    const press = await db.press.create({
+    const res = await db.threader.create({
       data: {
         item: product,
         version,
         odf,
         amount,
         qtd,
-        result
+        result,
+        process,
       }
     });
 
-    return NextResponse.json(press);
+    return NextResponse.json(res);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
@@ -35,7 +34,7 @@ export async function GET(
 ) {
   try {
     
-    const res = await db.press.findMany();
+    const res = await db.threader.findMany();
 
     return NextResponse.json(res);
   } catch (error) {

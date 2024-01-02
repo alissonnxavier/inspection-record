@@ -31,6 +31,15 @@ import {
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
 import { redirect, useRouter } from 'next/navigation';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -40,6 +49,7 @@ const formSchema = z.object({
     qtd: z.string().min(1),
     result: z.string().min(1),
     prefix: z.string().min(1),
+    process: z.string().min(1),
 
 });
 
@@ -57,7 +67,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
 
     const onSubmit = async (data: PressFormValues) => {
         try {
-            const res = await axios.post('/api/register', data);
+            const res = await axios.post('/api/register/threader', data);
             toast.success('Registro salvo com sucesso!!!', {
                 style: {
                     border: '3px solid white',
@@ -83,12 +93,11 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                     border: '3px solid white',
                     padding: '30px',
                     color: 'white',
-                    backgroundColor: '#109c2e'
-
+                    backgroundColor: '#a80a1f'
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#109c2e',
+                    secondary: '#a80a1f',
                 },
             });
         }
@@ -104,7 +113,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                 <div className="flex justify-between">
                                     <CardTitle>
                                         <Badge className="p-1 text-2xl">
-                                            Prensa
+                                            Rosqueadeira
                                         </Badge>
                                     </CardTitle>
                                     <div>
@@ -167,8 +176,35 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                             <FormLabel>Versao:</FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    type='number' placeholder='Versao do item' {...field}
+                                                                    type='number' placeholder='Revisão' {...field}
                                                                 />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name='process'
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Processo:</FormLabel>
+                                                            <FormControl>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    value={field.value}
+                                                                    defaultValue={field.value}
+                                                                >
+                                                                    <SelectTrigger className="w-[150px]">
+                                                                        <SelectValue placeholder="Selecione o processo" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectGroup>
+                                                                            <SelectLabel>Selecione o processo</SelectLabel>
+                                                                            <SelectItem value="Rosca">Rosca</SelectItem>
+                                                                            <SelectItem value="Escareado">Escareado</SelectItem>
+                                                                        </SelectGroup>
+                                                                    </SelectContent>
+                                                                </Select>
                                                             </FormControl>
                                                         </FormItem>
                                                     )}

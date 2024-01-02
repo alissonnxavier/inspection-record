@@ -40,7 +40,6 @@ const formSchema = z.object({
     qtd: z.string().min(1),
     result: z.string().min(1),
     prefix: z.string().min(1),
-
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -57,7 +56,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
 
     const onSubmit = async (data: PressFormValues) => {
         try {
-            const res = await axios.post('/api/register', data);
+            const res = await axios.post('/api/register/fold', data);
             toast.success('Registro salvo com sucesso!!!', {
                 style: {
                     border: '3px solid white',
@@ -83,12 +82,12 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                     border: '3px solid white',
                     padding: '30px',
                     color: 'white',
-                    backgroundColor: '#109c2e'
+                    backgroundColor: '#a80a1f'
 
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#109c2e',
+                    secondary: '#a80a1f',
                 },
             });
         }
@@ -104,7 +103,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                 <div className="flex justify-between">
                                     <CardTitle>
                                         <Badge className="p-1 text-2xl">
-                                            Prensa
+                                            Dobra
                                         </Badge>
                                     </CardTitle>
                                     <div>

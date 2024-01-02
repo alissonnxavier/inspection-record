@@ -77,22 +77,22 @@ export function Menu() {
                                     </a>
                                 </NavigationMenuLink>
                             </li>
-                            <ListItem href="/csv/prensa" title="Planilha Prensa">
+                            <ListItem href="/csv/press" title="Planilha Prensa">
                                 ODF, codigos, resultados e etc...
                             </ListItem>
-                            <ListItem href="/csv/puncionadeira" title="Planilha Puncionadeira">
+                            <ListItem href="/csv/punching" title="Planilha Puncionadeira">
                                 ODF, codigos, resultados e etc...
                             </ListItem>
-                            <ListItem href="/csv/rosqueadeira" title="Planilha Rosqueadeira">
+                            <ListItem href="/csv/threader" title="Planilha Rosqueadeira">
                                 ODF, codigos, resultados e etc...
                             </ListItem>
-                            <ListItem href="/csv/dobra" title="Planilha Dobra">
+                            <ListItem href="/csv/fold" title="Planilha Dobra">
                                 ODF, codigos, resultados e etc...
                             </ListItem>
-                            <ListItem href="/csv/solda" title="Planilha Solda">
+                            <ListItem href="/csv/soldier" title="Planilha Solda">
                                 ODF, codigos, resultados e etc...
                             </ListItem>
-                            <ListItem href="/csv/acabamento" title="Planilha Acabamento">
+                            <ListItem href="/csv/finishing" title="Planilha Acabamento">
                                 ODF, codigos, resultados e etc...
                             </ListItem>
 
