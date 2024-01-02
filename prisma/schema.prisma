@@ -22,10 +22,19 @@ model Press {
   amount    String
   qtd       String
   result    String
-  createdAt DateTime @default(now()) @db.Timestamp
+  createdAt DateTime @default(now()) @db.Date
 }
 
-model Test {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+model Punching {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  version   String
+  thickness String
+  odf       String
+  amount    String
+  qtd       String
+  result    String
+  createdAt DateTime @default(now()) @db.Date
 }
+
+

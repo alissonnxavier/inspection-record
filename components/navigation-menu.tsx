@@ -60,35 +60,45 @@ export function Menu() {
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                        <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                            <li className="row-span-3">
-                                <NavigationMenuLink asChild>
+                        <ul className="grid   md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                            <li className="row-span-6">
+                                <NavigationMenuLink asChild className="justify-center align-middle items-center">
                                     <a
-                                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-1 no-underline outline-none focus:shadow-md"
                                         href="/"
                                     >
                                         <FcInspection className="h-32 w-32" />
                                         <div className="mb-2 mt-4 text-lg font-medium">
                                             Formularios
                                         </div>
-                                        <p className="text-sm leading-tight text-muted-foreground">
-                                            Prensa, Puncionadeira, Rosqueadeira, Dobra e acabamento.
+                                        <p className="text-sm leading-tight text-muted-foreground p-1">
+                                            Prensa, Puncionadeira, Dobra, Rosqueadeira, Solda e Acabamento.
                                         </p>
                                     </a>
                                 </NavigationMenuLink>
                             </li>
-                            <ListItem href="/csv" title="Planilha prensa">
-                                Codigos, odf, resultados e etc...
+                            <ListItem href="/csv/prensa" title="Planilha Prensa">
+                                ODF, codigos, resultados e etc...
                             </ListItem>
-                            <ListItem href="/docs/installation" title="Installation">
-                                How to install dependencies and structure your app.
+                            <ListItem href="/csv/puncionadeira" title="Planilha Puncionadeira">
+                                ODF, codigos, resultados e etc...
                             </ListItem>
-                            <ListItem href="/docs/primitives/typography" title="Typography">
-                                Styles for headings, paragraphs, lists...etc
+                            <ListItem href="/csv/rosqueadeira" title="Planilha Rosqueadeira">
+                                ODF, codigos, resultados e etc...
                             </ListItem>
+                            <ListItem href="/csv/dobra" title="Planilha Dobra">
+                                ODF, codigos, resultados e etc...
+                            </ListItem>
+                            <ListItem href="/csv/solda" title="Planilha Solda">
+                                ODF, codigos, resultados e etc...
+                            </ListItem>
+                            <ListItem href="/csv/acabamento" title="Planilha Acabamento">
+                                ODF, codigos, resultados e etc...
+                            </ListItem>
+
                         </ul>
                     </NavigationMenuContent>
-                </NavigationMenuItem>              
+                </NavigationMenuItem>
             </NavigationMenuList>
         </NavigationMenu>
     )
@@ -109,8 +119,8 @@ const ListItem = React.forwardRef<
                     )}
                     {...props}
                 >
-                    <div className="text-sm font-medium leading-none">{title}</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                    <div className="text-sm font-medium leading-none ">{title}</div>
+                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground ">
                         {children}
                     </p>
                 </a>

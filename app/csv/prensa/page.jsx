@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import { CSVLink } from "react-csv";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -7,15 +8,17 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
 import { columns } from "@/components/dataTable/colums";
+import { Navbar } from "@/components/navbar";
+import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const Table = () => {
 
+  const { data: session, status } = useSession();
   const [usersData, setUsersData] = useState([]);
-  const [press, setPress] = useState([]);
-
   const handleSubmit = async () => {
     try {
-      axios.get('/api/register')
+      axios.get('/api/register/press')
         .then((response) => { setUsersData(response.data) });
     } catch (error) {
       console.error(error);
@@ -41,8 +44,20 @@ const Table = () => {
     ]),
   ];
 
+  if (status === "loading") {
+    return <div>Loading</div>
+  }
+  if (status === 'authenticated') {
+
+  }else{
+    redirect('/login')
+  }
+
   return (
     <div className="w-screen h-screen align-middle items-center ">
+      <div className="flex justify-center p-10">
+        <Navbar />
+      </div>
       <div className="p-10">
         <div className=" flex justify-center ">
           <Button className="p-10 ">

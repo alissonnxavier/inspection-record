@@ -11,17 +11,11 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
     TabsContent,
 } from "@/components/ui/tabs"
-import { ToggleItems } from "./toggle-items"
-import { ToggleResult } from "./toggle-result"
-import { FormEvent, useCallback, useState } from "react";
 import { Badge } from "./ui/badge";
-import { Press } from "@prisma/client";
 import * as z from 'zod';
-import { useRouter } from "next/navigation";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -30,19 +24,13 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
 } from "@/components/ui/form"
-import { SelectValue } from './ui/select';
-import {
-    FontBoldIcon,
-    FontItalicIcon,
-    UnderlineIcon,
-} from "@radix-ui/react-icons"
-
 import {
     ToggleGroup,
     ToggleGroupItem,
 } from "@/components/ui/toggle-group"
+import toast from 'react-hot-toast';
+import { redirect, useRouter } from 'next/navigation';
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -55,22 +43,55 @@ const formSchema = z.object({
 
 });
 
-type PressFormValues = z.infer<typeof formSchema>
+type PressFormValues = z.infer<typeof formSchema>;
 
 interface FormPressProps {
     tab: string;
 }
 
 const FormPress: React.FC<FormPressProps> = ({ tab }) => {
-    const router = useRouter();
-
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
-    })
+    });
+    const router = useRouter();
 
     const onSubmit = async (data: PressFormValues) => {
+        try {
+            const res = await axios.post('/api/register/press', data);
+            toast.success('Registro salvo com sucesso!!!', {
+                style: {
+                    border: '3px solid white',
+                    padding: '30px',
+                    color: 'white',
+                    backgroundColor: '#109c2e'
 
-        const res = await axios.post('/api/register', data)
+                },
+                iconTheme: {
+                    primary: 'white',
+                    secondary: '#109c2e',
+                },
+            });
+            form.setValue('item', '');
+            form.setValue('version', '');
+            form.setValue('odf', '');
+            form.setValue('amount', '');
+            form.setValue('qtd', '');
+        } catch (error) {
+            console.log(error);
+            toast.error('Parece que algo está errado!!!', {
+                style: {
+                    border: '3px solid white',
+                    padding: '30px',
+                    color: 'white',
+                    backgroundColor: '#a80d1a'
+
+                },
+                iconTheme: {
+                    primary: 'white',
+                    secondary: '#a80d1a',
+                },
+            });
+        }
     }
 
     return (
@@ -83,7 +104,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                 <div className="flex justify-between">
                                     <CardTitle>
                                         <Badge className="p-1 text-2xl">
-                                            Rosqueadeira
+                                            Prensa
                                         </Badge>
                                     </CardTitle>
                                     <div>
