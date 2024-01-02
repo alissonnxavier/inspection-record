@@ -2,8 +2,7 @@
 
 import { CSVLink } from "react-csv";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTable } from "react-table";
+import {  useEffect,  useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";

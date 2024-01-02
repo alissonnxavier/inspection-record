@@ -15,15 +15,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import toast from 'react-hot-toast';
+import { Navbar } from '@/components/navbar';
+import { GridLoader } from 'react-spinners';
 
 const LoginForm = () => {
 
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  if (session) {
-    router.push('/')
-  }
+
 
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -45,12 +45,12 @@ const LoginForm = () => {
             border: '3px solid white',
             padding: '30px',
             color: 'white',
-            backgroundColor: '#109c2e'
+            backgroundColor: '#870921'
 
           },
           iconTheme: {
             primary: 'white',
-            secondary: '#109c2e',
+            secondary: '#870921',
           },
         });
 
@@ -74,6 +74,17 @@ const LoginForm = () => {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="flex h-5/6 justify-center items-center">
+        {/* <GridLoader color="#9e0837" size={100} />  */}
+      </div>
+    )
+  }
+  if (status === 'authenticated') {
+    redirect('/');
   }
 
   return (

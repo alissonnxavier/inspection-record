@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { FcInspection } from "react-icons/fc";
 import { cn } from "@/lib/utils"
 
@@ -12,7 +11,6 @@ import {
     NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
-    navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 
 const components: { title: string; href: string; description: string }[] = [
@@ -60,7 +58,7 @@ export function Menu() {
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                        <ul className="grid   md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                        <ul className="grid   md:w-[400px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr]">
                             <li className="row-span-6">
                                 <NavigationMenuLink asChild className="justify-center align-middle items-center">
                                     <a
