@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation';
-import { authOptions } from './api/auth/[...nextauth]/route'
+//@ts-ignore
+import { authOptions } from `./api/auth/[...nextauth]/route`;
 
 export default async function Home() {
 

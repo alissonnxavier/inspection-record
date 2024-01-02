@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import toast from 'react-hot-toast';
-import { ToasterProvider } from '@/components/providers/toast-provider';
 
 const LoginForm = () => {
 
