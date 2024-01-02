@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation';
 //@ts-ignore
-import { authOptions } from `./api/auth/[...nextauth]/route`;
+import { authOptions } from './api/auth/[...nextauth]/route';
 
 export default async function Home() {
 
