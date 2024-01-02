@@ -12,8 +12,6 @@ import FormThreader from "./form-threader";
 import FormFold from "./form-fold";
 import FormSolder from "./form-solder";
 import FormFinishing from "./from-finishing";
-import FormTest from "./form-press-test";
-import { db } from "@/lib/prismadb";
 
 export async function FormsInspectionRecords() {
 
