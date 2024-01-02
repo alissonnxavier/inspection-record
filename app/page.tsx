@@ -4,32 +4,32 @@ import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation';
-//@ts-ignore
-import { authOptions } from './api/auth/[...nextauth]/route';
+//@ts-nocheck
+import { authOptions } from "./api/auth/[...nextauth]/route";
 
 export default async function Home() {
 
   //@ts-ignore
   const session = await getServerSession(authOptions);
 
-  if(!session){
+  if (!session) {
     redirect("/login");
   }
 
   return (
-      <div className='h-screen'>
-        <div className='flex justify-end p-10'>
-          <Navbar />
-        </div>
-        <div className='
+    <div className='h-screen'>
+      <div className='flex justify-end p-10'>
+        <Navbar />
+      </div>
+      <div className='
           flex 
           align-middle
           justify-center
           items-center 
           h-5/6
       '>
-          <FormsInspectionRecords />
-        </div>
+        <FormsInspectionRecords />
       </div>
+    </div>
   )
 }
