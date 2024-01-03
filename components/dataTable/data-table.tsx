@@ -49,7 +49,7 @@ export function DataTable<TData, TValue>({
         state: {
             columnFilters,
         }
-    })
+    });
 
     return (
         <div className=" m-auto  w-5/6">
@@ -95,7 +95,7 @@ export function DataTable<TData, TValue>({
 
                                         <TableCell key={cell.id}>
                                             <div className="w-30 truncate overflow-hidden ">
-                                                {cell.id.slice(2, cell.id.length) == "createdAt" ? format(new Date(cell.getValue()), "dd/MM/yyyy HH:mm:ss") : <div>{cell.getValue()}</div>}
+                                                {cell.id.slice(cell.id.length - 9, cell.id.length) == "createdAt" ? format(new Date(cell.getValue()), "dd/MM/yyyy HH:mm:ss") : <div>{cell.getValue()}</div>}
                                             </div>
                                         </TableCell>
                                     ))}
