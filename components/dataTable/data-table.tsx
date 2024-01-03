@@ -95,8 +95,7 @@ export function DataTable<TData, TValue>({
 
                                         <TableCell key={cell.id}>
                                             <div className="w-30 truncate overflow-hidden ">
-
-                                                {cell.id.slice(2, cell.id.length) == "createdAt" ? format(new Date(cell.getValue()), "MM/dd/yyyy HH:mm:ss") : <div>{cell.getValue()}</div>}
+                                                {cell.id.slice(2, cell.id.length) == "createdAt" ? format(new Date(cell.getValue()), "dd/MM/yyyy HH:mm:ss") : <div>{cell.getValue()}</div>}
                                             </div>
                                         </TableCell>
                                     ))}

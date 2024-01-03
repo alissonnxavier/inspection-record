@@ -42,7 +42,7 @@ const Table = () => {
       amount,
       qtd,
       result,
-      format(new Date(createdAt), "MM/dd/yyyy HH:mm"),
+      format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
       process
     ]),
   ];
