@@ -20,7 +20,8 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
+import { format, compareAsc } from "date-fns";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -91,9 +92,11 @@ export function DataTable<TData, TValue>({
                                     className="hover:opacity-75 hover:bg-red-500"
                                 >
                                     {row.getVisibleCells().map((cell) => (
+
                                         <TableCell key={cell.id}>
                                             <div className="w-30 truncate overflow-hidden ">
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+
+                                                {cell.id.slice(2, cell.id.length) == "createdAt" ? format(new Date(cell.getValue()), "MM/dd/yyyy HH:mm:ss") : <div>{cell.getValue()}</div>}
                                             </div>
                                         </TableCell>
                                     ))}

@@ -12,6 +12,7 @@ import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { GridLoader } from 'react-spinners';
+import { format, compareAsc } from "date-fns";
 
 const Table = () => {
 
@@ -43,7 +44,7 @@ const Table = () => {
       amount,
       qtd,
       result,
-      createdAt,
+      format(new Date(createdAt), "MM/dd/yyyy HH:mm"),
     ]),
   ];
 

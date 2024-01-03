@@ -48,12 +48,13 @@ export const Navbar = () => {
                 <Menu />
             </div>
             <div className="flex">
-
                 <Badge
                     variant='destructive'
-                    className="mr-5"
+                    className="mr-5 p-2 w-32"
                 >
+                    <div className="m-auto">
                     Inspetor {session?.user?.name}
+                    </div>
                 </Badge>
 
                 <DropdownMenu>

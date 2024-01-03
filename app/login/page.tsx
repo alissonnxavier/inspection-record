@@ -107,7 +107,7 @@ const LoginForm = () => {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="name">Senha</Label>
+                <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
                   type='password'

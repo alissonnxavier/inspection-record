@@ -9,10 +9,6 @@ import { ColumnDef } from "@tanstack/react-table"
 
 export const columns: ColumnDef<MovieInterface>[] = [
     {
-        accessorKey: "id",
-        header: "ID",
-    },
-    {
         accessorKey: "item",
         header: "Item",
     },

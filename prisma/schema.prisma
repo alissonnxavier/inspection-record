@@ -22,7 +22,7 @@ model Press {
   amount    String
   qtd       String
   result    String
-  createdAt String
+  createdAt DateTime @default(now()) @db.Date
 }
 
 model Punching {

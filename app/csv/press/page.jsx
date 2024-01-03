@@ -2,7 +2,7 @@
 
 import { CSVLink } from "react-csv";
 
-import {  useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
@@ -11,6 +11,7 @@ import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { GridLoader } from 'react-spinners';
+import { format, compareAsc } from "date-fns";
 
 const Table = () => {
   const { data: session, status } = useSession();
@@ -29,18 +30,20 @@ const Table = () => {
   }, [setUsersData]);
 
   const csvData = [
-    ["ID", "item", "version", "odf", "amount", "qtd", "result", "createdAt"],
-    ...usersData.map(({ id, item, version, odf, amount, qtd, result, createdAt }) => [
-      id,
+    ["item", "version", "odf", "amount", "qtd", "result", "createdAt"],
+    ...usersData.map(({ item, version, odf, amount, qtd, result, createdAt }) => [
       item,
       version,
       odf,
       amount,
       qtd,
       result,
-      createdAt,
+      format(new Date(createdAt), "MM/dd/yyyy HH:mm"),
     ]),
   ];
+
+  /* const f = format(new Date(createdAt), "MM/dd/yyyy HH:mm");
+  console.log(f) */
 
   if (status === "loading") {
     return (
