@@ -92,7 +92,7 @@ const LoginForm = () => {
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Fazer Login</CardTitle>
-          <CardDescription>Faça login para fazer registros de inspeção.</CardDescription>
+          <CardDescription>Faça login para salvar as inspeçoẽs.</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -102,7 +102,7 @@ const LoginForm = () => {
                 <Input
                   id="name"
                   type='text'
-                  placeholder="Nome de usuario"
+                  placeholder="Digite o nome"
                   onChange={(e) => { setName(e.target.value) }}
                 />
               </div>

@@ -35,6 +35,7 @@ model Punching {
   qtd       String
   result    String
   createdAt DateTime @default(now()) @db.Date
+  cnc       String
 }
 
 model Threader {

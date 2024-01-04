@@ -41,6 +41,7 @@ const formSchema = z.object({
     result: z.string().min(1),
     prefix: z.string().min(1),
     thickness: z.string().min(1),
+    cnc: z.string().min(2),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -76,6 +77,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
             form.setValue('odf', '');
             form.setValue('amount', '');
             form.setValue('qtd', '');
+            form.setValue('cnc', '');
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {
@@ -109,7 +111,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                     </CardTitle>
                                     <div>
                                         <CardDescription>
-                                            Formulario digital Rev: 00
+                                            Formulário digital Rev: 00
                                         </CardDescription>
                                         <CardDescription>
                                             Criação: 00/00/00
@@ -164,7 +166,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='version'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Versão:</FormLabel>
+                                                            <FormLabel>Revisão:</FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     type='number' placeholder='Rev' {...field}
@@ -208,10 +210,30 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='amount'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Quantida ODF:</FormLabel>
+                                                            <FormLabel>Quantidade ODF:</FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    type='number' placeholder='_,_,_,_' {...field}
+                                                                    type='number'
+                                                                     placeholder='_,_,_,_' 
+                                                                     {...field}
+                                                                     className=''
+                                                                />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name='cnc'
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>CNC:</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type='text'
+                                                                     placeholder='_,_,_,_' 
+                                                                     {...field}
+                                                                     className='w-20'
                                                                 />
                                                             </FormControl>
                                                         </FormItem>
@@ -222,10 +244,13 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='qtd'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Quantidade inspecionada:</FormLabel>
+                                                            <FormLabel>Qtd inspecionada:</FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    type='number' placeholder='_,_' {...field}
+                                                                    type='number'
+                                                                     placeholder='_,_'
+                                                                      {...field}
+                                                                      className=''
                                                                 />
                                                             </FormControl>
                                                         </FormItem>

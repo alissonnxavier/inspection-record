@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, thickness, odf, amount, qtd, result } = body;
+    const { prefix, item, version, thickness, odf, amount, qtd, result, cnc } = body;
     const product = prefix + item;
 
 
@@ -19,7 +19,8 @@ export async function POST(
         odf,
         amount,
         qtd,
-        result
+        result,
+        cnc,
       }
     });
 

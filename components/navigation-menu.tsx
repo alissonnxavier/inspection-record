@@ -67,7 +67,7 @@ export function Menu() {
                                     >
                                         <FcInspection className="h-32 w-32" />
                                         <div className="mb-2 mt-4 text-lg font-medium">
-                                            Formularios
+                                            Formulários
                                         </div>
                                         <p className="text-sm leading-tight text-muted-foreground p-1">
                                             Prensa, Puncionadeira, Dobra, Rosqueadeira, Solda e Acabamento.

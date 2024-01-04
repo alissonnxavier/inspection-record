@@ -109,7 +109,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                     </CardTitle>
                                     <div>
                                         <CardDescription>
-                                            Formulario digital Rev: 00
+                                            Formulário digital Rev: 00
                                         </CardDescription>
                                         <CardDescription>
                                             Criação: 00/00/00
@@ -167,10 +167,10 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='version'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Versao:</FormLabel>
+                                                            <FormLabel>Revisão:</FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    type='number' placeholder='Versao do item' {...field}
+                                                                    type='number' placeholder='Revisão' {...field}
                                                                 />
                                                             </FormControl>
                                                         </FormItem>
