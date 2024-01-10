@@ -16,17 +16,17 @@ export default async function Home() {
   }
 
   return (
-    <div className='h-screen'>
-      <div className='flex justify-end p-10'>
-        <Navbar />
+    <div className='h-full'>
+      <div className='flex pb-10 pt-10 '>
+      <Navbar />
       </div>
       <div className='
           flex 
           align-middle
           justify-center
           items-center 
-          h-5/6
       '>
+        
         <FormsInspectionRecords />
       </div>
     </div>

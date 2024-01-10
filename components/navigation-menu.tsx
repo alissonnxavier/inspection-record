@@ -58,7 +58,7 @@ export function Menu() {
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                        <ul className="grid   md:w-[400px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr]">
+                        <ul className="grid md:w-[400px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr]">
                             <li className="row-span-6">
                                 <NavigationMenuLink asChild className="justify-center align-middle items-center">
                                     <a

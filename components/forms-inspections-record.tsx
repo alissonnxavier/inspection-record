@@ -21,7 +21,7 @@ export async function FormsInspectionRecords() {
     }
 
     return (
-        <div className="flex items-center h-full">
+        <div className="flex items-center ">
             <Tabs defaultValue="Press" className="w-[410px]">
                 <TabsList className="grid w-full grid-cols-3 h-20 gap-">
                     <TabsTrigger value="Press">

@@ -43,17 +43,17 @@ export const Navbar = () => {
     }
 
     return (
-        <div className="flex justify-start m-auto">
-            <div className="mr-20">
-                <Menu />
-            </div>
+        <div className="flex m-auto">
             <div className="flex">
+                <div className="mr-6">
+                    <Menu />
+                </div>
                 <Badge
                     variant='destructive'
                     className="mr-5 p-2 w-32"
                 >
                     <div className="m-auto">
-                    Inspetor {session?.user?.name}
+                        Inspetor {session?.user?.name}
                     </div>
                 </Badge>
 

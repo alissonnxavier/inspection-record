@@ -194,7 +194,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='amount'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Quantida ODF:</FormLabel>
+                                                            <FormLabel>Quantidade ODF:</FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     type='number' placeholder='_,_,_,_' {...field}
