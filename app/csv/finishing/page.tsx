@@ -1,9 +1,8 @@
 'use client';
-
+//@ts-ignore
 import { CSVLink } from "react-csv";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTable } from "react-table";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
@@ -66,17 +65,19 @@ const Table = () => {
 
   return (
     <div className="w-screen h-screen align-middle items-center ">
-      <div className="flex justify-center p-10">
+      <div className="flex p-10">
         <Navbar />
       </div>
-      <div className="p-10">
+      <div className="pt-10">
         <div className=" flex justify-center ">
-          <Button className="p-10 ">
+          <Button className="p-10">
             <CSVLink className="" filename="my-file.csv" data={csvData}>
               Baixar planilha
             </CSVLink>
           </Button>
         </div>
+      </div>
+      <div className="mt-2">
         <DataTable
           searchKey='item'
           columns={columns}
