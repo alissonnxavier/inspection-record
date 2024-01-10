@@ -65,19 +65,17 @@ const Table = () => {
 
   return (
     <div className="w-screen h-screen align-middle items-center ">
-      <div className="flex p-10">
+      <div className="flex justify-center p-10">
         <Navbar />
       </div>
-      <div className="pt-10">
+      <div className="p-10">
         <div className=" flex justify-center ">
-          <Button className="p-10">
+          <Button className="p-10 ">
             <CSVLink className="" filename="my-file.csv" data={csvData}>
               Baixar planilha
             </CSVLink>
           </Button>
         </div>
-      </div>
-      <div className="mt-2">
         <DataTable
           searchKey='item'
           columns={columns}
