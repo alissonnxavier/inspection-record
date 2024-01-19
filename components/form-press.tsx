@@ -32,7 +32,7 @@ import {
 import toast from 'react-hot-toast';
 import { redirect, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -42,7 +42,7 @@ const formSchema = z.object({
     qtd: z.string().min(1),
     result: z.string().min(1),
     prefix: z.string().min(1),
-    inspector: z.string().min(3, {message: 'Atualize a pagina'}),
+    inspector: z.string().min(3, { message: 'Atualize a pagina' }),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -63,13 +63,13 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     useEffect(() => {
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name');
         form.setValue('inspector', inspetorName);
-    }, [setInspectorName, session]);
-   
+    }, [setInspectorName, session, inspetorName]);
+
 
     const onSubmit = async (formData: PressFormValues) => {
-        
+
         try {
-            
+
             const res = await axios.post('/api/register/press', formData);
             toast.success('Registro salvo com sucesso!!!', {
                 style: {
