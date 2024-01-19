@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
-import { columns } from "@/components/dataTable/colums";
+import { pressColumns } from "@/components/dataTable/press-colums";
 import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -16,6 +16,7 @@ import { format, compareAsc } from "date-fns";
 const Table = () => {
   const { data: session, status } = useSession();
   const [usersData, setUsersData] = useState([]);
+
   const handleSubmit = async () => {
     try {
       axios.get('/api/register/press')
@@ -29,9 +30,11 @@ const Table = () => {
     handleSubmit();
   }, [setUsersData]);
 
+  console.log(usersData)
+
   const csvData = [
-    ["item", "version", "odf", "amount", "qtd", "result", "createdAt"],
-    ...usersData.map(({ item, version, odf, amount, qtd, result, createdAt }) => [
+    ["item", "version", "odf", "amount", "qtd", "result", "createdAt", "Qualidade"],
+    ...usersData.map(({ item, version, odf, amount, qtd, result, createdAt, inspector }) => [
       item,
       version,
       odf,
@@ -39,6 +42,7 @@ const Table = () => {
       qtd,
       result,
       format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
+      inspector,
     ]),
   ];
 
@@ -70,15 +74,17 @@ const Table = () => {
       </div>
       <div className="p-10">
         <div className=" flex justify-center ">
-          <Button className="p-10 ">
-            <CSVLink className="" filename="my-file.csv" data={csvData}>
-              Baixar planilha
-            </CSVLink>
-          </Button>
+          <div className="">
+            <Button className="p-10 ">
+              <CSVLink className="" filename="my-file.csv" data={csvData}>
+                Baixar planilha
+              </CSVLink>
+            </Button>
+          </div>
         </div>
         <DataTable
           searchKey='item'
-          columns={columns}
+          columns={pressColumns}
           data={usersData}
         />
       </div>

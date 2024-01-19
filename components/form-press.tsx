@@ -1,4 +1,4 @@
-'use client'
+
 
 import axios from 'axios';
 import { Button } from "@/components/ui/button"
@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
 import { redirect, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect, useMemo, useState } from 'react';
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -40,7 +42,7 @@ const formSchema = z.object({
     qtd: z.string().min(1),
     result: z.string().min(1),
     prefix: z.string().min(1),
-
+    inspector: z.string().min(3, {message: 'Atualize a pagina'}),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -50,21 +52,31 @@ interface FormPressProps {
 }
 
 const FormPress: React.FC<FormPressProps> = ({ tab }) => {
+
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
     const router = useRouter();
+    const { data: session } = useSession();
+    const [inspetorName, setInspectorName] = useState('');
 
-    const onSubmit = async (data: PressFormValues) => {
+    useEffect(() => {
+        setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name');
+        form.setValue('inspector', inspetorName);
+    }, [setInspectorName, session]);
+   
+
+    const onSubmit = async (formData: PressFormValues) => {
+        
         try {
-            const res = await axios.post('/api/register/press', data);
+            
+            const res = await axios.post('/api/register/press', formData);
             toast.success('Registro salvo com sucesso!!!', {
                 style: {
                     border: '3px solid white',
                     padding: '30px',
                     color: 'white',
                     backgroundColor: '#109c2e'
-
                 },
                 iconTheme: {
                     primary: 'white',

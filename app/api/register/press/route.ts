@@ -1,5 +1,5 @@
 import { db } from "@/lib/prismadb";
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 
 export async function POST(
   req: Request,
@@ -7,11 +7,12 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, odf, amount, qtd, result } = body;
+    const { prefix, item, version, odf, amount, qtd, result, inspector } = body;
     const product = prefix + item;
     const press = await db.press.create({
       data: {
         item: product,
+        inspector,
         version,
         odf,
         amount,
@@ -32,8 +33,11 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-
-    const res = await db.press.findMany();
+    const res = await db.press.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      }
+    });
 
     return NextResponse.json(res);
   } catch (error) {

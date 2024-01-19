@@ -15,16 +15,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import toast from 'react-hot-toast';
-import { Navbar } from '@/components/navbar';
-import { GridLoader } from 'react-spinners';
 
 const LoginForm = () => {
 
   const { data: session, status } = useSession();
   const router = useRouter();
-
-
-
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 

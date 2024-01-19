@@ -88,7 +88,7 @@ body,
 
 .shine-border {
   animation: gradient 1s linear infinite ;
-  background: linear-gradient(3333330deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82, #6fba82);
+  background: linear-gradient(3333330deg, #1baa65, #041624, #0b1706, #040105, #020409, #1098ad, #07b39b, #6fba82, #6fba82);
   background-size: 50%;
   left: 0;
   top: 0;
@@ -99,18 +99,18 @@ body,
       background-position: 100% ;
   }
 
-  /* 50% {
+   50% {
       background-position: 100% 50%;
   }
 
   100% {
       background-position: 0% 50%;
-  } */
+  } 
 }
 
 .shine-border:hover {
   animation: gradient 0.2s linear infinite;
-  background: linear-gradient(3333330deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82, #6fba82);
+  background: linear-gradient(3333330deg, #1baa65, #041624, #46ba1c, #040105, #020409, #1098ad, #07b39b, #6fba82, #6fba82);
   background-size: 50%;
   left: 0;
   top: 0;

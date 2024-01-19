@@ -12,8 +12,13 @@ import FormThreader from "./form-threader";
 import FormFold from "./form-fold";
 import FormSolder from "./form-solder";
 import FormFinishing from "./from-finishing";
+import { Navbar } from "./navbar";
+import { GridLoader } from 'react-spinners';
+import { useSession } from "next-auth/react";
 
-export async function FormsInspectionRecords() {
+export  function FormsInspectionRecords() {
+
+    const { data: session, status } = useSession();
 
     const test = {
         id: '',

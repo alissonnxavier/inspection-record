@@ -9,13 +9,15 @@ datasource db {
 }
 
 model Users {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
   name     String
   password String
+  press    String[] @db.ObjectId
 }
 
 model Press {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  inspector String
   item      String
   version   String
   odf       String
