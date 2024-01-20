@@ -6,12 +6,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
-import { pressColumns } from "@/components/dataTable/press-colums";
+import { pressColumns } from "@/components/dataTable/press-columns";
 import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { GridLoader } from 'react-spinners';
-import { format, compareAsc } from "date-fns";
+import { format } from "date-fns";
 
 const Table = () => {
   const { data: session, status } = useSession();
@@ -33,15 +33,15 @@ const Table = () => {
   console.log(usersData)
 
   const csvData = [
-    ["item", "version", "odf", "amount", "qtd", "result", "createdAt", "Qualidade"],
-    ...usersData.map(({ item, version, odf, amount, qtd, result, createdAt, inspector }) => [
+    ["Data", "item", "Revisão", "ODF", "quantidade ODF", "Qtd isnpecionada", "Resultado", "Qualidade"],
+    ...usersData.map(({ createdAt, item, version, odf, amount, qtd, result, inspector }) => [
+      format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
       item,
       version,
       odf,
       amount,
       qtd,
       result,
-      format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
       inspector,
     ]),
   ];

@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, odf, amount, qtd, result, process } = body;
+    const { prefix, item, version, odf, amount, qtd, result, process, inspector } = body;
     const product = prefix + item;
     const res = await db.threader.create({
       data: {
@@ -18,14 +18,13 @@ export async function POST(
         qtd,
         result,
         process,
+        inspector,
       }
     });
-
     return NextResponse.json(res);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
-
 }
 
 export async function GET(
@@ -34,7 +33,11 @@ export async function GET(
 ) {
   try {
     
-    const res = await db.threader.findMany();
+    const res = await db.threader.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      }
+    });
 
     return NextResponse.json(res);
   } catch (error) {

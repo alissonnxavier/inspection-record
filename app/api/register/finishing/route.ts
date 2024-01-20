@@ -7,13 +7,21 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, odf, amount, qtd, result } = body;
+    const {
+      prefix,
+      item,
+      version,
+      odf,
+      amount,
+      qtd,
+      result,
+      inspector
+    } = body;
     const product = prefix + item;
-
-
-    const press = await db.press.create({
+    const press = await db.finishing.create({
       data: {
         item: product,
+        inspector,
         version,
         odf,
         amount,
@@ -21,12 +29,10 @@ export async function POST(
         result
       }
     });
-
     return NextResponse.json(press);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
-
 }
 
 export async function GET(
@@ -34,9 +40,11 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-    
-    const res = await db.press.findMany();
-
+    const res = await db.finishing.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      }
+    });
     return NextResponse.json(res);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });

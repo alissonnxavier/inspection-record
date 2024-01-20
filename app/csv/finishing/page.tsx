@@ -1,4 +1,5 @@
 'use client';
+
 //@ts-ignore
 import { CSVLink } from "react-csv";
 
@@ -6,17 +7,17 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
-import { columns } from "@/components/dataTable/colums";
+import { finishingColumns } from "@/components/dataTable/finishing-columns";
 import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { GridLoader } from 'react-spinners';
-import { format, compareAsc } from "date-fns";
+import { format } from "date-fns";
 
 const Table = () => {
-
   const { data: session, status } = useSession();
   const [usersData, setUsersData] = useState([]);
+
   const handleSubmit = async () => {
     try {
       axios.get('/api/register/finishing')
@@ -30,20 +31,24 @@ const Table = () => {
     handleSubmit();
   }, [setUsersData]);
 
-  // Contains the column headers and table data in the required format for CSV
+  console.log(usersData)
+
   const csvData = [
-    ["ID", "peça", "Revisao", "ODF", "quantidade ODF", "qtd inspecionada", "Resultado", "Data inspeção"],
-    ...usersData.map(({ id, item, version, odf, amount, qtd, result, createdAt }) => [
-      id,
+    ["Data", "item", "Revisão", "ODF", "quantidade ODF", "Qtd isnpecionada", "Resultado", "Qualidade"],
+    ...usersData.map(({ createdAt, item, version, odf, amount, qtd, result, inspector }) => [
+      format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
       item,
       version,
       odf,
       amount,
       qtd,
       result,
-      format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
+      inspector,
     ]),
   ];
+
+  /* const f = format(new Date(createdAt), "MM/dd/yyyy HH:mm");
+  console.log(f) */
 
   if (status === "loading") {
     return (
@@ -70,19 +75,19 @@ const Table = () => {
       </div>
       <div className="p-10">
         <div className=" flex justify-center ">
-          <Button className="p-10 ">
-            <CSVLink className="" filename="my-file.csv" data={csvData}>
-              Baixar planilha
-            </CSVLink>
-          </Button>
+          <div className="">
+            <Button className="p-10 ">
+              <CSVLink className="" filename="my-file.csv" data={csvData}>
+                Baixar planilha
+              </CSVLink>
+            </Button>
+          </div>
         </div>
         <DataTable
           searchKey='item'
-          columns={columns}
+          columns={finishingColumns}
           data={usersData}
         />
-      </div>
-      <div className="">
       </div>
     </div>
   );

@@ -38,6 +38,7 @@ model Punching {
   result    String
   createdAt DateTime @default(now()) @db.Date
   cnc       String
+  inspector String
 }
 
 model Threader {
@@ -50,6 +51,7 @@ model Threader {
   result    String
   createdAt DateTime @default(now()) @db.Date
   process   String
+  inspector String
 }
 
 model Soldier {
@@ -62,6 +64,7 @@ model Soldier {
   result    String
   createdAt DateTime @default(now()) @db.Date
   process   String
+  inspector String
 }
 
 model Fold {
@@ -72,6 +75,7 @@ model Fold {
   amount    String
   qtd       String
   result    String
+  inspector String
   createdAt DateTime @default(now()) @db.Date
 }
 
@@ -83,5 +87,6 @@ model Finishing {
   amount    String
   qtd       String
   result    String
+  inspector String
   createdAt DateTime @default(now()) @db.Date
 }

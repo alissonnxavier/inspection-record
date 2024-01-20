@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
 import { redirect, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -42,6 +44,7 @@ const formSchema = z.object({
     prefix: z.string().min(1),
     thickness: z.string().min(1),
     cnc: z.string().min(2),
+    inspector: z.string().min(2),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -54,7 +57,14 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
+    const { data: session } = useSession();
+    const [inspectorName, setInspectorName] = useState('');
     const router = useRouter();
+
+    useEffect(()=>{
+        setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
+        form.setValue('inspector', inspectorName);
+    },[inspectorName, setInspectorName, session]);
 
     const onSubmit = async (data: PressFormValues) => {
         try {

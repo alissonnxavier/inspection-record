@@ -7,7 +7,7 @@ import { useTable } from "react-table";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
-import { columns } from "@/components/dataTable/colums";
+import { soldierColumns } from "@/components/dataTable/soldier-columns copy";
 import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -33,16 +33,16 @@ const Table = () => {
 
   // Contains the column headers and table data in the required format for CSV
   const csvData = [
-    ["ID", "item", "version", "odf", "amount", "qtd", "result", "createdAt"],
-    ...usersData.map(({ id, item, version, odf, amount, qtd, result, createdAt }) => [
-      id,
+    [ "Data", "item", "Revisão", "ODF", "Quantidade ODF", "Qtd inspecionada", "Processo", "Resultado", ],
+    ...usersData.map(({ createdAt, item, version, odf, amount, qtd, process, result }) => [
+      format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
       item,
       version,
       odf,
       amount,
       qtd,
+      process,
       result,
-      format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
     ]),
   ];
 
@@ -79,7 +79,7 @@ const Table = () => {
         </div>
         <DataTable
           searchKey='item'
-          columns={columns}
+          columns={soldierColumns}
           data={usersData}
         />
       </div>

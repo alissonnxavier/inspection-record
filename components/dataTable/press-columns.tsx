@@ -9,6 +9,10 @@ import { ColumnDef } from "@tanstack/react-table"
 
 export const pressColumns: ColumnDef<PressInterface>[] = [
     {
+        accessorKey: 'createdAt',
+        header: 'Data'
+    },
+    {
         accessorKey: "item",
         header: "Item",
     },
@@ -31,10 +35,6 @@ export const pressColumns: ColumnDef<PressInterface>[] = [
     {
         accessorKey: "result",
         header: "Resultado",
-    },
-    {
-        accessorKey: 'createdAt',
-        header: 'Data'
     },
     {
         accessorKey: 'inspector',

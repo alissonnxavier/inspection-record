@@ -11,7 +11,7 @@ import FormPunchingMachine from "./form-punching-machine";
 import FormThreader from "./form-threader";
 import FormFold from "./form-fold";
 import FormSolder from "./form-solder";
-import FormFinishing from "./from-finishing";
+import FormFinishing from "./form-finishing";
 import { Navbar } from "./navbar";
 import { GridLoader } from 'react-spinners';
 import { useSession } from "next-auth/react";
@@ -36,7 +36,7 @@ export  function FormsInspectionRecords() {
                         Puncionadeira
                     </TabsTrigger>
                     <TabsTrigger value="Threader">
-                        Rorqueadeira
+                        Rosqueadeira
                     </TabsTrigger>
                     <TabsTrigger value="Fold">
                         Dobra

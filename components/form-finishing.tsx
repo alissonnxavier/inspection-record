@@ -1,6 +1,7 @@
 'use client'
 
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -30,7 +31,8 @@ import {
     ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -40,6 +42,7 @@ const formSchema = z.object({
     qtd: z.string().min(1),
     result: z.string().min(1),
     prefix: z.string().min(1),
+    inspector: z.string().min(1),
 
 });
 
@@ -53,7 +56,15 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
+
+    const { data: session } = useSession();
+    const [inspectorName, setInspectorName] = useState('');
     const router = useRouter();
+
+    useEffect(()=>{
+        setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
+        form.setValue('inspector', inspectorName);
+    },[inspectorName, setInspectorName, session]);
 
     const onSubmit = async (data: PressFormValues) => {
         try {
@@ -129,7 +140,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <ToggleGroup type="single" onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <ToggleGroupItem value="ER." aria-label="Toggle bold">
+                                                                    <ToggleGroupItem value="ER." aria-label="Toggle bold">
                                                                         ER.
                                                                     </ToggleGroupItem>
                                                                     <ToggleGroupItem value="ME." aria-label="Toggle bold">

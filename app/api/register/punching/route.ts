@@ -7,10 +7,8 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, thickness, odf, amount, qtd, result, cnc } = body;
+    const { prefix, item, version, thickness, odf, amount, qtd, result, cnc, inspector } = body;
     const product = prefix + item;
-
-
     const punching = await db.punching.create({
       data: {
         item: product,
@@ -21,14 +19,13 @@ export async function POST(
         qtd,
         result,
         cnc,
+        inspector,
       }
     });
-
     return NextResponse.json(punching);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
-
 }
 
 export async function GET(
@@ -37,7 +34,11 @@ export async function GET(
 ) {
   try {
     
-    const res = await db.punching.findMany();
+    const res = await db.punching.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      }
+    });
 
     return NextResponse.json(res);
   } catch (error) {

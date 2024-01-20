@@ -40,6 +40,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -50,7 +52,7 @@ const formSchema = z.object({
     result: z.string().min(1),
     prefix: z.string().min(1),
     process: z.string().min(1),
-
+    inspector: z.string().min(1),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -63,7 +65,14 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
+    const { data: session } = useSession();
+    const [inspectorName, setInspectorName] = useState('');
     const router = useRouter();
+
+    useEffect(()=>{
+        setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
+        form.setValue('inspector', inspectorName);
+    },[inspectorName, setInspectorName, session]);
 
     const onSubmit = async (data: PressFormValues) => {
         try {

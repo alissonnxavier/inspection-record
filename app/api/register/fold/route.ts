@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, odf, amount, qtd, result } = body;
+    const { prefix, item, version, odf, amount, qtd, result, inspector } = body;
     const product = prefix + item;
     const res = await db.fold.create({
       data: {
@@ -17,14 +17,13 @@ export async function POST(
         amount,
         qtd,
         result,
+        inspector,
       }
     });
-
     return NextResponse.json(res);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
-
 }
 
 export async function GET(
@@ -32,12 +31,13 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-
-    const res = await db.fold.findMany();
-
+    const res = await db.fold.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
     return NextResponse.json(res);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
   }
-
 }
