@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { signIn, useSession } from 'next-auth/react';
 import { redirect, useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -22,15 +22,18 @@ const LoginForm = () => {
   const router = useRouter();
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [block, setBlock] = useState(false);
 
   const handleSubmit = async (event: any) => {
     event.stopPropagation();
 
     try {
+      setBlock(true);
       const res = await signIn("credentials", {
         name,
         password,
         redirect: false,
+        callbackUrl: '/'
       });
 
       if (res?.error) {
@@ -68,6 +71,8 @@ const LoginForm = () => {
 
     } catch (error) {
       console.log(error);
+    }finally{
+      setBlock(false);
     }
   }
 
@@ -116,6 +121,7 @@ const LoginForm = () => {
         <CardFooter className="flex justify-between">
           <Button
             onClick={handleSubmit}
+            disabled={block}
           >
             Entrar
           </Button>
