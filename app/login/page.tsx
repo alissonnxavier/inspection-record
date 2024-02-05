@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import toast from 'react-hot-toast';
+import { Separator } from '@/components/ui/separator';
+import { Icons } from '@/components/icons';
 
 const LoginForm = () => {
 
@@ -71,9 +73,17 @@ const LoginForm = () => {
 
     } catch (error) {
       console.log(error);
-    }finally{
+    } finally {
       setBlock(false);
     }
+  }
+
+  const signInGoogle = () => {
+    signIn("google");
+  }
+
+  const signInGithub = () => {
+    signIn("github");
   }
 
   if (status === "loading") {
@@ -95,6 +105,25 @@ const LoginForm = () => {
           <CardDescription>Faça login para salvar as inspeçoẽs.</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className='flex justify-around'>
+            <Button
+              onClick={() => signInGoogle()}
+              variant='outline'
+              className='gap-2 px-8'
+            >
+              <Icons.google className='w-5 h-5' />
+              Google
+            </Button>
+            <Button
+              onClick={() => signInGithub()}
+              variant='outline'
+              className='gap-2 px-8'
+            >
+              <Icons.gitHub className='h-5 w-5' />
+              Github
+            </Button>
+          </div>
+          <Separator className='my-4' />
           <form>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
