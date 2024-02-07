@@ -1,15 +1,16 @@
 .env
-
+</br>
 DATABASE_URL=
-
-NEXTAUTH_JWT_SECRET=
+</br></br>
+NEXTAUTH_JWT_SECRET=</br>
 #Providers
-GOOGLE_CLIENT_ID=
+</br></br>
+GOOGLE_CLIENT_ID=</br>
 GOOGLE_CLIENT_SECRET=
-
-GITHUB_CLIENT_ID=
+</br></br>
+GITHUB_CLIENT_ID=</br>
 GITHUB_CLIENT_SECRET=
-
+</br></br>
 #Auth Config
 NEXTAUTH_SECRET=
 NEXTAUTH_URL=
