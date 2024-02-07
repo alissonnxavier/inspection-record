@@ -33,8 +33,8 @@ const Table = () => {
   console.log(usersData)
 
   const csvData = [
-    ["Data", "item", "Revisão", "ODF", "quantidade ODF", "Qtd isnpecionada", "Espessura", "CNC", "Resultado", "Qualidade"],
-    ...usersData.map(({ createdAt, item, version, odf, amount, qtd, thickness, cnc, result, inspector }) => [
+    ["Data", "item", "Revisão", "ODF", "quantidade ODF", "Qtd isnpecionada", "Espessura", "Maquina", "CNC", "Resultado", "Qualidade"],
+    ...usersData.map(({ createdAt, item, version, odf, amount, qtd, thickness, machine, cnc, result, inspector }) => [
       format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
       item,
       version,
@@ -42,6 +42,7 @@ const Table = () => {
       amount,
       qtd,
       thickness,
+      machine,
       cnc,
       result,
       inspector,

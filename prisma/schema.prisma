@@ -39,6 +39,7 @@ model Punching {
   createdAt DateTime @default(now()) @db.Date
   cnc       String
   inspector String
+  machine   String
 }
 
 model Threader {
@@ -77,6 +78,7 @@ model Fold {
   result    String
   inspector String
   createdAt DateTime @default(now()) @db.Date
+  machine   String
 }
 
 model Finishing {

@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, thickness, odf, amount, qtd, result, cnc, inspector } = body;
+    const { prefix, item, version, thickness, odf, amount, qtd, result, cnc, inspector, machine } = body;
     const product = prefix + item;
     const punching = await db.punching.create({
       data: {
@@ -20,6 +20,7 @@ export async function POST(
         result,
         cnc,
         inspector,
+        machine,
       }
     });
     return NextResponse.json(punching);

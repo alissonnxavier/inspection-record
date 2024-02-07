@@ -33,6 +33,15 @@ import toast from 'react-hot-toast';
 import { redirect, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -45,6 +54,7 @@ const formSchema = z.object({
     thickness: z.string().min(1),
     cnc: z.string().min(2),
     inspector: z.string().min(2),
+    machine: z.string().min(2),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -61,10 +71,10 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     const [inspectorName, setInspectorName] = useState('');
     const router = useRouter();
 
-    useEffect(()=>{
+    useEffect(() => {
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
         form.setValue('inspector', inspectorName);
-    },[inspectorName, setInspectorName, session]);
+    }, [inspectorName, setInspectorName, session]);
 
     const onSubmit = async (data: PressFormValues) => {
         try {
@@ -88,6 +98,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
             form.setValue('amount', '');
             form.setValue('qtd', '');
             form.setValue('cnc', '');
+            form.setValue('machine', '');
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {
@@ -185,7 +196,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                         </FormItem>
                                                     )}
                                                 />
-                                                 <FormField
+                                                <FormField
                                                     control={form.control}
                                                     name='thickness'
                                                     render={({ field }) => (
@@ -213,25 +224,26 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                         </FormItem>
                                                     )}
                                                 />
-                                            </div>
-                                            <div className='flex gap-2'>
                                                 <FormField
                                                     control={form.control}
                                                     name='amount'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Quantidade ODF:</FormLabel>
+                                                            <FormLabel>Qtd ODF:</FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     type='number'
-                                                                     placeholder='_,_,_,_' 
-                                                                     {...field}
-                                                                     className=''
+                                                                    placeholder='_,_,_,_'
+                                                                    {...field}
+                                                                    className=''
                                                                 />
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
                                                 />
+                                            </div>
+                                            <div className='flex gap-2'>
+
                                                 <FormField
                                                     control={form.control}
                                                     name='cnc'
@@ -241,10 +253,37 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                             <FormControl>
                                                                 <Input
                                                                     type='text'
-                                                                     placeholder='_,_,_,_' 
-                                                                     {...field}
-                                                                     className='w-20'
+                                                                    placeholder='_,_,_,_'
+                                                                    {...field}
+                                                                    className='w-20'
                                                                 />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name='machine'
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Maquina:</FormLabel>
+                                                            <FormControl>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    value={field.value}
+                                                                    defaultValue={field.value}
+                                                                >
+                                                                    <SelectTrigger className="w-[150px]">
+                                                                        <SelectValue placeholder="Selecione a maquina" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectGroup>
+                                                                            <SelectLabel>Selecione a maquina</SelectLabel>
+                                                                            <SelectItem value="MT300">MT300</SelectItem>
+                                                                            <SelectItem value="HPE">HPE</SelectItem>
+                                                                        </SelectGroup>
+                                                                    </SelectContent>
+                                                                </Select>
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
@@ -254,13 +293,13 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='qtd'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Qtd inspecionada:</FormLabel>
+                                                            <FormLabel className='truncate'>Qtd inspecionada:</FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     type='number'
-                                                                     placeholder='_,_'
-                                                                      {...field}
-                                                                      className=''
+                                                                    placeholder='_,_'
+                                                                    {...field}
+                                                                    className=''
                                                                 />
                                                             </FormControl>
                                                         </FormItem>

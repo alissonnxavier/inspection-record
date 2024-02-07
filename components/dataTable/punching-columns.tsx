@@ -30,11 +30,15 @@ export const punchingColumns: ColumnDef<PunchingInterface>[] = [
     },
     {
         accessorKey: "qtd",
-        header: "Qtd inspecionada",
+        header: "inspecionado",
     },
     {
         accessorKey: "thickness",
         header: "Espessura",
+    },
+    {
+        accessorKey: "machine",
+        header: "Maquina",
     },
     {
         accessorKey: "cnc",

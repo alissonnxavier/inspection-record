@@ -173,7 +173,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                             <FormLabel>Item:</FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    type='number' placeholder='_,_,_,_,_' {...field}
+                                                                    type='number' placeholder='Codigo do item' {...field}
                                                                 />
                                                             </FormControl>
                                                         </FormItem>

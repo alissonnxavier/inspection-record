@@ -17,6 +17,10 @@ export const foldColumns: ColumnDef<FoldInterface>[] = [
         header: "Item",
     },
     {
+        accessorKey: "machine",
+        header: "Maquina",
+    },
+    {
         accessorKey: "version",
         header: "Revisão",
     },

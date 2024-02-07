@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { prefix, item, version, odf, amount, qtd, result, inspector } = body;
+    const { prefix, item, version, odf, amount, qtd, result, inspector, machine } = body;
     const product = prefix + item;
     const res = await db.fold.create({
       data: {
@@ -18,6 +18,7 @@ export async function POST(
         qtd,
         result,
         inspector,
+        machine,
       }
     });
     return NextResponse.json(res);

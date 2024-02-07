@@ -33,10 +33,11 @@ const Table = () => {
   console.log(usersData)
 
   const csvData = [
-    ["Data", "item", "Revisão", "ODF", "quantidade ODF", "Qtd isnpecionada", "Resultado", "Qualidade"],
-    ...usersData.map(({ createdAt, item, version, odf, amount, qtd, result, inspector }) => [
+    ["Data", "item", "Maquina", "Revisão", "ODF", "quantidade ODF", "isnpecionado", "Resultado", "Qualidade"],
+    ...usersData.map(({ createdAt, item, machine, version, odf, amount, qtd, result, inspector }) => [
       format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
       item,
+      machine,
       version,
       odf,
       amount,

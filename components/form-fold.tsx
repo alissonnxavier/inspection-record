@@ -30,9 +30,18 @@ import {
     ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
-import {  useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -43,6 +52,7 @@ const formSchema = z.object({
     result: z.string().min(1),
     prefix: z.string().min(1),
     inspector: z.string().min(1),
+    machine: z.string().min(2),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -59,10 +69,10 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     const [inspectorName, setInspectorName] = useState('');
     const router = useRouter();
 
-    useEffect(()=>{
+    useEffect(() => {
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
         form.setValue('inspector', inspectorName);
-    },[inspectorName, setInspectorName, session]);
+    }, [inspectorName, setInspectorName, session]);
 
 
     const onSubmit = async (data: PressFormValues) => {
@@ -179,6 +189,34 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                                 <Input
                                                                     type='number' placeholder='Revisão' {...field}
                                                                 />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name='machine'
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Maquina:</FormLabel>
+                                                            <FormControl>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    value={field.value}
+                                                                    defaultValue={field.value}
+                                                                >
+                                                                    <SelectTrigger className="w-[150px]">
+                                                                        <SelectValue placeholder="Selecione a maquina" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectGroup>
+                                                                            <SelectLabel>Selecione a maquina</SelectLabel>
+                                                                            <SelectItem value="Durma">Durma</SelectItem>
+                                                                            <SelectItem value="Jfy">Jfy</SelectItem>
+                                                                            <SelectItem value="Jiangsu">Jiangsu</SelectItem>
+                                                                        </SelectGroup>
+                                                                    </SelectContent>
+                                                                </Select>
                                                             </FormControl>
                                                         </FormItem>
                                                     )}
