@@ -14,7 +14,8 @@ import { signOut } from "next-auth/react"
 import toast from "react-hot-toast"
 import { Badge } from "./ui/badge";
 import { useSession } from "next-auth/react";
-import { Menu } from "./navigation-menu"
+import { Menu } from "./navigation-menu";
+import { RiseLoader, FadeLoader } from "react-spinners"
 
 export const Navbar = () => {
     const { setTheme } = useTheme();
@@ -53,7 +54,8 @@ export const Navbar = () => {
                     className="mr-5 p-2 w-32"
                 >
                     <div className="m-auto">
-                        Inspetor {session?.user?.name}
+                        {session?.user?.name ? `Inspetor ${session?.user?.name}` 
+                        : <div><RiseLoader  color="#f5f7fa" size={5}/></div>}
                     </div>
                 </Badge>
 
