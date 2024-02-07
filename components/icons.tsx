@@ -129,6 +129,7 @@ export const Icons = {
             />
         </svg>
     ),
+   
     spinner: (props: IconProps) => (
         <svg
             xmlns="http://www.w3.org/2000/svg"

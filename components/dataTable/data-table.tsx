@@ -94,8 +94,13 @@ export function DataTable<TData, TValue>({
                                     {row.getVisibleCells().map((cell) => (
 
                                         <TableCell key={cell.id}>
+
                                             <div className="w-30 truncate overflow-hidden ">
-                                                {cell.id.slice(cell.id.length - 9, cell.id.length) == "createdAt" ? format(new Date(cell.getValue()), "dd/MM/yyyy HH:mm:ss") : <div>{cell.getValue()}</div>}
+                                                {cell.id.slice(cell.id.length - 9, cell.id.length) == "createdAt"
+                                                    //@ts-ignore
+                                                    ? format(new Date(cell.getValue()), "dd/MM/yyyy HH:mm:ss")
+                                                    //@ts-ignore
+                                                    : <div>{cell.getValue()}</div>}
                                             </div>
                                         </TableCell>
                                     ))}
@@ -104,7 +109,7 @@ export function DataTable<TData, TValue>({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
+                                    Sem registros.
                                 </TableCell>
                             </TableRow>
                         )}

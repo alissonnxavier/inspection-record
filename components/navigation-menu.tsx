@@ -3,6 +3,7 @@
 import * as React from "react"
 import { FcInspection } from "react-icons/fc";
 import { cn } from "@/lib/utils"
+import excel from '@/public/excel.svg';
 
 import {
     NavigationMenu,
@@ -12,6 +13,8 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import Image from "next/image";
 
 const components: { title: string; href: string; description: string }[] = [
     {
@@ -58,40 +61,146 @@ export function Menu() {
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                        <ul className="grid md:w-[400px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr]">
-                            <li className="row-span-6">
-                                <NavigationMenuLink asChild className="justify-center align-middle items-center">
+                        <ul className="grid md:w-[500px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr] ">
+                            <li className="row-span-6 m-2 ">
+                                <NavigationMenuLink asChild className="justify-center align-middle items-center ">
                                     <a
-                                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-1 no-underline outline-none focus:shadow-md"
+                                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-5 no-underline outline-none focus:shadow-md hover:opacity-75"
                                         href="/"
                                     >
                                         <FcInspection className="h-32 w-32" />
-                                        <div className="mb-2 mt-4 text-lg font-medium">
+                                        {/*  <Alert className="gap-y-5">
+                                            <AlertTitle>Formulários</AlertTitle>
+                                            <AlertDescription>
+                                                Prensa
+                                            </AlertDescription>
+                                            <AlertDescription>
+                                                Puncionadeira
+                                            </AlertDescription>
+                                            <AlertDescription>
+                                                Dobra
+                                            </AlertDescription>
+                                            <AlertDescription>
+                                                Rosqueadeira
+                                            </AlertDescription>
+                                            <AlertDescription>
+                                                Solda
+                                            </AlertDescription>
+                                            <AlertDescription>
+                                                Acabamento
+                                            </AlertDescription>
+                                        </Alert> */}
+                                        <p className="font-extrabold text-2xl">
                                             Formulários
-                                        </div>
-                                        <p className="text-sm leading-tight text-muted-foreground p-1">
-                                            Prensa, Puncionadeira, Dobra, Rosqueadeira, Solda e Acabamento.
                                         </p>
                                     </a>
                                 </NavigationMenuLink>
                             </li>
-                            <ListItem href="/csv/press" title="Planilha Prensa">
-                                ODF, codigos, resultados e etc...
+                            <ListItem href="/csv/press" title="" className="p-0 m-2">
+                                <Alert
+                                    variant='default'
+                                    className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">
+                                    <AlertTitle>
+                                        <Image
+                                            width={30}
+                                            height={30}
+                                            alt="excel"
+                                            src={excel}
+                                        />
+                                    </AlertTitle>
+                                    <AlertDescription>
+                                        Prensa
+                                    </AlertDescription>
+                                </Alert>
                             </ListItem>
-                            <ListItem href="/csv/punching" title="Planilha Puncionadeira">
-                                ODF, codigos, resultados e etc...
+                            <ListItem href="/csv/punching" className="p-0 m-2">
+                                <Alert
+                                    variant='default'
+                                    className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">
+                                    <AlertTitle>
+                                        <Image
+                                            width={30}
+                                            height={30}
+                                            alt="excel"
+                                            src={excel}
+                                        />
+                                    </AlertTitle>
+                                    <AlertDescription className="truncate">
+                                        Puncionadeira
+                                    </AlertDescription>
+                                </Alert>
                             </ListItem>
-                            <ListItem href="/csv/threader" title="Planilha Rosqueadeira">
-                                ODF, codigos, resultados e etc...
+                            <ListItem href="/csv/threader" className="p-0 m-2">
+                                <Alert
+                                    variant='default'
+                                    className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">
+
+                                    <AlertTitle>
+                                        <Image
+                                            width={30}
+                                            height={30}
+                                            alt="excel"
+                                            src={excel}
+                                        />
+                                    </AlertTitle>
+                                    <AlertDescription className="truncate">
+                                        Rosqueadeira
+                                    </AlertDescription>
+                                </Alert>
                             </ListItem>
-                            <ListItem href="/csv/fold" title="Planilha Dobra">
-                                ODF, codigos, resultados e etc...
+                            <ListItem href="/csv/fold" className="p-0 m-2">
+                                <Alert
+                                    variant='default'
+                                    className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">
+
+                                    <AlertTitle>
+                                        <Image
+                                            width={30}
+                                            height={30}
+                                            alt="excel"
+                                            src={excel}
+                                        />
+                                    </AlertTitle>
+                                    <AlertDescription>
+                                        Dobra
+                                    </AlertDescription>
+                                </Alert>
                             </ListItem>
-                            <ListItem href="/csv/soldier" title="Planilha Solda">
-                                ODF, codigos, resultados e etc...
+                            <ListItem href="/csv/soldier" className="p-0 m-2">
+                                <Alert
+                                    variant='default'
+                                    className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">
+
+                                    <AlertTitle>
+                                        <Image
+                                            width={30}
+                                            height={30}
+                                            alt="excel"
+                                            src={excel}
+                                        />
+                                    </AlertTitle>
+                                    <AlertDescription>
+                                        Solda
+                                    </AlertDescription>
+                                </Alert>
                             </ListItem>
-                            <ListItem href="/csv/finishing" title="Planilha Acabamento">
-                                ODF, codigos, resultados e etc...
+                            <ListItem href="/csv/finishing" className="p-0 m-2">
+                                <Alert
+                                    variant='default'
+                                    className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">
+
+                                    <AlertTitle>
+                                        <Image
+                                            width={30}
+                                            height={30}
+                                            alt="excel"
+                                            src={excel}
+                                        />
+                                    </AlertTitle>
+                                    <AlertDescription className="truncate">
+                                        Acabamento
+                                    </AlertDescription>
+                                </Alert>
                             </ListItem>
 
                         </ul>

@@ -28,9 +28,7 @@ const Table = () => {
 
   useEffect(() => {
     handleSubmit();
-  }, [setUsersData]);
-
-  console.log(usersData)
+  }, [usersData]);
 
   const csvData = [
     ["Data", "item", "Revisão", "ODF", "quantidade ODF", "Qtd isnpecionada", "Resultado", "Qualidade"],

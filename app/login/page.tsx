@@ -101,7 +101,7 @@ const LoginForm = () => {
     <div className='h-screen flex items-center justify-center align-middle'>
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Fazer Login</CardTitle>
+          <CardTitle>Login</CardTitle>
           <CardDescription>Faça login para salvar as inspeçoẽs.</CardDescription>
         </CardHeader>
         <CardContent>
