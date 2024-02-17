@@ -16,8 +16,10 @@ import { Badge } from "./ui/badge";
 import { useSession } from "next-auth/react";
 import { Menu } from "./navigation-menu";
 import { RiseLoader, FadeLoader } from "react-spinners"
+import { useRouter } from "next/navigation"
 
 export const Navbar = () => {
+    const route = useRouter();
     const { setTheme } = useTheme();
     const { data: session } = useSession();
 

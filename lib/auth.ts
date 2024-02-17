@@ -48,11 +48,17 @@ export const authConfig: NextAuthOptions = {
             clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
         }),
     ],
+    pages: {
+        signIn: "/login",
+        error: "/error",
+        signOut: "https://properly-whole-crab.ngrok-free.app/",       
+    },
+    session: { strategy: 'jwt' },
 };
 
 export async function loginIsRequiredServer() {
     const session = await getServerSession(authConfig);
-    if (!session) return redirect("/");
+    if (!session) return redirect("https://properly-whole-crab.ngrok-free.app/");
 }
 
 
