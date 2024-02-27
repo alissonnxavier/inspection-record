@@ -55,7 +55,7 @@ export const Navbar = () => {
                     variant='destructive'
                     className="mr-5 p-2 w-32"
                 >
-                    <div className="m-auto">
+                    <div className="m-auto truncate">
                         {session?.user?.name ? `Inspetor ${session?.user?.name}` 
                         : <div><RiseLoader  color="#f5f7fa" size={5}/></div>}
                     </div>

@@ -105,7 +105,7 @@ const LoginForm = () => {
           <CardDescription>Faça login para salvar as inspeçoẽs.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='flex justify-around'>
+          {/* <div className='flex justify-around'>
             <Button
               onClick={() => signInGoogle()}
               variant='outline'
@@ -122,8 +122,8 @@ const LoginForm = () => {
               <Icons.gitHub className='h-5 w-5' />
               Github
             </Button>
-          </div>
-          <Separator className='my-4' />
+          </div> */}
+          {/* <Separator className='my-4' /> */}
           <form>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
