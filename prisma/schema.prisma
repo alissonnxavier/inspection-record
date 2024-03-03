@@ -25,7 +25,6 @@ model Press {
   qtd       String
   result    String
   createdAt DateTime @default(now()) @db.Date
-  newfield  String
 }
 
 model Punching {
