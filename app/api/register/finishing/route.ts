@@ -15,7 +15,8 @@ export async function POST(
       amount,
       qtd,
       result,
-      inspector
+      inspector,
+      newfield
     } = body;
     const product = prefix + item;
     const press = await db.finishing.create({
@@ -26,7 +27,7 @@ export async function POST(
         odf,
         amount,
         qtd,
-        result
+        result,
       }
     });
     return NextResponse.json(press);

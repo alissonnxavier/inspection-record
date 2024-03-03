@@ -30,7 +30,7 @@ export const soldierColumns: ColumnDef<SodierInterface>[] = [
     },
     {
         accessorKey: "qtd",
-        header: "Qtd inspecionada",
+        header: "Qtd inspecionado",
     },
     {
         accessorKey: "process",

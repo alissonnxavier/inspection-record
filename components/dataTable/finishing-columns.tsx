@@ -30,7 +30,7 @@ export const finishingColumns: ColumnDef<FinishingInterface>[] = [
     },
     {
         accessorKey: "qtd",
-        header: "Qtd inspecionada",
+        header: "inspecionado",
     },
     {
         accessorKey: "result",

@@ -30,7 +30,7 @@ export const threaderColumns: ColumnDef<ThreaderInterface>[] = [
     },
     {
         accessorKey: "qtd",
-        header: "Qtd inspecionada",
+        header: "inspecionado ",
     },
     {
         accessorKey: "process",

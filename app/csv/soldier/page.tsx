@@ -2,11 +2,12 @@
 
 //@ts-ignore
 import { CSVLink } from "react-csv";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { DataTable } from "@/components/dataTable/data-table";
-import { finishingColumns } from "@/components/dataTable/finishing-columns";
+import { soldierColumns } from "@/components/dataTable/soldier-columns copy";
 import { Navbar } from "@/components/navbar";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -15,12 +16,12 @@ import { format } from "date-fns";
 import ExportToExcel from "@/components/export-to-excell";
 
 const Table = () => {
+
   const { data: session, status } = useSession();
   const [isnpectionData, setInspectionData] = useState([]);
-
   const handleSubmit = async () => {
     try {
-      axios.get('/api/register/finishing')
+      axios.get('/api/register/soldier')
         .then((response) => { setInspectionData(response.data) });
     } catch (error) {
       console.error(error);
@@ -30,17 +31,20 @@ const Table = () => {
   useEffect(() => {
     handleSubmit();
   }, [setInspectionData]);
+
   const editedData: string[][] = [];
   isnpectionData.forEach((element, index) => {
     editedData.push(
-      [format(new Date(element['createdAt']), "dd/MM/yyyy HH:mm"),
-      element['item'],
-      element['version'],
-      element['odf'],
-      element['amount'],
-      element['qtd'],
-      element['result'],
-      element['inspector'],
+      [
+        format(new Date(element['createdAt']), "dd/MM/yyyy HH:mm"),
+        element['item'],
+        element['version'],
+        element['odf'],
+        element['amount'],
+        element['qtd'],
+        element['process'],
+        element['result'],
+        element['inspector'],
       ]
     );
   });
@@ -52,6 +56,7 @@ const Table = () => {
       'ODF',
       'Quantidade ODF',
       'Quantidade inspecionado',
+      'Processo',
       'Resultado',
       'Qualidade',
     ]
@@ -59,21 +64,18 @@ const Table = () => {
   editedData.reverse();
 
   /*  const csvData = [
-     ["Data", "item", "Revisão", "ODF", "quantidade ODF", "Qtd isnpecionada", "Resultado", "Qualidade"],
-     ...usersData.map(({ createdAt, item, version, odf, amount, qtd, result, inspector }) => [
+     [ "Data", "item", "Revisão", "ODF", "Quantidade ODF", "Qtd inspecionada", "Processo", "Resultado", ],
+     ...usersData.map(({ createdAt, item, version, odf, amount, qtd, process, result }) => [
        format(new Date(createdAt), "dd/MM/yyyy HH:mm"),
        item,
        version,
        odf,
        amount,
        qtd,
+       process,
        result,
-       inspector,
      ]),
-   ];
-  */
-  /* const f = format(new Date(createdAt), "MM/dd/yyyy HH:mm");
-  console.log(f) */
+   ]; */
 
   if (status === "loading") {
     return (
@@ -100,22 +102,22 @@ const Table = () => {
       </div>
       <div className="p-10">
         <div className=" flex justify-center ">
-          <div className="">
-            <Button className="p-10 ">
-              {/* <CSVLink className="" filename="my-file.xlsx" data={csvData}>
-                Baixar planilha
-              </CSVLink> */}
-              <div>
-                <ExportToExcel apiData={editedData} fileName='planilha acabamento' />
+          <Button className="p-10 ">
+            {/* <CSVLink className="" filename="my-file.csv" data={csvData}>
+              Baixar planilha
+            </CSVLink> */}
+            <div>
+                <ExportToExcel apiData={editedData} fileName='planilha solda' />
               </div>
-            </Button>
-          </div>
+          </Button>
         </div>
         <DataTable
           searchKey='item'
-          columns={finishingColumns}
+          columns={soldierColumns}
           data={isnpectionData}
         />
+      </div>
+      <div className="">
       </div>
     </div>
   );

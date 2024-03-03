@@ -34,7 +34,7 @@ export const foldColumns: ColumnDef<FoldInterface>[] = [
     },
     {
         accessorKey: "qtd",
-        header: "Qtd inspecionada",
+        header: "inspecionado",
     },
     {
         accessorKey: "result",

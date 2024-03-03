@@ -12,19 +12,8 @@ import FormThreader from "./form-threader";
 import FormFold from "./form-fold";
 import FormSolder from "./form-solder";
 import FormFinishing from "./form-finishing";
-import { Navbar } from "./navbar";
-import { GridLoader } from 'react-spinners';
-import { useSession } from "next-auth/react";
 
 export  function FormsInspectionRecords() {
-
-    const { data: session, status } = useSession();
-
-    const test = {
-        id: '',
-        name: ''
-    }
-
     return (
         <div className="flex items-center ">
             <Tabs defaultValue="Press" className="w-[410px]">

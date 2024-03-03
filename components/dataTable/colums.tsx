@@ -26,7 +26,7 @@ export const columns: ColumnDef<MovieInterface>[] = [
     },
     {
         accessorKey: "qtd",
-        header: "Qtd inspecionada",
+        header: "inspecionado",
     },
     {
         accessorKey: "result",

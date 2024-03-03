@@ -30,7 +30,7 @@ export const pressColumns: ColumnDef<PressInterface>[] = [
     },
     {
         accessorKey: "qtd",
-        header: "Qtd inspecionada",
+        header: "inspecionado",
     },
     {
         accessorKey: "result",
