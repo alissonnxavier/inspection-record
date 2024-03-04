@@ -128,7 +128,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                                <div className="">
+                                <div className="pt-2">
                                     <div className="space-y-1 mb-4 ">
                                         <div className="">
                                             <div className='flex mb-3'>

@@ -42,6 +42,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { AlertOctagon, Trash2 } from 'lucide-react';
 
 const formSchema = z.object({
     item: z.string().min(4),
@@ -69,12 +70,13 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     });
     const { data: session } = useSession();
     const [inspectorName, setInspectorName] = useState('');
+    const [showIcon, setShowIcon] = useState('hidden');
     const router = useRouter();
 
     useEffect(() => {
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
         form.setValue('inspector', inspectorName);
-    }, [inspectorName, setInspectorName, session]);
+    }, [inspectorName, setInspectorName, session, form]);
 
     const onSubmit = async (data: PressFormValues) => {
         try {
@@ -96,9 +98,8 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
             form.setValue('version', '');
             form.setValue('odf', '');
             form.setValue('amount', '');
-            form.setValue('qtd', '');
-            form.setValue('cnc', '');
-            form.setValue('machine', '');
+            form.setValue('result', '');
+            form.setValue('prefix', '');
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {
@@ -114,6 +115,41 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                     secondary: '#a80a1f',
                 },
             });
+        }
+    }
+
+    const clearForm = () => {
+        form.setValue('item', '');
+        form.setValue('version', '');
+        form.setValue('odf', '');
+        form.setValue('amount', '');
+        form.setValue('thickness', '');
+        form.setValue('qtd', '');
+        form.setValue('cnc', '');
+        form.setValue('machine', '');
+        form.setValue('result', '');
+        form.setValue('prefix', '');
+        setShowIcon('hidden');
+        toast.success('Formulário limpo!!!', {
+            style: {
+                border: '3px solid white',
+                padding: '30px',
+                color: 'white',
+                backgroundColor: '#2786b3'
+
+            },
+            iconTheme: {
+                primary: 'white',
+                secondary: '#2786b3',
+            },
+        });
+    }
+
+    const verifyEmpetyField = () => {
+        if (form.getValues('cnc') !== '' || form.getValues('thickness') !== '' || form.getValues('machine') !== '') {
+            setShowIcon('');
+        } else {
+            setShowIcon('hidden')
         }
     }
 
@@ -145,7 +181,28 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                     <div className="space-y-1 mb-4 ">
                                         <div className="">
                                             <div className='flex mb-3'>
-                                                <div className='pt-8'>
+                                                <div className='flex fixed gap-5 gap-y-4 ml-3 '>
+                                                    <div
+                                                        onClick={() => clearForm()}
+                                                        className='cursor-pointer'
+                                                    >
+                                                        <Button type='reset' size='icon' variant='outline'>
+                                                            <Trash2 size={20} color='red' />
+                                                        </Button>
+                                                    </div>
+                                                    <div className=''>
+                                                        <Button
+                                                            type='button'
+                                                            size='icon'
+                                                            variant='outline'
+                                                            disabled={true}
+                                                            className={`brightness-200 ${showIcon}`}
+                                                        >
+                                                            <AlertOctagon color='#0ba3a1' size={20} className='animate-pulse' />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                                <div className='pt-10 '>
                                                     <FormField
                                                         control={form.control}
                                                         name="prefix"
@@ -166,20 +223,26 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                         )}
                                                     />
                                                 </div>
-                                                <FormField
-                                                    control={form.control}
-                                                    name='item'
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Item:</FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    type='number' placeholder='Codigo do item' {...field}
-                                                                />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                                <div className='pt-2'>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name='item'
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Item:</FormLabel>
+                                                                <FormControl
+                                                                    onChange={() => { verifyEmpetyField() }}
+                                                                >
+                                                                    <Input
+                                                                        type='number'
+                                                                        placeholder='Codigo do item'
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
                                             </div>
                                             <div className='flex gap-2'>
                                                 <FormField
@@ -202,7 +265,9 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>Espessura:</FormLabel>
-                                                            <FormControl>
+                                                            <FormControl
+                                                                onChange={() => { verifyEmpetyField() }}
+                                                            >
                                                                 <Input
                                                                     type='text' placeholder='0,0' {...field}
                                                                 />
@@ -250,7 +315,9 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>CNC:</FormLabel>
-                                                            <FormControl>
+                                                            <FormControl
+                                                                onChange={() => { verifyEmpetyField() }}
+                                                            >
                                                                 <Input
                                                                     type='text'
                                                                     placeholder='_,_,_,_'
@@ -267,7 +334,9 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>Maquina:</FormLabel>
-                                                            <FormControl>
+                                                            <FormControl
+                                                                onChange={() => { verifyEmpetyField() }}
+                                                            >
                                                                 <Select
                                                                     onValueChange={field.onChange}
                                                                     value={field.value}

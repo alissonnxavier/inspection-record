@@ -72,7 +72,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     useEffect(()=>{
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
         form.setValue('inspector', inspectorName);
-    },[inspectorName, setInspectorName, session]);
+    },[inspectorName, setInspectorName, session, form]);
 
     const onSubmit = async (data: PressFormValues) => {
         try {
@@ -136,7 +136,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                                <div className="">
+                                <div className="pt-2">
                                     <div className="space-y-1 mb-4 ">
                                         <div className="">
                                             <div className='flex mb-3'>

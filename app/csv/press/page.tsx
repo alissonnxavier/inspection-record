@@ -31,7 +31,7 @@ const Table = () => {
   };
   useEffect(() => {
     handleSubmit();
-  }, [setInspectionData]);
+  }, [setInspectionData, isnpectionData]);
 
   const editedData: string[][] = [];
   isnpectionData.forEach((element, index) => {
@@ -75,7 +75,7 @@ const Table = () => {
         inspector,
       ]),
     ]; */
-  if (status === "loading") {
+  if (status === "loading" || !isnpectionData) {
     return (
       <>
         <div className="flex justify-center p-10">
