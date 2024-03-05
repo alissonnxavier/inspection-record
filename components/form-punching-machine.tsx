@@ -70,13 +70,19 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     });
     const { data: session } = useSession();
     const [inspectorName, setInspectorName] = useState('');
-    const [showIcon, setShowIcon] = useState('hidden');
+    const [showIcon, setShowIcon] = useState(false);
+    const [showTrashIcon, setShowTrashIcon] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
         form.setValue('inspector', inspectorName);
-    }, [inspectorName, setInspectorName, session, form]);
+    }, [
+        inspectorName,
+        setInspectorName,
+        session,
+        form,
+    ]);
 
     const onSubmit = async (data: PressFormValues) => {
         try {
@@ -129,7 +135,8 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
         form.setValue('machine', '');
         form.setValue('result', '');
         form.setValue('prefix', '');
-        setShowIcon('hidden');
+        setShowIcon(false);
+        setShowTrashIcon(false);
         toast.success('Formulário limpo!!!', {
             style: {
                 border: '3px solid white',
@@ -146,11 +153,24 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
     }
 
     const verifyEmpetyField = () => {
-        if (form.getValues('cnc') !== '' || form.getValues('thickness') !== '' || form.getValues('machine') !== '') {
-            setShowIcon('');
+
+        if (form.getValues('cnc') || form.getValues('machine') || form.getValues('thickness')) {
+            setShowIcon(true);
+            setShowTrashIcon(true);
         } else {
-            setShowIcon('hidden')
+            setShowIcon(false);
+            setShowTrashIcon(false);
         }
+        verifyEmpetyForm();
+    }
+
+    const verifyEmpetyForm = () => {
+        if (form.getValues('amount') || form.getValues('cnc') || form.getValues('machine') || form.getValues('thickness') || form.getValues('item') || form.getValues('odf') || form.getValues('prefix') || form.getValues('qtd') || form.getValues('result') || form.getValues('version')) {
+            setShowTrashIcon(true);
+        } else {
+            setShowTrashIcon(false)
+        }
+
     }
 
     return (
@@ -182,24 +202,32 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                         <div className="">
                                             <div className='flex mb-3'>
                                                 <div className='flex fixed gap-5 gap-y-4 ml-3 '>
-                                                    <div
-                                                        onClick={() => clearForm()}
-                                                        className='cursor-pointer'
-                                                    >
-                                                        <Button type='reset' size='icon' variant='outline'>
-                                                            <Trash2 size={20} color='red' />
-                                                        </Button>
-                                                    </div>
-                                                    <div className=''>
-                                                        <Button
-                                                            type='button'
-                                                            size='icon'
-                                                            variant='outline'
-                                                            disabled={true}
-                                                            className={`brightness-200 ${showIcon}`}
+                                                    {showTrashIcon ?
+                                                        <div
+                                                            onClick={() => clearForm()}
+                                                            className='cursor-pointer'
                                                         >
-                                                            <AlertOctagon color='#0ba3a1' size={20} className='animate-pulse' />
-                                                        </Button>
+                                                            <Button type='reset' size='icon' variant='outline'>
+                                                                <Trash2 size={20} color='red' />
+                                                            </Button>
+                                                        </div> : <div></div>
+                                                    }
+                                                    <div className=''>
+                                                        {showIcon ?
+                                                            <Button
+                                                                type='button'
+                                                                size='icon'
+                                                                variant='outline'
+                                                                disabled={true}
+                                                                className={`brightness-200`}
+                                                                hidden={false}
+
+                                                            >
+                                                                <AlertOctagon color='#0ba3a1' size={20} className='animate-pulse' />
+                                                            </Button>
+                                                            : <div></div>
+                                                        }
+
                                                     </div>
                                                 </div>
                                                 <div className='pt-10 '>
@@ -251,7 +279,9 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>Revisão:</FormLabel>
-                                                            <FormControl>
+                                                            <FormControl
+                                                                onChange={verifyEmpetyField}
+                                                            >
                                                                 <Input
                                                                     type='number' placeholder='Rev' {...field}
                                                                 />
@@ -316,7 +346,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                         <FormItem>
                                                             <FormLabel>CNC:</FormLabel>
                                                             <FormControl
-                                                                onChange={() => { verifyEmpetyField() }}
+                                                                onChange={verifyEmpetyField}
                                                             >
                                                                 <Input
                                                                     type='text'
@@ -335,18 +365,18 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                         <FormItem>
                                                             <FormLabel>Maquina:</FormLabel>
                                                             <FormControl
-                                                                onChange={() => { verifyEmpetyField() }}
                                                             >
                                                                 <Select
                                                                     onValueChange={field.onChange}
                                                                     value={field.value}
                                                                     defaultValue={field.value}
+                                                                    onOpenChange={verifyEmpetyField}
                                                                 >
-                                                                    <SelectTrigger className="w-[150px]">
+                                                                    <SelectTrigger className="w-[150px]" onChange={() => { console.log('maquina') }}>
                                                                         <SelectValue placeholder="Selecione a maquina" />
-                                                                    </SelectTrigger>
+                                                                    </SelectTrigger >
                                                                     <SelectContent>
-                                                                        <SelectGroup>
+                                                                        <SelectGroup >
                                                                             <SelectLabel>Selecione a maquina</SelectLabel>
                                                                             <SelectItem value="MT300">MT300</SelectItem>
                                                                             <SelectItem value="HPE">HPE</SelectItem>
@@ -362,8 +392,10 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='qtd'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel className='truncate'>Qtd inspecionada:</FormLabel>
-                                                            <FormControl>
+                                                            <FormLabel className='truncate'>Qtd inspecionado:</FormLabel>
+                                                            <FormControl
+                                                                onChange={verifyEmpetyField}
+                                                            >
                                                                 <Input
                                                                     type='number'
                                                                     placeholder='_,_'
