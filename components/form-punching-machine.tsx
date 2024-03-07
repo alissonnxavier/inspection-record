@@ -201,7 +201,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                     <div className="space-y-1 mb-4 ">
                                         <div className="">
                                             <div className='flex mb-3'>
-                                                <div className='flex fixed gap-5 gap-y-4 ml-3 '>
+                                                <div className='flex absolute gap-5 gap-y-4 ml-3 '>
                                                     {showTrashIcon ?
                                                         <div
                                                             onClick={() => clearForm()}
