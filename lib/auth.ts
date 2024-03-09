@@ -17,8 +17,12 @@ export const authConfig: NextAuthOptions = {
                     label: "Name",
                     type: "name",
                 },
-                password: { label: "Password", type: "password" },
+                password: {
+                    label: "Password",
+                    type: "password"
+                },
             },
+            //@ts-ignore
             async authorize(credentials) {
                 if (!credentials || !credentials.name || !credentials.password)
                     return null;
@@ -51,7 +55,7 @@ export const authConfig: NextAuthOptions = {
     pages: {
         signIn: "/login",
         error: "/error",
-        signOut: "https://properly-whole-crab.ngrok-free.app/",       
+        signOut: "https://properly-whole-crab.ngrok-free.app/",
     },
     session: { strategy: 'jwt' },
 };

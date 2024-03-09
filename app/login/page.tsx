@@ -40,7 +40,7 @@ const LoginForm = () => {
 
       if (res?.error) {
         console.error('invalid credentials');
-        toast.error('Algo deu errado, verifique sua senha e email.', {
+        toast.error('Algo deu errado, verifique seu nome e senha.', {
           style: {
             border: '3px solid white',
             padding: '30px',

@@ -372,12 +372,11 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                                     defaultValue={field.value}
                                                                     onOpenChange={verifyEmpetyField}
                                                                 >
-                                                                    <SelectTrigger className="w-[150px]" onChange={() => { console.log('maquina') }}>
+                                                                    <SelectTrigger className="w-[150px]">
                                                                         <SelectValue placeholder="Selecione a maquina" />
                                                                     </SelectTrigger >
                                                                     <SelectContent>
                                                                         <SelectGroup >
-                                                                            <SelectLabel>Selecione a maquina</SelectLabel>
                                                                             <SelectItem value="MT300">MT300</SelectItem>
                                                                             <SelectItem value="HPE">HPE</SelectItem>
                                                                         </SelectGroup>
