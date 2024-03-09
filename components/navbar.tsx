@@ -22,6 +22,7 @@ export const Navbar = () => {
     const route = useRouter();
     const { setTheme } = useTheme();
     const { data: session } = useSession();
+    
 
     const handleLogOut = () => {
 
