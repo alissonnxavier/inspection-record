@@ -7,6 +7,9 @@ const nextConfig = {
         // your project has type errors.
         // !! WARN !!
         ignoreBuildErrors: true,
+    },
+    experimental: {
+        serverComponentsExternalPackages: ['@react-pdf/renderer'],
     }
 }
 

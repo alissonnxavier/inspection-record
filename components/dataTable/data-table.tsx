@@ -52,7 +52,7 @@ export function DataTable<TData, TValue>({
     });
 
     return (
-        <div className=" m-auto  w-5/6">
+        <div className=" m-auto lg:w-5/6 md:w-full md:px-3 sm:w-full">
             <div className="flex items-center py-4">
                 <Input
                     placeholder="Pesquisar por item"
@@ -60,7 +60,7 @@ export function DataTable<TData, TValue>({
                     onChange={(event) =>
                         table.getColumn(searchKey)?.setFilterValue(event.target.value)
                     }
-                    className="rounded focus:outline-none focus:border-red-500 focus:ring-red-500 focus:border-4 w-60 "
+                    className="rounded focus:outline-none w-60"
                 />
             </div>
             <div className="rounded-md border">
@@ -89,7 +89,7 @@ export function DataTable<TData, TValue>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className=" hover:bg-destructive/90 "
+                                    className=""
                                 >
                                     {row.getVisibleCells().map((cell) => (
 
@@ -122,6 +122,7 @@ export function DataTable<TData, TValue>({
                     size="sm"
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
+                    className="shadow-xl hover:shadow-sm"
                 >
                     Anterior
                 </Button>
@@ -130,6 +131,7 @@ export function DataTable<TData, TValue>({
                     size="sm"
                     onClick={() => table.nextPage()}
                     disabled={!table.getCanNextPage()}
+                    className="shadow-xl hover:shadow-sm"
                 >
                     Proximo
                 </Button>

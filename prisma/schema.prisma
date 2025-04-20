@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["mongoDb"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -9,10 +8,11 @@ datasource db {
 }
 
 model Users {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
   name     String
+  email    String
   password String
-  press    String[] @db.ObjectId
+  admin    String
 }
 
 model Press {
@@ -90,5 +90,33 @@ model Finishing {
   qtd       String
   result    String
   inspector String
+  createdAt DateTime @default(now()) @db.Date
+}
+
+model Plate {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  supplier  String
+  lot       String
+  invoice   String
+  rir       String
+  hbOne     String
+  hbTwo     String
+  hbThree   String
+  inspector String
+  images    String[]
+  createdAt DateTime @default(now()) @db.Date
+}
+
+model Serigraphy {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  version   String
+  odf       String
+  amount    String
+  inspected String
+  result    String
+  inspector String
+  images    String[]
   createdAt DateTime @default(now()) @db.Date
 }

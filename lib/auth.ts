@@ -5,24 +5,18 @@ import { redirect, useRouter } from "next/navigation";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
-import { setCookie } from "nookies";
 import { getToken } from "next-auth/jwt";
-//@ts-ignore
-import jsonwebtoken  from 'jsonwebtoken'
-
 import { db } from "./prismadb";
-import { randomBytes, randomUUID } from "crypto";
-
-const callbacks = {}
+const bcrypt = require('bcrypt');
 
 export const authConfig: NextAuthOptions = {
     providers: [
         CredentialsProvider({
             name: "Sign in",
             credentials: {
-                name: {
-                    label: "Name",
-                    type: "name",
+                email: {
+                    label: "Email",
+                    type: "email"
                 },
                 password: {
                     label: "Password",
@@ -31,20 +25,19 @@ export const authConfig: NextAuthOptions = {
             },
             //@ts-ignore
             async authorize(credentials) {
-                if (!credentials || !credentials.name || !credentials.password)
+                if (!credentials || !credentials.email || !credentials.password)
+
                     return null;
 
                 const dbUser = await db.users.findFirst({
                     where: {
-                        name: credentials.name
+                        email: credentials.email
                     },
                 })
-
-
-                //Verify Password here
-                //We are going to use a simple === operator
-                //In production DB, passwords should be encrypted using something like bcrypt...
-                if (dbUser && dbUser.password === credentials.password) {
+                const saltRounds = 10;
+                const salt = await bcrypt.genSalt(saltRounds);
+                const isPasswordMath = await bcrypt.compare(credentials.password, dbUser?.password);
+                if (dbUser && isPasswordMath) {
                     return dbUser
                 }
                 return null;
@@ -62,21 +55,38 @@ export const authConfig: NextAuthOptions = {
     pages: {
         signIn: "/login",
         error: "/error",
-        signOut: "https://properly-whole-crab.ngrok-free.app/",
+        signOut: "/",
+
     },
-    session: { 
+    session: {
         strategy: 'jwt',
     },
     secret: process.env.NEXTAUTH_JWT_SECRET,
     callbacks: {
-
+        async jwt({ token, user, profile, trigger, session, account }) {
+            return {
+                ...token,
+            }
+        },
+        async session({ session, token, user }) {
+            if (session) {
+                const admin = await db.users.findFirst({
+                    where: {
+                        email: user?.email,
+                    }
+                })
+                session = Object.assign({}, session, { admin: {}})
+                 
+            }
+            return {
+                ...session,
+            }
+        },
     },
-    
 };
 
 export async function loginIsRequiredServer() {
     const session = await getServerSession(authConfig);
     if (!session) return redirect("https://properly-whole-crab.ngrok-free.app/");
 }
-
 

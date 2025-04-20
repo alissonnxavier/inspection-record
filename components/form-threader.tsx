@@ -42,8 +42,11 @@ import {
 } from "@/components/ui/select"
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import { useEditForm } from '@/hooks/use-edit-form';
+import { loadUniqueThreaderRegister } from '@/actions/load';
 
 const formSchema = z.object({
+    id: z.string().default(''),
     item: z.string().min(4),
     version: z.string(),
     odf: z.string().min(6),
@@ -58,43 +61,94 @@ const formSchema = z.object({
 type PressFormValues = z.infer<typeof formSchema>;
 
 interface FormPressProps {
+    id: string;
     tab: string;
 }
 
-const FormPress: React.FC<FormPressProps> = ({ tab }) => {
+const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
     const { data: session } = useSession();
     const [inspectorName, setInspectorName] = useState('');
-    const router = useRouter();
+    const handleEditForm = useEditForm();
+    const [inspectionData, setInspectionData] = useState([] as any);
 
-    useEffect(()=>{
+    const handleData = async (id: string) => {
+        if (id?.length > 2 && handleEditForm.tab === tab) {
+            await loadUniqueThreaderRegister(id)
+                .then((response) => {
+                    setInspectionData(response as any);
+                    if (inspectionData?.id?.length > 3) {
+                        form.setValue('id', response?.id as string);
+                        form.setValue('prefix', response?.item.slice(0, 3) as string);
+                        form.setValue('item', response?.item.slice(3, response?.item.length) as any);
+                        form.setValue('version', response?.version as any);
+                        form.setValue('odf', response?.odf as string);
+                        form.setValue('amount', response?.amount as string);
+                        form.setValue('qtd', response?.qtd as string);
+                        form.setValue('process', response?.process as string);
+                        form.setValue('result', response?.result as string);
+                    }
+                });
+        }
+    }
+
+    useEffect(() => {
+        handleData(id);
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
         form.setValue('inspector', inspectorName);
-    },[inspectorName, setInspectorName, session, form]);
+    }, [setInspectorName, session, form, id, inspectionData?.id]);
 
-    const onSubmit = async (data: PressFormValues) => {
+    const onSubmit = async (formData: PressFormValues) => {
         try {
-            const res = await axios.post('/api/register/threader', data);
-            toast.success('Registro salvo com sucesso!!!', {
-                style: {
-                    border: '3px solid white',
-                    padding: '30px',
-                    color: 'white',
-                    backgroundColor: '#109c2e'
+            if (inspectionData?.id?.length > 0) {
+                const res = await axios.post('/api/edit/threader', formData);
+                toast.success('Registro editado com sucesso!!!', {
+                    style: {
+                        border: '3px solid white',
+                        padding: '30px',
+                        color: 'white',
+                        backgroundColor: '#706d0c',
+                        borderRadius: '50%',
+                        boxShadow: '20px 20px 50px grey',
+                    },
+                    iconTheme: {
+                        primary: 'white',
+                        secondary: '#706d0c',
+                    },
+                });
+                form.setValue('item', '');
+                form.setValue('version', '');
+                form.setValue('odf', '');
+                form.setValue('amount', '');
+                form.setValue('qtd', '');
+                form.setValue('process', '')
+                setInspectionData([]);
+                handleEditForm.clearData();
+            } else {
+                const res = await axios.post('/api/register/threader', formData);
+                toast.success('Registro salvo com sucesso!!!', {
+                    style: {
+                        border: '3px solid white',
+                        padding: '30px',
+                        color: 'white',
+                        backgroundColor: '#109c2e',
+                        borderRadius: '50%',
+                        boxShadow: '20px 20px 50px grey',
 
-                },
-                iconTheme: {
-                    primary: 'white',
-                    secondary: '#109c2e',
-                },
-            });
-            form.setValue('item', '');
-            form.setValue('version', '');
-            form.setValue('odf', '');
-            form.setValue('amount', '');
-            form.setValue('qtd', '');
+                    },
+                    iconTheme: {
+                        primary: 'white',
+                        secondary: '#109c2e',
+                    },
+                });
+                form.setValue('item', '');
+                form.setValue('version', '');
+                form.setValue('odf', '');
+                form.setValue('amount', '');
+                form.setValue('qtd', '');
+            }
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {
@@ -102,7 +156,9 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                     border: '3px solid white',
                     padding: '30px',
                     color: 'white',
-                    backgroundColor: '#a80a1f'
+                    backgroundColor: '#a80a1f',
+                    borderRadius: '50%',
+                    boxShadow: '20px 20px 50px grey',
                 },
                 iconTheme: {
                     primary: 'white',
@@ -253,7 +309,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                                                     name='qtd'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Quantidade inspecionada:</FormLabel>
+                                                            <FormLabel>Inspecionado:</FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     type='number' placeholder='_,_' {...field}
@@ -302,12 +358,36 @@ const FormPress: React.FC<FormPressProps> = ({ tab }) => {
                             </CardContent>
                             <CardFooter>
                                 <div className='flex w-[390px] justify-center '>
-                                    <Button
-                                        type='submit'
-                                        className='flex w-[320px] '
-                                    >
-                                        Registrar
-                                    </Button>
+                                    {handleEditForm.id && handleEditForm.tab === tab ?
+                                        <>
+                                            <div className='flex w-full justify-between px-10'>
+                                                <div>
+                                                    <Button
+                                                        type='submit'
+                                                        className='shadow-lg hover:shadow-sm'
+                                                        variant='secondary'>
+                                                        Salvar
+                                                    </Button>
+                                                </div>
+                                                <div>
+                                                    <Button
+                                                        onClick={() => {
+                                                            handleEditForm.clearData();
+                                                            window.location.reload()
+                                                        }}
+                                                        variant='delete'>
+                                                        Cancelar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </>
+                                        : <Button
+                                            type='submit'
+                                            className='flex w-[320px] '
+                                        >
+                                            Registrar
+                                        </Button>
+                                    }
                                 </div>
                             </CardFooter>
                         </Card>

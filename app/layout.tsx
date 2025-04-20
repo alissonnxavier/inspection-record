@@ -1,14 +1,23 @@
-
-import dynamic from 'next/dynamic'
-
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { ThemeProvider } from '@/components/theme-provider'
-import { AuthProvider } from '../components/providers/Providers'
-import { Toaster } from 'react-hot-toast';
-import { ToasterProvider } from '@/components/providers/toast-provider'
-import { siteConfig } from '@/config/site'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { ThemeProvider } from '@/components/theme-provider';
+import { AuthProvider } from '../components/providers/Providers';
+import { ToasterProvider } from '@/components/providers/toast-provider';
+import { siteConfig } from '@/config/site';
+import { ModalProvider } from '@/providers/modal-provider';
+import { DrawerPressProvider } from '@/providers/drawer-provider-press';
+import { DrawerPunchingProvider } from '@/providers/drawer-provider-punching';
+import { DrawerThreaderProvider } from '@/providers/drawer-provider-threader';
+import { DrawerFoldProvider } from '@/providers/drawer-provider-fold';
+import { DrawerSoldierProvider } from '@/providers/drawer-provider-soldier';
+import { DrawerFinishingProvider } from '@/providers/drawer-provider-finishing';
+import { DrawerPlateProvider } from '@/providers/drawer-provider-plate';
+import { DrawerSerigraphyProvider } from '@/providers/drawer-provider-serigraphy';
+import { ProviderGallery } from '@/providers/modal-provider-gallery';
+import { AdminProvider } from '@/providers/admin-provider';
+import { EditFormProvider } from '@/providers/edit-form-provider';
+import { ReportProvider } from '@/providers/report-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,7 +31,7 @@ export const metadata: Metadata = {
   icons: [
     {
       url: '/logo.svg',
-      href:'/logo.svg'
+      href: '/logo.svg'
     }
   ]
 }
@@ -42,7 +51,20 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <ToasterProvider/>
+            <ToasterProvider />
+            <EditFormProvider />
+            <ModalProvider />
+            <AdminProvider />
+            <DrawerPressProvider />
+            <DrawerPunchingProvider />
+            <DrawerThreaderProvider />
+            <DrawerFoldProvider />
+            <DrawerSoldierProvider />
+            <DrawerFinishingProvider />
+            <DrawerPlateProvider />
+            <DrawerSerigraphyProvider />
+            <ProviderGallery />
+            <ReportProvider />
             {children}
           </ThemeProvider>
         </AuthProvider>

@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/providers/Providers.jsx", "app/api/auth/[...nextauth]/route.ts", "app/page.tsx", "app/logout/page.tsx", "app/api/register/press/route.ts", "app/csv/prensa/page.jsx", "components/dataTable/data-table.tsx", "components/export-to-excell.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/providers/Providers.jsx", "app/api/auth/[...nextauth]/route.ts", "app/page.tsx", "app/logout/page.tsx", "app/api/register/press/route.ts", "app/csv/prensa/page.jsx", "components/dataTable/data-table.tsx", "components/export-to-excell.jsx", "lib/auth.ts", "components/dataTable/tables/columns-data-table", "app/api/register/plate/route.ts", "app/test/page.tsx", "components/drawer/report-drawer.tsx"],
   "exclude": ["node_modules"]
 }
