@@ -111,7 +111,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
         try {
             if (inspectionData?.id?.length > 0) {
                 const res = await axios.post('/api/edit/punching', formData);
-                toast.success('Registro editado com sucesso!!!', {
+                toast.success('Registro alterado com sucesso!!!', {
                     style: {
                         border: '3px solid white',
                         padding: '30px',
@@ -159,7 +159,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 form.setValue('result', '');
                 form.setValue('prefix', '');
             }
-            handleEditForm.clearData();
+            //handleEditForm.clearData();
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {

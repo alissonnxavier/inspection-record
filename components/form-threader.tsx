@@ -104,7 +104,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
         try {
             if (inspectionData?.id?.length > 0) {
                 const res = await axios.post('/api/edit/threader', formData);
-                toast.success('Registro editado com sucesso!!!', {
+                toast.success('Registro alterado com sucesso!!!', {
                     style: {
                         border: '3px solid white',
                         padding: '30px',
