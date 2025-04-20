@@ -4,7 +4,7 @@ DATABASE_URL=
 </br></br>
 NEXTAUTH_JWT_SECRET=</br>
 </br></br>
-#Providers
+#Providers</br>
 GOOGLE_CLIENT_ID=</br>
 GOOGLE_CLIENT_SECRET=
 </br></br>
