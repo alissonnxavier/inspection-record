@@ -13,7 +13,6 @@ import { useReporDrawer } from '@/hooks/use-drawer-report';
 
 interface EditProps {
     id: string;
-
 }
 
 const ButtonReport: React.FC<EditProps> = ({
@@ -35,7 +34,7 @@ const ButtonReport: React.FC<EditProps> = ({
             variant='link'
             onClick={
                 () => {
-                    handleDrawerReport.onOpen();
+                    handleDrawerReport.onOpen(id);
                     handleDrawerPlate.onClose();
                     handleDrawerPress.onClose();
                     handleDrawerPunchingMachine.onClose();

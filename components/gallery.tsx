@@ -22,13 +22,9 @@ const Gallery: React.FC<GalleryProps> = ({ data }) => {
     const [inspectionData, setInspectionData] = useState([] as any);
     const [imgOnPreview, setImgOnPreview] = useState();
     const [currentIndex, setCurrentIndex] = useState(0);
-
     const [zoomable, setZoomable] = useState(true);
     const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
     const [position, setPosition] = useState({ x: 100, y: 100, mouseX: 0, mouseY: 0 });
-
-    console.log(inspectionData)
-
 
     const handleMouseEnter = (e: MouseEvent) => {
         let element = e.currentTarget;
@@ -91,7 +87,7 @@ const Gallery: React.FC<GalleryProps> = ({ data }) => {
                 </div>
             </>
         )
-    }
+    };
 
     return (
         <ScrollArea className='xl:m-auto lg:m-auto 2xl:m-auto md:m-auto'>
@@ -179,6 +175,6 @@ const Gallery: React.FC<GalleryProps> = ({ data }) => {
             </div>
         </ScrollArea>
     )
-}
+};
 
-export default Gallery
+export default Gallery;

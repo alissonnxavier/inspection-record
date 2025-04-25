@@ -124,21 +124,6 @@ export const ColumnsPress = () => {
                 </div>
             ),
         },
-        /*   {
-              accessorKey: "amount",
-              header: () => <div className="text-right">Amount</div>,
-              cell: ({ row }) => {
-                  const amount = parseFloat(row.getValue("amount"))
-      
-                  // Format the amount as a dollar amount
-                  const formatted = new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                  }).format(amount)
-      
-                  return <div className="text-right font-medium">{formatted}</div>
-              },
-          }, */
         {
             accessorKey: "inspector",
             header: "Qualidade",
@@ -147,7 +132,6 @@ export const ColumnsPress = () => {
             ),
         },
         {
-
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
@@ -157,7 +141,6 @@ export const ColumnsPress = () => {
                     deleteRegisterPress(id);
                     location.reload();
                 }
-
                 if (handleAdmin.admin) {
                     return (
                         <DropdownMenu>
@@ -175,7 +158,7 @@ export const ColumnsPress = () => {
                                             <ButtonEditInspection tab="Press" id={row.original.id} />
                                         </DropdownMenuItem>
                                         <DropdownMenuItem>
-                                            <ButtonReport id=''/>
+                                            <ButtonReport id={row.original as any}/>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() => {
