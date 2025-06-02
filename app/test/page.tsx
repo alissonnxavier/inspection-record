@@ -1,37 +1,47 @@
 'use client'
 
+import InputEspecifiedMeasure from '@/components/input-especified-measure';
 import { Button } from '@/components/ui/button';
-import React, { useState } from 'react'
+import { Input } from '@/components/ui/input';
+import { add } from 'date-fns';
+import React, { useRef, useState, ElementRef } from 'react';
+import toast from "react-hot-toast";
+import { useEventListener } from "usehooks-ts";
 
 const Page = () => {
 
-  const [item, setItem] = useState([]);
+  const [inputAmount, setInputAmount] = useState<any>([1]);
+
+  console.log(inputAmount);
+
+  const addInput = () => {
+    setInputAmount((prev: any) => [...prev, prev.length + 1]);
+  };
 
   return (
-    <div>
-      <div>
-        {item.map((item, index) => {
-          return (
-            <div key={index}>
-              {item}
-            </div>
-          )
-        }
-        )}
-      </div>
-      <div>
-        <Button
-          onClick={() => {
-            //@ts-ignore
-            setItem([...item, item.length + 1]);
-            console.log(item)
-          }}
-        >
-          Add new item
-        </Button>
-      </div>
-    </div>
-  )
-}
 
-export default Page
+    <div className='flex flex-col items-center justify-center h-full'>
+      <Button
+        onClick={() => {
+          addInput();
+        }}
+      >
+        Add more input
+      </Button>
+
+      {inputAmount.map((input: any, inputIndex: number) => (
+        <div key={inputIndex}>
+          <InputEspecifiedMeasure />
+        </div>
+      ))}
+
+
+
+    </div>
+
+
+  )
+
+};
+
+export default Page;

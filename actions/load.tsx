@@ -37,7 +37,6 @@ export const loadUniquePlateRegister = async (id: string) => {
             id
         }
     });
-
     if (serigraphyRegister?.images) {
         let imagesArray = [];
         for (let i = 0; serigraphyRegister?.images.length > i; i++) {

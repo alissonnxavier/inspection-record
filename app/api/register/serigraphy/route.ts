@@ -68,7 +68,6 @@ export async function GET(
   req: Request,
   { params }: { params: { storeId: string } }
 ) {
-  let inspectionsWithBase64 = [] as any;
   try {
     const inspections = await db.serigraphy.findMany({
       orderBy: {

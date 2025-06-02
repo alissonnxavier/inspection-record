@@ -80,7 +80,7 @@ const Gallery: React.FC<GalleryProps> = ({ data }) => {
     if (!inspectionData[0]?.base64[0]) {
         return (
             <>
-                <div className="flex justify-center p-10">
+                <div className="flex justify-center">
                 </div>
                 <div className="flex h-5/6 justify-center items-center m-auto">
                     <GridLoader color="#9e0837" size={100} />

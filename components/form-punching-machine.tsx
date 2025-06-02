@@ -30,7 +30,6 @@ import {
     ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
-import { redirect, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import {
@@ -38,7 +37,6 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
@@ -49,7 +47,7 @@ import { useEditForm } from '@/hooks/use-edit-form';
 const formSchema = z.object({
     id: z.string().default(''),
     item: z.string().min(4),
-    version: z.string(),
+    version: z.string().min(1),
     odf: z.string().min(6),
     amount: z.string().min(1),
     qtd: z.string().min(1),
@@ -79,6 +77,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     const [inspectionData, setInspectionData] = useState([] as any);
     const handleEditForm = useEditForm();
 
+    console.log('name', inspectorName);
+
     const handleData = async (id: string) => {
         if (id?.length > 2 && handleEditForm.tab === tab) {
             await loadUniquePunchingMachineRegister(id)
@@ -105,7 +105,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
         setInspectorName(session?.user?.name ? session?.user?.name : 'No isnpector name')
         form.setValue('inspector', inspectorName);
         handleData(id);
-    }, [setInspectorName, session, form, id, inspectionData?.id]);
+    }, [setInspectorName, session, form, id, inspectorName]);
 
     const onSubmit = async (formData: PressFormValues) => {
         try {
@@ -145,7 +145,6 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                         backgroundColor: '#109c2e',
                         borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
-
                     },
                     iconTheme: {
                         primary: 'white',
@@ -178,7 +177,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 },
             });
         }
-    }
+    };
 
     const clearForm = () => {
         form.setValue('item', '');
@@ -208,7 +207,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 secondary: '#2786b3',
             },
         });
-    }
+    };
 
     const verifyEmpetyField = () => {
 
@@ -220,7 +219,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
             setShowTrashIcon(false);
         }
         verifyEmpetyForm();
-    }
+    };
 
     const verifyEmpetyForm = () => {
         if (form.getValues('amount') || form.getValues('cnc') || form.getValues('machine') || form.getValues('thickness') || form.getValues('item') || form.getValues('odf') || form.getValues('prefix') || form.getValues('qtd') || form.getValues('result') || form.getValues('version')) {
@@ -228,8 +227,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
         } else {
             setShowTrashIcon(false)
         }
-
-    }
+    };
 
     return (
         <>

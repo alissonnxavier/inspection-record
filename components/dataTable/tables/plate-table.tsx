@@ -36,6 +36,8 @@ const Table = () => {
     handleSubmit();
   }, [setInspectionData]);
 
+  console.log(inspectionData);
+
   const editedData: string[][] = [];
   inspectionData.forEach((element, index) => {
     editedData.push(

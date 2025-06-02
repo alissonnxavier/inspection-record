@@ -1,8 +1,9 @@
+
 import { DrawerPatter } from "../drawer-patter";
 import { useReporDrawer } from "@/hooks/use-drawer-report";
 import { Button } from "../ui/button";
 import generatePDF, { Resolution, Margin, Options } from 'react-to-pdf';
-import { ElementRef, useRef, useState } from "react";
+import { ElementRef, useEffect, useRef, useState } from "react";
 import { Separator } from "../ui/separator";
 import ReportTitle from "../report-title";
 import { Card, CardHeader, CardTitle } from "../ui/card";
@@ -11,56 +12,57 @@ import { Input } from "../ui/input";
 import toast from "react-hot-toast";
 import { useEventListener } from "usehooks-ts";
 import { useSession } from "next-auth/react";
+import { loadUniquePressRegister } from "@/actions/load";
+import { GridLoader } from "react-spinners";
+import { format } from "date-fns";
+import { saveReport } from "@/actions/save";
 
 
 const options: Options = {
     filename: "advanced-example.pdf",
     method: "save",
-    // default is Resolution.MEDIUM = 3, which should be enough, higher values
-    // increases the image quality but also the size of the PDF, so be careful
-    // using values higher than 10 when having multiple pages generated, it
-    // might cause the page to crash or hang.
     resolution: Resolution.NORMAL,
     page: {
-        // margin is in MM, default is Margin.NONE = 0
         margin: Margin.LARGE,
-        // default is 'A4'
         format: "letter",
-        // default is 'portrait'
         orientation: "portrait"
     },
     canvas: {
-        // default is 'image/jpeg' for better size performance
         mimeType: "image/jpeg",
         qualityRatio: 1
     },
-    // Customize any value passed to the jsPDF instance and html2canvas
-    // function. You probably will not need this and things can break,
-    // so use with caution.
     overrides: {
-        // see https://artskydj.github.io/jsPDF/docs/jsPDF.html for more options
         pdf: {
             compress: true
         },
-        // see https://html2canvas.hertzen.com/configuration for more options
         canvas: {
             useCORS: true
         }
     }
-}
+};
 
 export function DrawerRepor() {
 
     const [divNumber, setDivNumber] = useState<number | null>(null);
     const [enable, setEnable] = useState<boolean>(false);
     const handleDrawer = useReporDrawer();
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
+    const [inspectionData, setInspectionData] = useState<any>([]);
+
+    useEffect(() => {
+        if (handleDrawer.id !== "") {
+            loadUniquePressRegister(handleDrawer?.id.id!).then((res) => {
+                setInspectionData(res);
+            });
+        }
+    }, [handleDrawer.id]);
+
+    console.log(inspectionData);
+    console.log(handleDrawer.id);
 
 
-    //const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' });
+
     const ref = useRef<HTMLDivElement | null>(null);
-
-    console.log(handleDrawer.id)
 
     const [thickness, setThickness] = useState<string>('');
     const [surface, setSurface] = useState<string>('');
@@ -86,6 +88,37 @@ export function DrawerRepor() {
     const [especifiedCot8, setEspecifiedCot8] = useState<string>('');
     const [especifiedCot9, setEspecifiedCot9] = useState<string>('');
     const [especifiedCot10, setEspecifiedCot10] = useState<string>('');
+
+    let array = [
+        {
+            "measurements": {
+                "especifiedMeasurements": {
+                    "cot1": especifiedCot1,
+                    "cot2": especifiedCot2,
+                    "cot3": especifiedCot3,
+                    "cot4": especifiedCot4,
+                    "cot5": especifiedCot5,
+                    "cot6": especifiedCot6,
+                    "cot7": especifiedCot7,
+                    "cot8": especifiedCot8,
+                    "cot9": especifiedCot9,
+                    "cot10": especifiedCot10,
+                },
+                "foundMeasurements": {
+                    "cot1": cot1,
+                    "cot2": cot2,
+                    "cot3": cot3,
+                    "cot4": cot4,
+                    "cot5": cot5,
+                    "cot6": cot6,
+                    "cot7": cot7,
+                    "cot8": cot8,
+                    "cot9": cot9,
+                    "cot10": cot10,
+                },
+            },
+        },
+    ];
 
     const inputEspecifiedThickness = useRef<ElementRef<"input">>(null)
     const inputRefEspecified1 = useRef<ElementRef<"input">>(null);
@@ -462,860 +495,887 @@ export function DrawerRepor() {
     };
     useEventListener("keydown", onKeyDown);
 
+    if (status === "loading" && !inspectionData) {
+        return (
+            <>
+                <div className="flex justify-center p-10">
+                </div>
+                <div className="flex h-5/6 justify-center items-center">
+                    <GridLoader color="#9e0837" size={100} />
+                </div>
+            </>
+        )
+    };
+
+    /*     const handleSaveReport = async () => {
+            await saveReport(
+                inspectionData.id,
+                inspectionData.item,
+                inspectionData.version,
+                inspectionData.odf,
+                inspectionData.amount,
+                inspectionData.inspected,
+                inspectionData.result,
+                inspectionData.inspector,
+                array,
+            );
+        }; */
+
+
+
+
     return (
-        <DrawerPatter
-            isOpen={handleDrawer.isOpen}
-            onClose={handleDrawer.onClose}
-        >
-            <div className="flex m-auto">
-                <div ref={ref}>
-                    <div className="border border-spacing-4  w-[40rem] bg-zinc-50 dark:bg-zinc-900">
-                        <div
-                            className="
+        <>
+            <div>
+                <DrawerPatter
+                    isOpen={handleDrawer.isOpen}
+                    onClose={handleDrawer.onClose}
+                >
+                    <div className="flex m-auto">
+                        <div ref={ref}>
+                            <div className="border border-spacing-4 w-[40rem]  bg-zinc-50 dark:bg-zinc-900">
+                                <div
+                                    className="
                              
                               
                             ">
-                            <Card className="mx-10 my-5 boder shadow-lg">
-                                <CardHeader>
-                                    <CardTitle>
-                                        <div className="flex justify-between items-center">
-                                            <div className="text-3xl">RELATORIO DE QUALIDADE</div>
-                                            <div><ShieldCheck size={60} /></div>
-                                        </div>
-                                    </CardTitle>
-                                </CardHeader>
-                            </Card>
-                        </div>
-
-                        <div className="flex justify-between mx-10">
-                            <ReportTitle
-                                name="Item"
-                                value="ME.00773"
-                            />
-                            <ReportTitle
-                                name="Amostras"
-                                value="5"
-                            />
-                        </div>
-                        <div className="flex justify-between mx-10">
-                            <ReportTitle
-                                name="Revisão"
-                                value="1"
-                            />
-                            <ReportTitle
-                                name="Resultado"
-                                value="Aprovado"
-                            />
-                        </div>
-                        <div className="flex justify-between mx-10">
-                            <ReportTitle
-                                name="Data"
-                                value="05/04/2023"
-                            />
-                            <ReportTitle
-                                name="ODF"
-                                value="554433"
-                            />
-                        </div>
-                        <div className="shadow-lg rounded-lg mx-10 my-1 ">
-                            <div className="flex justify-center font-bold text-sm dark:bg-zinc-900 bg-zinc-50 p-2">
-                                CARACTERISTICAS DE CONTROLE
-                            </div>
-                            <Separator />
-                            <div className="flex justify-between bg-white dark:bg-zinc-800">
-                                <div className="p-2 text-sm">
-                                    <div className="font-bold">DESCRIÇÃO</div>
-                                    <div>Espessura(mm)</div>
-                                    <div>Supeficie</div>
-                                    <div>Cota 1</div>
-                                    <div>Cota 2</div>
-                                    <div>Cota 3</div>
-                                    <div>Cota 4</div>
-                                    <div>Cota 5</div>
-                                    <div>Cota 6</div>
-                                    <div>Cota 7</div>
-                                    <div>Cota 8</div>
-                                    <div>Cota 9</div>
-                                    <div>Cota 10</div>
+                                    <Card className="mx-10 my-5 boder shadow-lg">
+                                        <CardHeader>
+                                            <CardTitle>
+                                                <div className="flex justify-between items-center">
+                                                    <div className="text-3xl">RELATORIO DE QUALIDADE</div>
+                                                    <div><ShieldCheck size={60} /></div>
+                                                </div>
+                                            </CardTitle>
+                                        </CardHeader>
+                                    </Card>
                                 </div>
-                                <div className="p-2 text-sm">
-                                    <div className="font-bold">ESPECIFICADO</div>
-                                    {divNumber !== 1000
-                                        ? <div
-                                            onClick={() => {
-                                                setDivNumber(1000);
-                                                setEnable(true);
-                                                enableEditing(1000);
-                                            }} >
-                                            {especifiedThickness ? `${especifiedThickness} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+
+                                <div className="flex justify-between mx-10">
+                                    <ReportTitle
+                                        name="Item"
+                                        value={inspectionData.item}
+                                    />
+                                    <ReportTitle
+                                        name="Amostras"
+                                        value="5"
+                                    />
+                                </div>
+                                <div className="flex justify-between mx-10">
+                                    <ReportTitle
+                                        name="Revisão"
+                                        value={inspectionData.version}
+                                    />
+                                    <ReportTitle
+                                        name="Resultado"
+                                        value={inspectionData.result}
+                                    />
+                                </div>
+                                <div className="flex justify-between mx-10">
+                                    <ReportTitle
+                                        name="Data"
+                                        value={!inspectionData.createdAt ? '' : format(new Date(inspectionData.createdAt), "dd/MM/yyyy")}
+                                    />
+                                    <ReportTitle
+                                        name="ODF"
+                                        value={inspectionData.odf}
+                                    />
+                                </div>
+                                <div className="shadow-lg rounded-lg mx-10 my-1 ">
+                                    <div className="flex justify-center font-bold text-sm dark:bg-zinc-900 bg-zinc-50 p-2">
+                                        CARACTERISTICAS DE CONTROLE
+                                    </div>
+                                    <Separator />
+                                    <div className="flex justify-between bg-white dark:bg-zinc-800">
+                                        <div className="p-2 text-sm">
+                                            <div className="font-bold">DESCRIÇÃO</div>
+                                            <div>Espessura(mm)</div>
+                                            <div>Supeficie</div>
+                                            <div>Cota 1</div>
+                                            <div>Cota 2</div>
+                                            <div>Cota 3</div>
+                                            <div>Cota 4</div>
+                                            <div>Cota 5</div>
+                                            <div>Cota 6</div>
+                                            <div>Cota 7</div>
+                                            <div>Cota 8</div>
+                                            <div>Cota 9</div>
+                                            <div>Cota 10</div>
                                         </div>
-                                        :
-                                        <form
-                                            ref={formRefThicknessEspecified}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 1000 && (
-                                                <>
-                                                    <div className="flex">
+                                        <div className="p-2 text-sm">
+                                            <div className="font-bold">ESPECIFICADO</div>
+                                            {divNumber !== 1000
+                                                ? <div
+                                                    onClick={() => {
+                                                        setDivNumber(1000);
+                                                        setEnable(true);
+                                                        enableEditing(1000);
+                                                    }} >
+                                                    {especifiedThickness ? `${especifiedThickness} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRefThicknessEspecified}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 1000 && (
+                                                        <>
+                                                            <div className="flex">
+                                                                <Input
+                                                                    value={especifiedThickness}
+                                                                    ref={inputEspecifiedThickness}
+                                                                    onBlur={() => {
+                                                                        onBlur()
+                                                                    }}
+                                                                    onChange={(e) => { setEspecifiedThickness(e.target.value) }}
+                                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                    type="number"
+                                                                />
+                                                                <div className="text-xm text-muted-foreground">mm</div>
+                                                            </div>
+                                                        </>
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+                                            <div className="font-bold">-------</div>
+                                            <div className="text-sm">
+                                                {divNumber !== 21
+                                                    ? <div
+                                                        onClick={() => {
+                                                            setDivNumber(21);
+                                                            setEnable(true);
+                                                            enableEditing(21);
+                                                        }} >
+                                                        {especifiedCot1 ? `${especifiedCot1} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified1}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 21 && (
+                                                            <Input
+                                                                value={especifiedCot1}
+                                                                ref={inputRefEspecified1}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot1(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+
+                                                {divNumber !== 22
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(22);
+                                                            setEnable(true);
+                                                            enableEditing(22);
+                                                        }} >
+                                                        {especifiedCot2 ? `${especifiedCot2} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified2}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 22 && (
+                                                            <Input
+                                                                value={especifiedCot2}
+                                                                ref={inputRefEspecified2}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot2(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+
+                                                {divNumber !== 23
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(23);
+                                                            setEnable(true);
+                                                            enableEditing(23);
+                                                        }} >
+                                                        {especifiedCot3 ? `${especifiedCot3} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified3}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 23 && (
+                                                            <Input
+                                                                value={especifiedCot3}
+                                                                ref={inputRefEspecified3}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot3(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+
+                                                {divNumber !== 24
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(24);
+                                                            setEnable(true);
+                                                            enableEditing(24)
+                                                        }} >
+                                                        {especifiedCot4 ? `${especifiedCot4} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified4}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 24 && (
+                                                            <Input
+                                                                value={especifiedCot4}
+                                                                ref={inputRefEspecified4}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot4(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+
+                                                {divNumber !== 25
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(25);
+                                                            setEnable(true);
+                                                            enableEditing(25)
+                                                        }} >
+                                                        {especifiedCot5 ? `${especifiedCot5} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified5}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 25 && (
+                                                            <Input
+                                                                value={especifiedCot5}
+                                                                ref={inputRefEspecified5}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot5(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+
+                                                {divNumber !== 26
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(26);
+                                                            setEnable(true);
+                                                            enableEditing(26)
+                                                        }} >
+                                                        {especifiedCot6 ? `${especifiedCot6} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified6}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 26 && (
+                                                            <Input
+                                                                value={especifiedCot6}
+                                                                ref={inputRefEspecified6}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot6(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+                                                {divNumber !== 27
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(27);
+                                                            setEnable(true);
+                                                            enableEditing(27)
+                                                        }} >
+                                                        {especifiedCot7 ? `${especifiedCot7} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified7}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 27 && (
+                                                            <Input
+                                                                value={especifiedCot7}
+                                                                ref={inputRefEspecified7}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot7(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+
+                                                {divNumber !== 28
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(28);
+                                                            setEnable(true);
+                                                            enableEditing(28)
+                                                        }} >
+                                                        {especifiedCot8 ? `${especifiedCot8} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified8}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 28 && (
+                                                            <Input
+                                                                value={especifiedCot8}
+                                                                ref={inputRefEspecified8}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot8(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+                                                {divNumber !== 29
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(29);
+                                                            setEnable(true);
+                                                            enableEditing(29)
+                                                        }} >
+                                                        {especifiedCot9 ? `${especifiedCot9} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified9}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 29 && (
+                                                            <Input
+                                                                value={especifiedCot9}
+                                                                ref={inputRefEspecified9}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot9(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+                                                {divNumber !== 30
+                                                    ?
+                                                    <div
+                                                        onClick={() => {
+                                                            setDivNumber(30);
+                                                            setEnable(true);
+                                                            enableEditing(30)
+                                                        }} >
+                                                        {especifiedCot10 ? `${especifiedCot10} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                    </div>
+                                                    :
+                                                    <form
+                                                        ref={formRefEspecified10}
+                                                        action={handleSubmit}
+                                                    >
+                                                        {divNumber === 30 && (
+                                                            <Input
+                                                                value={especifiedCot10}
+                                                                ref={inputRefEspecified10}
+                                                                onBlur={() => {
+                                                                    onBlur()
+                                                                }}
+                                                                onChange={(e) => { setEspecifiedCot10(e.target.value) }}
+                                                                className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                        <button type="submit" hidden />
+                                                    </form>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div className="p-2 text-sm">
+                                            <div className="font-bold">ENCONTRADO</div>
+                                            {divNumber !== 100
+                                                ? <div
+                                                    onClick={() => {
+                                                        setDivNumber(100);
+                                                        setEnable(true);
+                                                        enableEditing(100);
+                                                    }} >
+                                                    {thickness ? `${thickness} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRefThickness}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 100 && (
+                                                        <>
+                                                            <div className="flex">
+                                                                <Input
+                                                                    value={thickness}
+                                                                    ref={inputThickness}
+                                                                    onBlur={() => {
+                                                                        onBlur()
+                                                                    }}
+                                                                    onChange={(e) => { setThickness(e.target.value) }}
+                                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                                    type="number"
+                                                                />
+                                                                <div className="text-xm text-muted-foreground">mm</div>
+                                                            </div>
+                                                        </>
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+                                            {divNumber !== 200
+                                                ? <div
+                                                    onClick={() => {
+                                                        setDivNumber(200);
+                                                        setEnable(true);
+                                                        enableEditing(200);
+
+                                                    }} >
+                                                    {surface ? surface : <div className="text-xm text-muted-foreground">(ex. oleado)</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRefSurface}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 200 && (
                                                         <Input
-                                                            value={especifiedThickness}
-                                                            ref={inputEspecifiedThickness}
+                                                            value={surface}
+                                                            ref={inputSurface}
                                                             onBlur={() => {
                                                                 onBlur()
                                                             }}
-                                                            onChange={(e) => { setEspecifiedThickness(e.target.value) }}
+                                                            onChange={(e) => { setSurface(e.target.value) }}
                                                             className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                            type="number"
+                                                            type="text"
                                                         />
-                                                        <div className="text-xm text-muted-foreground">mm</div>
-                                                    </div>
-                                                </>
-                                            )}
+                                                    )}
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+                                            {divNumber !== 1
+                                                ? <div
+                                                    onClick={() => {
+                                                        setDivNumber(1);
+                                                        setEnable(true);
+                                                        enableEditing(1);
 
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-                                    <div className="font-bold">-------</div>
-                                    <div className="text-sm">
-                                        {divNumber !== 21
-                                            ? <div
-                                                onClick={() => {
-                                                    setDivNumber(21);
-                                                    setEnable(true);
-                                                    enableEditing(21);
-                                                }} >
-                                                {especifiedCot1 ? `${especifiedCot1} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified1}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 21 && (
-                                                    <Input
-                                                        value={especifiedCot1}
-                                                        ref={inputRefEspecified1}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot1(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-
-                                        {divNumber !== 22
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(22);
-                                                    setEnable(true);
-                                                    enableEditing(22);
-                                                }} >
-                                                {especifiedCot2 ? `${especifiedCot2} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified2}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 22 && (
-                                                    <Input
-                                                        value={especifiedCot2}
-                                                        ref={inputRefEspecified2}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot2(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-
-                                        {divNumber !== 23
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(23);
-                                                    setEnable(true);
-                                                    enableEditing(23);
-                                                }} >
-                                                {especifiedCot3 ? `${especifiedCot3} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified3}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 23 && (
-                                                    <Input
-                                                        value={especifiedCot3}
-                                                        ref={inputRefEspecified3}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot3(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-
-                                        {divNumber !== 24
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(24);
-                                                    setEnable(true);
-                                                    enableEditing(24)
-                                                }} >
-                                                {especifiedCot4 ? `${especifiedCot4} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified4}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 24 && (
-                                                    <Input
-                                                        value={especifiedCot4}
-                                                        ref={inputRefEspecified4}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot4(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-
-                                        {divNumber !== 25
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(25);
-                                                    setEnable(true);
-                                                    enableEditing(25)
-                                                }} >
-                                                {especifiedCot5 ? `${especifiedCot5} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified5}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 25 && (
-                                                    <Input
-                                                        value={especifiedCot5}
-                                                        ref={inputRefEspecified5}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot5(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-
-                                        {divNumber !== 26
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(26);
-                                                    setEnable(true);
-                                                    enableEditing(26)
-                                                }} >
-                                                {especifiedCot6 ? `${especifiedCot6} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified6}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 26 && (
-                                                    <Input
-                                                        value={especifiedCot6}
-                                                        ref={inputRefEspecified6}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot6(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-                                        {divNumber !== 27
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(27);
-                                                    setEnable(true);
-                                                    enableEditing(27)
-                                                }} >
-                                                {especifiedCot7 ? `${especifiedCot7} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified7}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 27 && (
-                                                    <Input
-                                                        value={especifiedCot7}
-                                                        ref={inputRefEspecified7}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot7(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-
-                                        {divNumber !== 28
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(28);
-                                                    setEnable(true);
-                                                    enableEditing(28)
-                                                }} >
-                                                {especifiedCot8 ? `${especifiedCot8} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified8}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 28 && (
-                                                    <Input
-                                                        value={especifiedCot8}
-                                                        ref={inputRefEspecified8}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot8(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-                                        {divNumber !== 29
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(29);
-                                                    setEnable(true);
-                                                    enableEditing(29)
-                                                }} >
-                                                {especifiedCot9 ? `${especifiedCot9} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified9}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 29 && (
-                                                    <Input
-                                                        value={especifiedCot9}
-                                                        ref={inputRefEspecified9}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot9(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-                                        {divNumber !== 30
-                                            ?
-                                            <div
-                                                onClick={() => {
-                                                    setDivNumber(30);
-                                                    setEnable(true);
-                                                    enableEditing(30)
-                                                }} >
-                                                {especifiedCot10 ? `${especifiedCot10} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                            </div>
-                                            :
-                                            <form
-                                                ref={formRefEspecified10}
-                                                action={handleSubmit}
-                                            >
-                                                {divNumber === 30 && (
-                                                    <Input
-                                                        value={especifiedCot10}
-                                                        ref={inputRefEspecified10}
-                                                        onBlur={() => {
-                                                            onBlur()
-                                                        }}
-                                                        onChange={(e) => { setEspecifiedCot10(e.target.value) }}
-                                                        className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                        type="number"
-                                                    />
-                                                )}
-                                                <button type="submit" hidden />
-                                            </form>
-                                        }
-
-                                        {/*   <Button
-                                      
-                                    >
-                                        add new one
-                                    </Button> */}
-                                    </div>
-                                </div>
-                                <div className="p-2 text-sm">
-                                    <div className="font-bold">ENCONTRADO</div>
-                                    {divNumber !== 100
-                                        ? <div
-                                            onClick={() => {
-                                                setDivNumber(100);
-                                                setEnable(true);
-                                                enableEditing(100);
-                                            }} >
-                                            {thickness ? `${thickness} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRefThickness}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 100 && (
-                                                <>
-                                                    <div className="flex">
+                                                    }} >
+                                                    {cot1 ? `${cot1} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef1}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 1 && (
                                                         <Input
-                                                            value={thickness}
-                                                            ref={inputThickness}
+                                                            value={cot1}
+                                                            ref={inputRefFound1}
                                                             onBlur={() => {
                                                                 onBlur()
                                                             }}
-                                                            onChange={(e) => { setThickness(e.target.value) }}
+                                                            onChange={(e) => { setCot1(e.target.value) }}
                                                             className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
                                                             type="number"
                                                         />
-                                                        <div className="text-xm text-muted-foreground">mm</div>
-                                                    </div>
-                                                </>
-                                            )}
+                                                    )}
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
 
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-                                    {divNumber !== 200
-                                        ? <div
-                                            onClick={() => {
-                                                setDivNumber(200);
-                                                setEnable(true);
-                                                enableEditing(200);
+                                            {divNumber !== 2
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(2);
+                                                        setEnable(true);
+                                                        enableEditing(2);
 
-                                            }} >
-                                            {surface ? surface : <div className="text-xm text-muted-foreground">(ex. oleado)</div>}
+                                                    }} >
+                                                    {cot2 ? `${cot2} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef2}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 2 && (
+                                                        <Input
+                                                            value={cot2}
+                                                            ref={inputRefFound2}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot2(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 3
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(3);
+                                                        setEnable(true);
+                                                        enableEditing(3);
+
+                                                    }} >
+                                                    {cot3 ? `${cot3} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef3}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 3 && (
+                                                        <Input
+                                                            value={cot3}
+                                                            ref={inputRefFound3}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot3(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 4
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(4);
+                                                        setEnable(true);
+
+                                                    }} >
+                                                    {cot4 ? `${cot4} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef4}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 4 && (
+                                                        <Input
+                                                            value={cot4}
+                                                            ref={inputRefFound4}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot4(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 5
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(5);
+                                                        setEnable(true);
+
+                                                    }} >
+                                                    {cot5 ? `${cot5} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef5}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 5 && (
+                                                        <Input
+                                                            value={cot5}
+                                                            ref={inputRefFound5}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot5(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 6
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(6);
+                                                        setEnable(true);
+
+                                                    }} >
+                                                    {cot6 ? `${cot6} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef6}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 6 && (
+                                                        <Input
+                                                            value={cot6}
+                                                            ref={inputRefFound6}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot6(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 7
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(7);
+                                                        setEnable(true);
+
+                                                    }} >
+                                                    {cot7 ? `${cot7} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef7}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 7 && (
+                                                        <Input
+                                                            value={cot7}
+                                                            ref={inputRefFound7}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot7(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 8
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(8);
+                                                        setEnable(true);
+
+                                                    }} >
+                                                    {cot8 ? `${cot8} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef8}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 8 && (
+                                                        <Input
+                                                            value={cot8}
+                                                            ref={inputRefFound8}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot8(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 9
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(9);
+                                                        setEnable(true);
+
+                                                    }} >
+                                                    {cot9 ? `${cot9} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef9}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 9 && (
+                                                        <Input
+                                                            value={cot9}
+                                                            ref={inputRefFound9}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot9(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
+
+                                            {divNumber !== 10
+                                                ?
+                                                <div
+                                                    onClick={() => {
+                                                        setDivNumber(10);
+                                                        setEnable(true);
+
+                                                    }} >
+                                                    {cot10 ? `${cot10} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                                                </div>
+                                                :
+                                                <form
+                                                    ref={formRef10}
+                                                    action={handleSubmit}
+                                                >
+                                                    {divNumber === 10 && (
+                                                        <Input
+                                                            value={cot10}
+                                                            ref={inputRefFound10}
+                                                            onBlur={() => {
+                                                                onBlur()
+                                                            }}
+                                                            onChange={(e) => { setCot10(e.target.value) }}
+                                                            className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
+                                                            type="number"
+                                                        />
+                                                    )}
+
+                                                    <button type="submit" hidden />
+                                                </form>
+                                            }
                                         </div>
-                                        :
-                                        <form
-                                            ref={formRefSurface}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 200 && (
-                                                <Input
-                                                    value={surface}
-                                                    ref={inputSurface}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setSurface(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="text"
-                                                />
-                                            )}
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-                                    {divNumber !== 1
-                                        ? <div
-                                            onClick={() => {
-                                                setDivNumber(1);
-                                                setEnable(true);
-                                                enableEditing(1);
-
-                                            }} >
-                                            {cot1 ? `${cot1} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef1}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 1 && (
-                                                <Input
-                                                    value={cot1}
-                                                    ref={inputRefFound1}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot1(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 2
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(2);
-                                                setEnable(true);
-                                                enableEditing(2);
-
-                                            }} >
-                                            {cot2 ? `${cot2} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef2}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 2 && (
-                                                <Input
-                                                    value={cot2}
-                                                    ref={inputRefFound2}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot2(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 3
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(3);
-                                                setEnable(true);
-                                                enableEditing(3);
-
-                                            }} >
-                                            {cot3 ? `${cot3} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef3}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 3 && (
-                                                <Input
-                                                    value={cot3}
-                                                    ref={inputRefFound3}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot3(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 4
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(4);
-                                                setEnable(true);
-
-                                            }} >
-                                            {cot4 ? `${cot4} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef4}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 4 && (
-                                                <Input
-                                                    value={cot4}
-                                                    ref={inputRefFound4}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot4(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 5
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(5);
-                                                setEnable(true);
-
-                                            }} >
-                                            {cot5 ? `${cot5} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef5}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 5 && (
-                                                <Input
-                                                    value={cot5}
-                                                    ref={inputRefFound5}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot5(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 6
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(6);
-                                                setEnable(true);
-
-                                            }} >
-                                            {cot6 ? `${cot6} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef6}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 6 && (
-                                                <Input
-                                                    value={cot6}
-                                                    ref={inputRefFound6}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot6(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 7
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(7);
-                                                setEnable(true);
-
-                                            }} >
-                                            {cot7 ? `${cot7} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef7}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 7 && (
-                                                <Input
-                                                    value={cot7}
-                                                    ref={inputRefFound7}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot7(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 8
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(8);
-                                                setEnable(true);
-
-                                            }} >
-                                            {cot8 ? `${cot8} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef8}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 8 && (
-                                                <Input
-                                                    value={cot8}
-                                                    ref={inputRefFound8}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot8(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 9
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(9);
-                                                setEnable(true);
-
-                                            }} >
-                                            {cot9 ? `${cot9} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef9}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 9 && (
-                                                <Input
-                                                    value={cot9}
-                                                    ref={inputRefFound9}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot9(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {divNumber !== 10
-                                        ?
-                                        <div
-                                            onClick={() => {
-                                                setDivNumber(10);
-                                                setEnable(true);
-
-                                            }} >
-                                            {cot10 ? `${cot10} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
-                                        </div>
-                                        :
-                                        <form
-                                            ref={formRef10}
-                                            action={handleSubmit}
-                                        >
-                                            {divNumber === 10 && (
-                                                <Input
-                                                    value={cot10}
-                                                    ref={inputRefFound10}
-                                                    onBlur={() => {
-                                                        onBlur()
-                                                    }}
-                                                    onChange={(e) => { setCot10(e.target.value) }}
-                                                    className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                                    type="number"
-                                                />
-                                            )}
-
-                                            <button type="submit" hidden />
-                                        </form>
-                                    }
-
-                                    {/*   <Button
-                                      
-                                    >
-                                        add new one
-                                    </Button> */}
+                                    </div>
                                 </div>
-
-
+                                <Card className="mx-10 my-5 boder shadow-lg">
+                                    <CardHeader>
+                                        <CardTitle>
+                                            <div className="flex justify-between items-center">
+                                                <div className="">Certificamos que esta peça foi produzida e inspecionada, estando em conformidade com todos os requisitos de qualidade especificados.</div>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <div className="text-yellow-400 mt-2 flex items-center">Garantia de qualidade <ShieldCheck /></div>
+                                                <div className="mt-2 text-sm font-normal">Rev00 00/00</div>
+                                            </div>
+                                            <div className="flex mt-2 items-center">
+                                                <div>Inspetor:&nbsp; </div>
+                                                <div className="font-normal text-sm "> {session?.user?.name}</div>
+                                            </div>
+                                        </CardTitle>
+                                    </CardHeader>
+                                </Card>
+                                <br></br>
+                            </div>
+                            <div className="p-2">
+                                <Button onClick={() => {  }}>
+                                    Salvar relatorio
+                                </Button>
                             </div>
                         </div>
-                        <Card className="mx-10 my-5 boder shadow-lg">
-                            <CardHeader>
-                                <CardTitle>
-                                    <div className="flex justify-between items-center">
-                                        <div className="">Certificamos que esta peça foi produzida e inspecionado, estando em conformidade com todos os requisitos de qualidade especificados</div>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <div className="text-yellow-400 mt-2 flex items-center">Garantia de qualidade <ShieldCheck /></div>
-                                        <div className="mt-2 text-sm font-normal">Rev00 00/00</div>
-                                    </div>
-                                    <div className="flex mt-2 items-center">
-                                        <div>Inspetor:&nbsp; </div>
-                                        <div className="font-normal text-sm "> {session?.user?.name}</div>
-                                    </div>
-                                </CardTitle>
-                            </CardHeader>
-                        </Card>
-                        <br></br>
+
                     </div>
-                </div>
+                    {/*  <div className="w-full">
+                        <Button>
+                            save
+                        </Button>
+                    </div> */}
+                </DrawerPatter>
             </div>
-            <Button onClick={() => { generatePDF(ref, options) }} >
-                Download
-            </Button>
-        </DrawerPatter>
+        </>
     )
 };
 

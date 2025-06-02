@@ -6,7 +6,7 @@ interface ReportInterface {
     onClose: () => void;
     data: any;
     drawer: string;
-    id: string;
+    id: any;
 };
 
 export const useReporDrawer = create<ReportInterface>((set) => ({
@@ -15,5 +15,5 @@ export const useReporDrawer = create<ReportInterface>((set) => ({
     data: {},
     drawer: '',
     onOpen: (id) => set({ isOpen: true, id }),
-    onClose: () => set({ isOpen: false, data: null, drawer: '' }),
-}))
+    onClose: () => set({ isOpen: false, data: null, drawer: '', id: '' }),
+}));

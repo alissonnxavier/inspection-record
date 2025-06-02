@@ -120,3 +120,11 @@ model Serigraphy {
   images    String[]
   createdAt DateTime @default(now()) @db.Date
 }
+
+model Report {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  measurement1 String?
+
+  createdAt DateTime @default(now()) @db.Date
+}

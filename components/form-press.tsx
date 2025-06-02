@@ -24,7 +24,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
     ToggleGroup,
     ToggleGroupItem,
@@ -33,10 +33,8 @@ import toast from 'react-hot-toast';
 import { redirect, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { getCookie } from '@/actions/set-cookies';
 import { useEditForm } from '@/hooks/use-edit-form';
 import { loadUniquePlateRegister, loadUniquePressRegister } from '@/actions/load';
-import { RiseLoader } from 'react-spinners';
 
 const formSchema = z.object({
     id: z.string().default(''),

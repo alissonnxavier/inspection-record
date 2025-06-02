@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from "@/lib/prismadb";
 
 
-export const POST = async (req: Request,) => {
+export const POST = async (req: Request) => {
   const body = await req.json();
   const { item, supplier, lot, invoice, inspector, rir, hbOne, hbTwo, hbThree, images } = body;
   const product = `CH.${item}`;
@@ -81,7 +81,6 @@ export async function GET(
     });
 
     for (let i = 0; res.length > i; i++) {
-      let t = [] as any;
       let imagesArray = [];
       for (let n = 0; res[i]?.images.length > n; n++) {
         let str = '';
