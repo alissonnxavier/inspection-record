@@ -87,6 +87,6 @@ export const authConfig: NextAuthOptions = {
 
 export async function loginIsRequiredServer() {
     const session = await getServerSession(authConfig);
-    if (!session) return redirect("https://properly-whole-crab.ngrok-free.app/");
+    if (!session) return redirect("http://localhost:3000/login");
 }
 

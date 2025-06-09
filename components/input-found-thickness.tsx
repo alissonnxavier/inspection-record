@@ -11,17 +11,17 @@ import { useEventListener } from "usehooks-ts";
 
 const formSchema = z.object({
     id: z.string().default(''),
-    especifiedMeasure: z.string().min(1).default(''),
-    especifiedMeasureNumber: z.string().min(1),
+    foundThickness: z.string().min(1).default(''),
+    foundThicknessNumber: z.string().min(1),
 });
 
 type ReportFormValues = z.infer<typeof formSchema>;
 
 interface InputEspecifiedMeasureProps {
-    especifiedMeasureNumber: number;
+    foundThicknessNumber: string;
 };
 
-const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeasureProps) => {
+const InputFoundThickness = ({ foundThicknessNumber }: InputEspecifiedMeasureProps) => {
 
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
@@ -31,13 +31,13 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
     const [enable, setEnable] = useState<boolean>(false);
 
 
-    const formRefEspecifiedMeasure = useRef<ElementRef<"form">>(null);
-    const inputRefEspecifiedMeasure = useRef<ElementRef<"input">>(null);
+    const formRefEspecifiedThickness = useRef<ElementRef<"form">>(null);
+    const inputRefEspecifiedThickness = useRef<ElementRef<"input">>(null);
 
     const enableEditing = () => {
         const interval = setInterval(() => {
-            inputRefEspecifiedMeasure.current?.focus();
-            inputRefEspecifiedMeasure.current?.select();
+            inputRefEspecifiedThickness.current?.focus();
+            inputRefEspecifiedThickness.current?.select();
 
             clearInterval(interval);
         }, 150);
@@ -45,10 +45,10 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
 
     const onSubmit = async () => {
         try {
-            form.setValue('especifiedMeasure', especifiedMeasure);
-            form.setValue('especifiedMeasureNumber', `em${especifiedMeasureNumber}` );
+            form.setValue('foundThickness', especifiedMeasure);
+            form.setValue('foundThicknessNumber', `ft${foundThicknessNumber}` );
             await axios.post('/api/register/report', form);
-            toast.success('Medida especificada salva!', {
+            toast.success('Espessura especificada salva!', {
                 style: {
                     border: '3px solid white',
                     padding: '30px',
@@ -89,13 +89,13 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
     };
 
     const onBlur = () => {
-        formRefEspecifiedMeasure.current?.requestSubmit();
+        formRefEspecifiedThickness.current?.requestSubmit();
         setEnable(false);
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape" || e.key === "Enter") {
-            formRefEspecifiedMeasure.current?.requestSubmit();
+            formRefEspecifiedThickness.current?.requestSubmit();
             setEnable(false);
         };
     };
@@ -115,14 +115,14 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
             )
                 :
                 <form
-                    ref={formRefEspecifiedMeasure}
+                    ref={formRefEspecifiedThickness}
                     action={handleSubmit}
                 >
                     <>
                         <div className="flex">
                             <Input
                                 value={especifiedMeasure}
-                                ref={inputRefEspecifiedMeasure}
+                                ref={inputRefEspecifiedThickness}
                                 onBlur={() => {
                                     onBlur()
                                 }}
@@ -141,4 +141,4 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
     )
 };
 
-export default InputEspecifiedMeasure;
+export default InputFoundThickness;

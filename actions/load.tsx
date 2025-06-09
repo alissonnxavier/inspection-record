@@ -41,7 +41,7 @@ export const loadUniquePlateRegister = async (id: string) => {
         let imagesArray = [];
         for (let i = 0; serigraphyRegister?.images.length > i; i++) {
             let str = '';
-            let img = await readFile(`/home/alisson/Documents/imagens/chapas/${serigraphyRegister.images[i]}`);
+            let img = await readFile(`C:/Users/aliss/Documents/imagens/chapas/${serigraphyRegister.images[i]}`);
             str = img.toString('base64');
             imagesArray.push("data:image/png;base64," + str);
         }

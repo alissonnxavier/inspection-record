@@ -11,17 +11,17 @@ import { useEventListener } from "usehooks-ts";
 
 const formSchema = z.object({
     id: z.string().default(''),
-    especifiedMeasure: z.string().min(1).default(''),
-    especifiedMeasureNumber: z.string().min(1),
+    foundSurface: z.string().min(1).default(''),
+    foundSurfaceNumber: z.string().min(1),
 });
 
 type ReportFormValues = z.infer<typeof formSchema>;
 
-interface InputEspecifiedMeasureProps {
-    especifiedMeasureNumber: number;
+interface InputSurfaceMeasureProps {
+    foundSurfaceNumber: string;
 };
 
-const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeasureProps) => {
+const InputSurfaceFound = ({ foundSurfaceNumber }: InputSurfaceMeasureProps) => {
 
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
@@ -31,13 +31,13 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
     const [enable, setEnable] = useState<boolean>(false);
 
 
-    const formRefEspecifiedMeasure = useRef<ElementRef<"form">>(null);
-    const inputRefEspecifiedMeasure = useRef<ElementRef<"input">>(null);
+    const formRefEspecifiedThickness = useRef<ElementRef<"form">>(null);
+    const inputRefEspecifiedThickness = useRef<ElementRef<"input">>(null);
 
     const enableEditing = () => {
         const interval = setInterval(() => {
-            inputRefEspecifiedMeasure.current?.focus();
-            inputRefEspecifiedMeasure.current?.select();
+            inputRefEspecifiedThickness.current?.focus();
+            inputRefEspecifiedThickness.current?.select();
 
             clearInterval(interval);
         }, 150);
@@ -45,10 +45,10 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
 
     const onSubmit = async () => {
         try {
-            form.setValue('especifiedMeasure', especifiedMeasure);
-            form.setValue('especifiedMeasureNumber', `em${especifiedMeasureNumber}` );
+            form.setValue('foundSurface', especifiedMeasure);
+            form.setValue('foundSurfaceNumber', `sf${foundSurfaceNumber}`);
             await axios.post('/api/register/report', form);
-            toast.success('Medida especificada salva!', {
+            toast.success('Superficie encontrada foi salva!', {
                 style: {
                     border: '3px solid white',
                     padding: '30px',
@@ -89,13 +89,13 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
     };
 
     const onBlur = () => {
-        formRefEspecifiedMeasure.current?.requestSubmit();
+        formRefEspecifiedThickness.current?.requestSubmit();
         setEnable(false);
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape" || e.key === "Enter") {
-            formRefEspecifiedMeasure.current?.requestSubmit();
+            formRefEspecifiedThickness.current?.requestSubmit();
             setEnable(false);
         };
     };
@@ -110,35 +110,34 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
                         setEnable(true);
                         enableEditing();
                     }} >
-                    {especifiedMeasure ? `${especifiedMeasure} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                    {especifiedMeasure ? `${especifiedMeasure}` : <div className="text-xm text-muted-foreground">(ex. oleado)</div>}
                 </div>
             )
                 :
                 <form
-                    ref={formRefEspecifiedMeasure}
+                    ref={formRefEspecifiedThickness}
                     action={handleSubmit}
                 >
                     <>
                         <div className="flex">
                             <Input
                                 value={especifiedMeasure}
-                                ref={inputRefEspecifiedMeasure}
+                                ref={inputRefEspecifiedThickness}
                                 onBlur={() => {
                                     onBlur()
                                 }}
                                 onChange={(e) => { setEspecifiedMeasure(e.target.value) }}
                                 className="text-sm px-[7px] py-1 h-5 w-16 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus:bg-white"
-                                type="number"
+                                type="text"
                             />
-                            <div className="text-xm text-muted-foreground">mm</div>
                         </div>
                     </>
                     <button type="submit" hidden />
                 </form>
 
-            } 
+            }
         </div>
     )
 };
 
-export default InputEspecifiedMeasure;
+export default InputSurfaceFound;

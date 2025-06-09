@@ -124,7 +124,31 @@ model Serigraphy {
 model Report {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  measurement1 String?
+  especifiedThickness String?
+  foundThickness      String?
+  surface             String?
+
+  measurement1  String?
+  measurement2  String?
+  measurement3  String?
+  measurement4  String?
+  measurement5  String?
+  measurement6  String?
+  measurement7  String?
+  measurement8  String?
+  measurement9  String?
+  measurement10 String?
+
+  foundMeasurement1  String?
+  foundMeasurement2  String?
+  foundMeasurement3  String?
+  foundMeasurement4  String?
+  foundMeasurement5  String?
+  foundMeasurement6  String?
+  foundMeasurement7  String?
+  foundMeasurement8  String?
+  foundMeasurement9  String?
+  foundMeasurement10 String?
 
   createdAt DateTime @default(now()) @db.Date
 }

@@ -16,7 +16,7 @@ export const POST = async (req: Request) => {
     for (let i = 0; images?.length > i; i++) {
       const name = uuidv4();
       imagesName.push(`${name}.jpg`);
-      const p = converBase64ToImage(images[i], `/home/alisson/Documents/imagens/chapas/${name}.jpg`)
+      const p = converBase64ToImage(images[i], `C:/Users/aliss/Documents/imagens/chapas/${name}.jpg`)
     }
     const plate = await db.plate.create({
       data: {
@@ -84,7 +84,7 @@ export async function GET(
       let imagesArray = [];
       for (let n = 0; res[i]?.images.length > n; n++) {
         let str = '';
-        let img = await readFile(`/home/alisson/Documents/imagens/chapas/${res[i].images[n]}`);
+        let img = await readFile(`C:/Users/aliss/Documents/imagens/chapas/${res[i].images[n]}`);
         str = img.toString('base64');
         imagesArray.push("data:image/png;base64," + str);
       }

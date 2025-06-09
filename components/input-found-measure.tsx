@@ -5,35 +5,49 @@ import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import React, { useRef, useState, ElementRef } from 'react';
+import React, { useRef, useState, ElementRef, useEffect } from 'react';
 import toast from "react-hot-toast";
 import { useEventListener } from "usehooks-ts";
-import { Form } from './ui/form';
 
 const formSchema = z.object({
     id: z.string().default(''),
-    especifiedMeasure: z.string().default(''),
-    especifiedMeasureNumber: z.number().min(1),
+    foundMeasure: z.string().default(''),
+    foundMeasureNumber: z.string().min(1),
 });
 
 type ReportFormValues = z.infer<typeof formSchema>;
 
 interface InputEspecifiedMeasureProps {
-    especifiedMeasureNumber?: number;
+    foundMeasureNumber: string;
 };
 
-const InputFoundMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeasureProps) => {
-
+const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) => {
+    const formRefEspecifiedMeasure = useRef<ElementRef<"form">>(null);
+    const inputRefEspecifiedMeasure = useRef<ElementRef<"input">>(null);
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
     });
-
     const [foundMeasure, setFoundMeasure] = useState<string>('');
     const [enable, setEnable] = useState<boolean>(false);
-   
+    const [especifiedMeasures, setEspecifiedMeasures] = useState<Record<string, string>>({});
 
-    const formRefEspecifiedMeasure = useRef<ElementRef<"form">>(null);
-    const inputRefEspecifiedMeasure = useRef<ElementRef<"input">>(null);
+    const getEspecifiedMeasure = async () => {
+        const result = await axios.get('/api/register/report')
+            .then((response) => {
+                setEspecifiedMeasures(response.data);
+            });
+    };
+
+    console.log('foundMeasureNumber', especifiedMeasures["foundMeasurement" + foundMeasureNumber as string]);
+    useEffect(() => {
+        getEspecifiedMeasure();
+    }, [foundMeasure]);
+
+    const formatFoundMeasure = (measure: string) => {
+      if(especifiedMeasures){
+
+      }
+    }
 
     const enableEditing = () => {
         const interval = setInterval(() => {
@@ -46,7 +60,8 @@ const InputFoundMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeasurePr
 
     const onSubmit = async () => {
         try {
-            form.setValue('especifiedMeasure', foundMeasure);
+            form.setValue('foundMeasure', foundMeasure);
+            form.setValue('foundMeasureNumber', `fm${foundMeasureNumber}`);
             await axios.post('/api/register/report', form);
             toast.success('Espessura especificada salva!', {
                 style: {

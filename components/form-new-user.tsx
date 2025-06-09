@@ -40,7 +40,6 @@ const RegisterForm: React.FC<FormLoginProps> = () => {
     });
 
     const { data: session, status } = useSession();
-    const router = useRouter();
     const [block, setBlock] = useState(false);
     const [admin, setAdmin] = useState(true);
 
