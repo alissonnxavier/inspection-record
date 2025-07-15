@@ -5,9 +5,10 @@ import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import React, { useRef, useState, ElementRef } from 'react';
+import React, { useRef, useState, ElementRef, use, useEffect } from 'react';
 import toast from "react-hot-toast";
 import { useEventListener } from "usehooks-ts";
+import { useReporDrawer } from '@/hooks/use-drawer-report';
 
 const formSchema = z.object({
     id: z.string().default(''),
@@ -19,9 +20,10 @@ type ReportFormValues = z.infer<typeof formSchema>;
 
 interface InputEspecifiedMeasureProps {
     foundThicknessNumber: string;
+    reportData?: any;
 };
 
-const InputFoundThickness = ({ foundThicknessNumber }: InputEspecifiedMeasureProps) => {
+const InputFoundThickness = ({ foundThicknessNumber, reportData }: InputEspecifiedMeasureProps) => {
 
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
@@ -29,6 +31,7 @@ const InputFoundThickness = ({ foundThicknessNumber }: InputEspecifiedMeasurePro
 
     const [especifiedMeasure, setEspecifiedMeasure] = useState<string>('');
     const [enable, setEnable] = useState<boolean>(false);
+    const handleDrawer = useReporDrawer();
 
 
     const formRefEspecifiedThickness = useRef<ElementRef<"form">>(null);
@@ -43,23 +46,27 @@ const InputFoundThickness = ({ foundThicknessNumber }: InputEspecifiedMeasurePro
         }, 150);
     };
 
+    useEffect(() => {
+        if (reportData) {
+            setEspecifiedMeasure(reportData.foundThickness);
+        }
+    }, [reportData])
+
     const onSubmit = async () => {
         try {
             form.setValue('foundThickness', especifiedMeasure);
-            form.setValue('foundThicknessNumber', `ft${foundThicknessNumber}` );
+            form.setValue('foundThicknessNumber', `ft${foundThicknessNumber}`);
+            form.setValue('id', handleDrawer.id.id!);
             await axios.post('/api/register/report', form);
-            toast.success('Espessura especificada salva!', {
+            toast.success('Espessura encontrada salva!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
-                    backgroundColor: '#706d0c',
-                    borderRadius: '50%',
-                    boxShadow: '20px 20px 50px grey',
+                    backgroundColor: '#2786b3',
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#706d0c',
+                    secondary: '#2786b3',
                 },
             });
             setEnable(false);
@@ -110,7 +117,10 @@ const InputFoundThickness = ({ foundThicknessNumber }: InputEspecifiedMeasurePro
                         setEnable(true);
                         enableEditing();
                     }} >
-                    {especifiedMeasure ? `${especifiedMeasure} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                    {especifiedMeasure
+                        ? `${especifiedMeasure} mm`
+                        : <div className="text-xm text-muted-foreground">_._mm</div>
+                    }
                 </div>
             )
                 :
@@ -121,7 +131,11 @@ const InputFoundThickness = ({ foundThicknessNumber }: InputEspecifiedMeasurePro
                     <>
                         <div className="flex">
                             <Input
-                                value={especifiedMeasure}
+                                value={
+                                    especifiedMeasure
+                                        ? especifiedMeasure
+                                        : ''
+                                }
                                 ref={inputRefEspecifiedThickness}
                                 onBlur={() => {
                                     onBlur()
@@ -136,7 +150,7 @@ const InputFoundThickness = ({ foundThicknessNumber }: InputEspecifiedMeasurePro
                     <button type="submit" hidden />
                 </form>
 
-            } 
+            }
         </div>
     )
 };

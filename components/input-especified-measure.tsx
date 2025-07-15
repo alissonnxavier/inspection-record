@@ -5,9 +5,10 @@ import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import React, { useRef, useState, ElementRef } from 'react';
+import React, { useRef, useState, ElementRef, use, useEffect } from 'react';
 import toast from "react-hot-toast";
 import { useEventListener } from "usehooks-ts";
+import { useReporDrawer } from '@/hooks/use-drawer-report';
 
 const formSchema = z.object({
     id: z.string().default(''),
@@ -19,9 +20,10 @@ type ReportFormValues = z.infer<typeof formSchema>;
 
 interface InputEspecifiedMeasureProps {
     especifiedMeasureNumber: number;
+    reportData?: any;
 };
 
-const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeasureProps) => {
+const InputEspecifiedMeasure = ({ especifiedMeasureNumber, reportData }: InputEspecifiedMeasureProps) => {
 
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
@@ -29,10 +31,17 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
 
     const [especifiedMeasure, setEspecifiedMeasure] = useState<string>('');
     const [enable, setEnable] = useState<boolean>(false);
+    const handleDrawer = useReporDrawer();
 
 
     const formRefEspecifiedMeasure = useRef<ElementRef<"form">>(null);
     const inputRefEspecifiedMeasure = useRef<ElementRef<"input">>(null);
+
+    useEffect(() => {
+        if (reportData) {
+            setEspecifiedMeasure((reportData as any)[`measurement${especifiedMeasureNumber + 1}`])
+        }
+    }, [reportData]);
 
     const enableEditing = () => {
         const interval = setInterval(() => {
@@ -46,20 +55,19 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
     const onSubmit = async () => {
         try {
             form.setValue('especifiedMeasure', especifiedMeasure);
-            form.setValue('especifiedMeasureNumber', `em${especifiedMeasureNumber}` );
+            form.setValue('especifiedMeasureNumber', `em${especifiedMeasureNumber}`);
+            form.setValue('id', handleDrawer.id.id!);
             await axios.post('/api/register/report', form);
             toast.success('Medida especificada salva!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
-                    backgroundColor: '#706d0c',
-                    borderRadius: '50%',
-                    boxShadow: '20px 20px 50px grey',
+                    backgroundColor: '#2786b3',
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#706d0c',
+                    secondary: '#2786b3',
+
                 },
             });
             setEnable(false);
@@ -68,15 +76,13 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
-                    boxShadow: '20px 20px 50px grey',
                 },
                 iconTheme: {
                     primary: 'white',
                     secondary: '#a80a1f',
+
                 },
             });
             setEnable(false);
@@ -101,16 +107,20 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
     };
 
     useEventListener("keydown", onKeyDown);
-
+    
     return (
         <div className='flex items-center justify-center h-full'>
             {!enable ? (
                 <div
+                className='cursor-pointer'
                     onClick={() => {
                         setEnable(true);
                         enableEditing();
                     }} >
-                    {especifiedMeasure ? `${especifiedMeasure} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                    {especifiedMeasure
+                        ? `${especifiedMeasure} mm`
+                        : <div className="text-xm text-muted-foreground">_._mm</div>
+                    }
                 </div>
             )
                 :
@@ -121,7 +131,11 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
                     <>
                         <div className="flex">
                             <Input
-                                value={especifiedMeasure}
+                                value={
+                                    especifiedMeasure
+                                        ? especifiedMeasure
+                                        : ''
+                                }
                                 ref={inputRefEspecifiedMeasure}
                                 onBlur={() => {
                                     onBlur()
@@ -136,9 +150,11 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber }: InputEspecifiedMeas
                     <button type="submit" hidden />
                 </form>
 
-            } 
+            }
         </div>
-    )
+    );
+
+
 };
 
 export default InputEspecifiedMeasure;

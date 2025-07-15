@@ -5,9 +5,14 @@ import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import React, { useRef, useState, ElementRef, useEffect } from 'react';
+import React, { useRef, useState, ElementRef, useEffect, use, useCallback, useMemo } from 'react';
 import toast from "react-hot-toast";
 import { useEventListener } from "usehooks-ts";
+import { cn } from '@/lib/utils';
+import { useReporDrawer } from '@/hooks/use-drawer-report';
+import { loadUniqueReportRegister } from '@/actions/load';
+import { set } from 'date-fns';
+
 
 const formSchema = z.object({
     id: z.string().default(''),
@@ -19,9 +24,10 @@ type ReportFormValues = z.infer<typeof formSchema>;
 
 interface InputEspecifiedMeasureProps {
     foundMeasureNumber: string;
+    reportData?: any;
 };
 
-const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) => {
+const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMeasureProps) => {
     const formRefEspecifiedMeasure = useRef<ElementRef<"form">>(null);
     const inputRefEspecifiedMeasure = useRef<ElementRef<"input">>(null);
     const form = useForm<ReportFormValues>({
@@ -30,24 +36,86 @@ const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) 
     const [foundMeasure, setFoundMeasure] = useState<string>('');
     const [enable, setEnable] = useState<boolean>(false);
     const [especifiedMeasures, setEspecifiedMeasures] = useState<Record<string, string>>({});
+    const [meassureNC, setMeassureNC] = useState<boolean>(false);
+    const handleDrawer = useReporDrawer();
 
-    const getEspecifiedMeasure = async () => {
-        const result = await axios.get('/api/register/report')
-            .then((response) => {
-                setEspecifiedMeasures(response.data);
-            });
+    const increment = foundMeasureNumber + 1;
+    const formatFoundMeasure = (especifidMeasure: string) => {
+
+        if (Number(especifidMeasure) > 0 && Number(especifidMeasure) <= 3) {
+            const tolerance = Number(foundMeasure) - Number(especifidMeasure);
+            if (tolerance > 0.19 || tolerance < -0.19) {
+                setMeassureNC(true);
+
+            } else {
+                setMeassureNC(false);
+            }
+        } else if (Number(especifidMeasure) > 3 && Number(especifidMeasure) <= 6) {
+            const tolerance = Number(foundMeasure) - Number(especifidMeasure);
+            if (tolerance > 0.19 || tolerance < -0.19) {
+                setMeassureNC(true);
+
+            } else {
+                setMeassureNC(false);
+            }
+        } else if (Number(especifidMeasure) > 6 && Number(especifidMeasure) <= 30) {
+            const tolerance = Number(foundMeasure) - Number(especifidMeasure);
+            if (tolerance > 0.29 || tolerance < -0.29) {
+                setMeassureNC(true);
+
+            } else {
+                setMeassureNC(false);
+            }
+        } else if (Number(especifidMeasure) > 30 && Number(especifidMeasure) <= 120) {
+            const tolerance = Number(foundMeasure) - Number(especifidMeasure);
+            if (tolerance > 0.39 || tolerance < -0.39) {
+                setMeassureNC(true);
+
+            } else {
+                setMeassureNC(false);
+            }
+        } else if (Number(especifidMeasure) > 120 && Number(especifidMeasure) <= 200) {
+            const tolerance = Number(foundMeasure) - Number(especifidMeasure);
+            if (tolerance > 0.59 || tolerance < -0.59) {
+                setMeassureNC(true);
+
+            } else {
+                setMeassureNC(false);
+            }
+        } else if (Number(especifidMeasure) > 200 && Number(especifidMeasure) <= 1000) {
+            const tolerance = Number(foundMeasure) - Number(especifidMeasure);
+            if (tolerance > 1.09 || tolerance < -1.09) {
+                setMeassureNC(true);
+
+            } else {
+                setMeassureNC(false);
+            }
+        } else if (Number(especifidMeasure) > 1000 && Number(especifidMeasure) <= 2000) {
+            const tolerance = Number(foundMeasure) - Number(especifidMeasure);
+            if (tolerance > 2.09 || tolerance < -2.09) {
+                setMeassureNC(true);
+
+            } else {
+                setMeassureNC(false);
+            }
+        }
     };
 
-    console.log('foundMeasureNumber', especifiedMeasures["foundMeasurement" + foundMeasureNumber as string]);
     useEffect(() => {
-        getEspecifiedMeasure();
-    }, [foundMeasure]);
 
-    const formatFoundMeasure = (measure: string) => {
-      if(especifiedMeasures){
+        setEspecifiedMeasures(reportData as any);
 
-      }
-    }
+        if (reportData) {
+            setFoundMeasure((reportData as any)[`foundMeasurement${foundMeasureNumber + 1}`]);
+        };
+
+    }, [reportData]);
+
+    useEffect(() => {
+        if (reportData) {
+            formatFoundMeasure(reportData["measurement" + increment as string]);
+        };
+    }, [formatFoundMeasure, foundMeasure, increment, reportData]);
 
     const enableEditing = () => {
         const interval = setInterval(() => {
@@ -58,23 +126,23 @@ const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) 
         }, 150);
     };
 
+
+
     const onSubmit = async () => {
         try {
             form.setValue('foundMeasure', foundMeasure);
             form.setValue('foundMeasureNumber', `fm${foundMeasureNumber}`);
+            form.setValue('id', handleDrawer.id.id!);
             await axios.post('/api/register/report', form);
             toast.success('Espessura especificada salva!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
-                    backgroundColor: '#706d0c',
-                    borderRadius: '50%',
-                    boxShadow: '20px 20px 50px grey',
+                    backgroundColor: '#2786b3',
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#706d0c',
+                    secondary: '#2786b3',
                 },
             });
             setEnable(false);
@@ -83,11 +151,8 @@ const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) 
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
-                    boxShadow: '20px 20px 50px grey',
                 },
                 iconTheme: {
                     primary: 'white',
@@ -114,18 +179,22 @@ const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) 
             setEnable(false);
         };
     };
-
     useEventListener("keydown", onKeyDown);
 
     return (
-        <div className='flex items-center justify-center h-full'>
+        <div className={cn('flex items-center justify-center h-full',
+            meassureNC ? 'text-red-500' : 'text-green-600'
+        )}>
             {!enable ? (
                 <div
                     onClick={() => {
                         setEnable(true);
                         enableEditing();
                     }} >
-                    {foundMeasure ? `${foundMeasure} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                    {foundMeasure
+                        ? `${foundMeasure} mm`
+                        : <div className="text-xm text-muted-foreground">_._mm</div>
+                    }
                 </div>
             )
                 :
@@ -136,7 +205,11 @@ const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) 
                     <>
                         <div className="flex">
                             <Input
-                                value={foundMeasure}
+                                value={
+                                    foundMeasure
+                                        ? foundMeasure
+                                        : ''
+                                }
                                 ref={inputRefEspecifiedMeasure}
                                 onBlur={() => {
                                     onBlur()
@@ -150,7 +223,6 @@ const InputFoundMeasure = ({ foundMeasureNumber }: InputEspecifiedMeasureProps) 
                     </>
                     <button type="submit" hidden />
                 </form>
-
             }
         </div>
     )

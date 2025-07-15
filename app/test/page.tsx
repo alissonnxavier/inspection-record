@@ -68,7 +68,7 @@ const Page = () => {
         <InputEspecifiedThickness especifiedThicknessNumber='0' />
         <InputFoundThickness foundThicknessNumber='0' />
       </div>
-      <div className='flex flex-col border-2 border-gray-300 rounded-lg p-4 mt-4 w-full'>
+      <div className='flex flex-col  p-4 mt-4 w-full'>
         {inputAmount.map((input: any, inputIndex: any) => (
           <div key={inputIndex} className='w-full'>
             <div className='flex justify-around'>

@@ -16,7 +16,7 @@ export const POST = async (req: Request,) => {
     for (let i = 0; images.length > i; i++) {
       const name = uuidv4();
       imagesName.push(`${name}.jpg`);
-      const p = converBase64ToImage(images[i], `/home/alisson/Documents/imagens/serigrafia/${name}.jpg`)
+      const p = converBase64ToImage(images[i], `C:/Users/aliss/Documents/imagens/serigrafia/${name}.jpg`)
     }
     const serigraphy = await db.serigraphy.create({
       data: {

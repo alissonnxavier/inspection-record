@@ -7,13 +7,17 @@ interface ReportInterface {
     data: any;
     drawer: string;
     id: any;
+    itemId?: any;
+    open?: boolean;
 };
 
 export const useReporDrawer = create<ReportInterface>((set) => ({
     id: '',
+    itemId: '',
     isOpen: false,
+    open: true,
     data: {},
     drawer: '',
-    onOpen: (id) => set({ isOpen: true, id }),
-    onClose: () => set({ isOpen: false, data: null, drawer: '', id: '' }),
+    onOpen: (id: any) => set({ isOpen: true, id, itemId: '' }),
+    onClose: () => set({ isOpen: false, data: null, drawer: '', id: '', itemId: '', open: true }),
 }));

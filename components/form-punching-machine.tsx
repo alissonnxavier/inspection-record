@@ -77,8 +77,6 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     const [inspectionData, setInspectionData] = useState([] as any);
     const handleEditForm = useEditForm();
 
-    console.log('name', inspectorName);
-
     const handleData = async (id: string) => {
         if (id?.length > 2 && handleEditForm.tab === tab) {
             await loadUniquePunchingMachineRegister(id)

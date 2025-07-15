@@ -17,7 +17,7 @@ export const loadUniqueSerigraphyRegister = async (id: string) => {
         let imagesArray = [];
         for (let i = 0; serigraphyRegister?.images.length > i; i++) {
             let str = '';
-            let img = await readFile(`/home/alisson/Documents/imagens/serigrafia/${serigraphyRegister.images[i]}`);
+            let img = await readFile(`C:/Users/aliss/Documents/imagens/serigrafia/${serigraphyRegister.images[i]}`);
             str = img.toString('base64');
             imagesArray.push("data:image/png;base64," + str);
         }
@@ -104,4 +104,23 @@ export const loadUniqueFinishingRegister = async (id: string) => {
         }
     });
     return finishingRegister;
+};
+
+export const loadUniqueReportRegister = async (id: string) => {
+  try {
+    const report = await db.report.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!report) {
+      return null;
+    }
+
+    return report;
+  } catch (error) {
+    console.error("Error loading report register:", error);
+    return null;
+  }
 };

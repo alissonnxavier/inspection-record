@@ -5,9 +5,10 @@ import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import React, { useRef, useState, ElementRef } from 'react';
+import React, { useRef, useState, ElementRef, useEffect } from 'react';
 import toast from "react-hot-toast";
 import { useEventListener } from "usehooks-ts";
+import { useReporDrawer } from '@/hooks/use-drawer-report';
 
 const formSchema = z.object({
     id: z.string().default(''),
@@ -19,9 +20,10 @@ type ReportFormValues = z.infer<typeof formSchema>;
 
 interface InputEspecifiedMeasureProps {
     especifiedThicknessNumber: string;
+    reportData?: any;
 };
 
-const InputEspecifiedThickness = ({ especifiedThicknessNumber }: InputEspecifiedMeasureProps) => {
+const InputEspecifiedThickness = ({ especifiedThicknessNumber, reportData }: InputEspecifiedMeasureProps) => {
 
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
@@ -29,6 +31,7 @@ const InputEspecifiedThickness = ({ especifiedThicknessNumber }: InputEspecified
 
     const [especifiedMeasure, setEspecifiedMeasure] = useState<string>('');
     const [enable, setEnable] = useState<boolean>(false);
+    const handleDrawer = useReporDrawer();
 
 
     const formRefEspecifiedThickness = useRef<ElementRef<"form">>(null);
@@ -43,23 +46,27 @@ const InputEspecifiedThickness = ({ especifiedThicknessNumber }: InputEspecified
         }, 150);
     };
 
+    useEffect(() => {
+        if (reportData) {
+            setEspecifiedMeasure(reportData.especifiedThickness);
+        }
+    }, [reportData])
+
     const onSubmit = async () => {
         try {
             form.setValue('especifiedThickness', especifiedMeasure);
-            form.setValue('especifiedThicknessNumber', `et${especifiedThicknessNumber}` );
+            form.setValue('especifiedThicknessNumber', `et${especifiedThicknessNumber}`);
+            form.setValue('id', handleDrawer.id.id!);
             await axios.post('/api/register/report', form);
             toast.success('Espessura especificada salva!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
-                    backgroundColor: '#706d0c',
-                    borderRadius: '50%',
-                    boxShadow: '20px 20px 50px grey',
+                    backgroundColor: '#2786b3',
                 },
                 iconTheme: {
                     primary: 'white',
-                    secondary: '#706d0c',
+                    secondary: '#2786b3',
                 },
             });
             setEnable(false);
@@ -68,15 +75,13 @@ const InputEspecifiedThickness = ({ especifiedThicknessNumber }: InputEspecified
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
-                    boxShadow: '20px 20px 50px grey',
                 },
                 iconTheme: {
                     primary: 'white',
                     secondary: '#a80a1f',
+
                 },
             });
             setEnable(false);
@@ -110,7 +115,10 @@ const InputEspecifiedThickness = ({ especifiedThicknessNumber }: InputEspecified
                         setEnable(true);
                         enableEditing();
                     }} >
-                    {especifiedMeasure ? `${especifiedMeasure} mm` : <div className="text-xm text-muted-foreground">_._mm</div>}
+                    {especifiedMeasure
+                        ? `${especifiedMeasure} mm`
+                        : <div className="text-xm text-muted-foreground">_._mm</div>
+                    }
                 </div>
             )
                 :
@@ -121,7 +129,11 @@ const InputEspecifiedThickness = ({ especifiedThicknessNumber }: InputEspecified
                     <>
                         <div className="flex">
                             <Input
-                                value={especifiedMeasure}
+                                value={
+                                    especifiedMeasure
+                                        ? especifiedMeasure
+                                        : ''
+                                }
                                 ref={inputRefEspecifiedThickness}
                                 onBlur={() => {
                                     onBlur()
@@ -136,7 +148,7 @@ const InputEspecifiedThickness = ({ especifiedThicknessNumber }: InputEspecified
                     <button type="submit" hidden />
                 </form>
 
-            } 
+            }
         </div>
     )
 };

@@ -13,9 +13,9 @@ export const saveReport = async (
     measurements: any,
 
 ) => {
-    const report = await db.report.create({
+   /*  const report = await db.report.create({
         data: {
-            item,
+            id,
             itemId: id,
             version,
             odf,
@@ -25,5 +25,5 @@ export const saveReport = async (
             inspector,
             measurements,
         }
-    });
+    }); */
 }

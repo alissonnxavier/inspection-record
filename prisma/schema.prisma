@@ -122,7 +122,7 @@ model Serigraphy {
 }
 
 model Report {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @map("_id") @db.ObjectId
 
   especifiedThickness String?
   foundThickness      String?
@@ -149,6 +149,8 @@ model Report {
   foundMeasurement8  String?
   foundMeasurement9  String?
   foundMeasurement10 String?
+
+  status String?
 
   createdAt DateTime @default(now()) @db.Date
 }
