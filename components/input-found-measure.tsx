@@ -10,8 +10,6 @@ import toast from "react-hot-toast";
 import { useEventListener } from "usehooks-ts";
 import { cn } from '@/lib/utils';
 import { useReporDrawer } from '@/hooks/use-drawer-report';
-import { loadUniqueReportRegister } from '@/actions/load';
-import { set } from 'date-fns';
 
 
 const formSchema = z.object({
@@ -40,13 +38,12 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
     const handleDrawer = useReporDrawer();
 
     const increment = foundMeasureNumber + 1;
-    const formatFoundMeasure = (especifidMeasure: string) => {
+    const formatFoundMeasure = async (especifidMeasure: string) => {
 
         if (Number(especifidMeasure) > 0 && Number(especifidMeasure) <= 3) {
             const tolerance = Number(foundMeasure) - Number(especifidMeasure);
             if (tolerance > 0.19 || tolerance < -0.19) {
                 setMeassureNC(true);
-
             } else {
                 setMeassureNC(false);
             }
@@ -54,7 +51,6 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
             const tolerance = Number(foundMeasure) - Number(especifidMeasure);
             if (tolerance > 0.19 || tolerance < -0.19) {
                 setMeassureNC(true);
-
             } else {
                 setMeassureNC(false);
             }
@@ -62,7 +58,6 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
             const tolerance = Number(foundMeasure) - Number(especifidMeasure);
             if (tolerance > 0.29 || tolerance < -0.29) {
                 setMeassureNC(true);
-
             } else {
                 setMeassureNC(false);
             }
@@ -70,7 +65,6 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
             const tolerance = Number(foundMeasure) - Number(especifidMeasure);
             if (tolerance > 0.39 || tolerance < -0.39) {
                 setMeassureNC(true);
-
             } else {
                 setMeassureNC(false);
             }
@@ -78,7 +72,6 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
             const tolerance = Number(foundMeasure) - Number(especifidMeasure);
             if (tolerance > 0.59 || tolerance < -0.59) {
                 setMeassureNC(true);
-
             } else {
                 setMeassureNC(false);
             }
@@ -86,7 +79,6 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
             const tolerance = Number(foundMeasure) - Number(especifidMeasure);
             if (tolerance > 1.09 || tolerance < -1.09) {
                 setMeassureNC(true);
-
             } else {
                 setMeassureNC(false);
             }
@@ -94,28 +86,24 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
             const tolerance = Number(foundMeasure) - Number(especifidMeasure);
             if (tolerance > 2.09 || tolerance < -2.09) {
                 setMeassureNC(true);
-
             } else {
                 setMeassureNC(false);
             }
-        }
+        };
     };
 
     useEffect(() => {
-
         setEspecifiedMeasures(reportData as any);
-
         if (reportData) {
             setFoundMeasure((reportData as any)[`foundMeasurement${foundMeasureNumber + 1}`]);
         };
-
     }, [reportData]);
 
     useEffect(() => {
         if (reportData) {
             formatFoundMeasure(reportData["measurement" + increment as string]);
         };
-    }, [formatFoundMeasure, foundMeasure, increment, reportData]);
+    }, [foundMeasure, increment, reportData]);
 
     const enableEditing = () => {
         const interval = setInterval(() => {
@@ -125,8 +113,6 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
             clearInterval(interval);
         }, 150);
     };
-
-
 
     const onSubmit = async () => {
         try {
@@ -187,6 +173,7 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
         )}>
             {!enable ? (
                 <div
+                    className='hover:bg-muted cursor-pointer hover:rounded-md hover:font-bold'
                     onClick={() => {
                         setEnable(true);
                         enableEditing();

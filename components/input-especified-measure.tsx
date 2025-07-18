@@ -107,12 +107,12 @@ const InputEspecifiedMeasure = ({ especifiedMeasureNumber, reportData }: InputEs
     };
 
     useEventListener("keydown", onKeyDown);
-    
+
     return (
         <div className='flex items-center justify-center h-full'>
             {!enable ? (
                 <div
-                className='cursor-pointer'
+                    className='cursor-pointer hover:bg-muted hover:rounded-md hover:font-bold'
                     onClick={() => {
                         setEnable(true);
                         enableEditing();

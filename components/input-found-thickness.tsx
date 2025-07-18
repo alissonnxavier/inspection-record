@@ -113,6 +113,7 @@ const InputFoundThickness = ({ foundThicknessNumber, reportData }: InputEspecifi
         <div className='flex items-center justify-center h-full'>
             {!enable ? (
                 <div
+                    className='cursor-pointer hover:bg-muted hover:rounded-md  hover:font-bold'
                     onClick={() => {
                         setEnable(true);
                         enableEditing();

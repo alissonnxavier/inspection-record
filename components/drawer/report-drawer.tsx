@@ -3,7 +3,7 @@ import { DrawerPatter } from "../drawer-patter";
 import { useReporDrawer } from "@/hooks/use-drawer-report";
 import { Button } from "../ui/button";
 import generatePDF, { Resolution, Margin, Options } from 'react-to-pdf';
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { Separator } from "../ui/separator";
 import ReportTitle from "../report-title";
 import { Card, CardHeader, CardTitle } from "../ui/card";
@@ -38,6 +38,7 @@ export function DrawerRepor() {
     const [show, setShow] = useState<boolean>(true);
     const [closed, setClosed] = useState<boolean>(true);
     const [reportData, setReportData] = useState<any>();
+    const [hidden, setHidden] = useState<boolean>(false);
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
     });
@@ -50,6 +51,8 @@ export function DrawerRepor() {
             clearInterval(interval);
         }, 1000);
     };
+
+    console.log("reportData", inspectionData);
 
     const endReport = async () => {
         try {
@@ -115,10 +118,10 @@ export function DrawerRepor() {
             });
         }
 
-         loadUniqueReportRegister(handleDrawer.id.id!)
+        loadUniqueReportRegister(handleDrawer.id.id!)
             .then((res) => {
                 setReportData(res);
-            }); 
+            });
     }, [handleDrawer.id]);
 
     if (status === "loading" && !inspectionData) {
@@ -193,16 +196,15 @@ export function DrawerRepor() {
                                         </div>
                                         <Separator />
                                         <div className="w-full flex justify-center items-center bg-white dark:bg-zinc-800">
-
                                             <FeaturesControlReport show={show} />
-
                                         </div>
                                     </div>
                                     <Card className="mx-10 my-5 boder shadow-lg">
                                         <CardHeader>
                                             <CardTitle>
                                                 <div className="flex justify-between items-center">
-                                                    <div className="">Certificamos que esta peça foi produzida e inspecionada, estando em conformidade com todos os requisitos de qualidade especificados.</div>
+                                                    <div className="" hidden={inspectionData?.result !== "Aprovado"}>Certificamos que esta peça foi produzida e inspecionada, estando em conformidade com todos os requisitos de qualidade especificados.</div>
+                                                    <div className="" hidden={inspectionData?.result !== "Reprovado"}>Informamos que esta peça não atende aos requisitos de qualidade especificados, tendo sido reprovada durante o processo de produção e inspeção de acordo com o relato acima.</div>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <div className="text-yellow-400 mt-2 flex items-center">Garantia de qualidade <ShieldCheck /></div>
@@ -214,7 +216,7 @@ export function DrawerRepor() {
                                                 </div>
                                             </CardTitle>
                                         </CardHeader>
-                                    </Card>
+                                    </Card> 
                                     <br></br>
                                 </div>
                                 <div className="flex justify-center items-center">
@@ -230,7 +232,7 @@ export function DrawerRepor() {
                                         </>
                                     )}
                                     {show ?
-                                         reportData?.status !== "closed" && (
+                                        reportData?.status !== "closed" && (
                                             <div className="p-2">
                                                 <Button
                                                     variant="ghost"

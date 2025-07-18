@@ -29,7 +29,7 @@ const FeaturesControlReport = ({ show }: FeaturesControlReportProps) => {
             .then((res) => {
                 setReportData(res);
                 if (res) {
-                    for (let i = 0; i < 10; i++) {
+                    for (let i = 0; i < 11; i++) {
                         if ((res as any)[`measurement${i}`] > 0 && i > 1) {
                             array.push(i + 1);
                         }
