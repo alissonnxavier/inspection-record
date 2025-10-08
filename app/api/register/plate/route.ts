@@ -30,6 +30,7 @@ export const POST = async (req: Request) => {
         hbThree,
         inspector,
         images: imagesName,
+        process: "Chapa"
       }
     });
     return NextResponse.json(plate);

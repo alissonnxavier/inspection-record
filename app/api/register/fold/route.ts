@@ -19,6 +19,7 @@ export async function POST(
         result,
         inspector,
         machine,
+        process: "Dobra"
       }
     });
     return NextResponse.json(res);

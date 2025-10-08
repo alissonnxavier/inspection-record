@@ -28,6 +28,7 @@ export const POST = async (req: Request,) => {
         result,
         inspector,
         images: imagesName,
+        process: "Serigrafia"
       }
     });
     return NextResponse.json(serigraphy);

@@ -21,6 +21,7 @@ export async function POST(
         cnc,
         inspector,
         machine,
+        process: "Punção"
       }
     });
     return NextResponse.json(punching);

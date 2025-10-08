@@ -17,13 +17,15 @@ import { useSession } from "next-auth/react";
 import { Menu } from "./navigation-menu";
 import { RiseLoader } from "react-spinners";
 import { redirect, useRouter } from "next/navigation";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Activity } from "lucide-react";
 import { useState } from "react";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { verifyAdmin } from "@/actions/verify-admin";
 import { useEffect } from "react";
 import { Tip } from "./ui/tip";
 import { useAdminHook } from "@/hooks/use-admin";
+import { useTimeLineDrawer } from "@/hooks/use-drawer-timeline";
+
 
 export const Navbar = () => {
     const route = useRouter();
@@ -43,6 +45,7 @@ export const Navbar = () => {
         AdminOrNot();
     }, [session]);
     const handleCardModal = useCardModal();
+    const hadleTimeline = useTimeLineDrawer();
     const handleLogOut = () => {
         try {
             toast.success(' Usuario deslogado.', {
@@ -76,13 +79,28 @@ export const Navbar = () => {
                 </div>
                 <Badge
                     variant='destructive'
-                    className="mr-5 p-2 w-32"
+                    className="mr-2 p-2 w-32"
                 >
                     <div className="m-auto truncate">
                         {session?.user?.name ? `Inspetor ${session?.user?.name}`
                             : <div><RiseLoader color="#f5f7fa" size={5} /></div>}
                     </div>
                 </Badge>
+                <div className="mr-1">
+                    <Tip
+                        message="Linha do tempo"
+                        content={
+                            <Button
+                                variant='newuser'
+                                size='icon'
+                                className="bg-blue-900 text-green-300 ml-1 hover:animate-pulse"
+                                onClick={hadleTimeline.onOpen}
+                            >
+                                <Activity size={15} />
+                            </Button>
+                        }>
+                    </Tip>
+                </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon">

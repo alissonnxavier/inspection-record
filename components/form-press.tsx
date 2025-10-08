@@ -30,11 +30,10 @@ import {
     ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 import toast from 'react-hot-toast';
-import { redirect, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useEditForm } from '@/hooks/use-edit-form';
-import { loadUniquePlateRegister, loadUniquePressRegister } from '@/actions/load';
+import { loadUniquePressRegister } from '@/actions/load';
 
 const formSchema = z.object({
     id: z.string().default(''),
@@ -60,7 +59,6 @@ const FormPress: React.FC<FormPressProps> = ({ tab, id }) => {
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
-    const router = useRouter();
     const { data: session } = useSession();
     const [inspetorName, setInspectorName] = useState('');
     const handleEditForm = useEditForm();
@@ -139,7 +137,7 @@ const FormPress: React.FC<FormPressProps> = ({ tab, id }) => {
                 form.setValue('amount', '');
                 form.setValue('qtd', '');
             }
-            handleEditForm.clearData();
+           // handleEditForm.clearData();
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {

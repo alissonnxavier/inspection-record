@@ -28,6 +28,7 @@ export async function POST(
         amount,
         qtd,
         result,
+        process: "Acabamento"
       }
     });
     return NextResponse.json(press);

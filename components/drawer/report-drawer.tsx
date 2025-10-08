@@ -36,9 +36,7 @@ export function DrawerRepor() {
     const { data: session, status } = useSession();
     const [inspectionData, setInspectionData] = useState<any>([]);
     const [show, setShow] = useState<boolean>(true);
-    const [closed, setClosed] = useState<boolean>(true);
     const [reportData, setReportData] = useState<any>();
-    const [hidden, setHidden] = useState<boolean>(false);
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(formSchema),
     });
@@ -52,11 +50,8 @@ export function DrawerRepor() {
         }, 1000);
     };
 
-    console.log("reportData", inspectionData);
-
     const endReport = async () => {
         try {
-            setClosed(false);
             form.setValue('reportStatus', 'rs');
             form.setValue('status', 'closed');
             form.setValue('id', handleDrawer.id.id!);
@@ -73,7 +68,6 @@ export function DrawerRepor() {
                 },
             });
         } catch (error) {
-            setClosed(true)
             toast.error('Este relatio está finalizado!!!', {
                 style: {
                     border: '3px solid white',
@@ -216,7 +210,7 @@ export function DrawerRepor() {
                                                 </div>
                                             </CardTitle>
                                         </CardHeader>
-                                    </Card> 
+                                    </Card>
                                     <br></br>
                                 </div>
                                 <div className="flex justify-center items-center">

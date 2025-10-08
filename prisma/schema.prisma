@@ -5,14 +5,14 @@ generator client {
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
-}
+} 
 
 model Users {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   name     String
   email    String
   password String
-  admin    String
+  admin    String 
 }
 
 model Press {
@@ -24,6 +24,7 @@ model Press {
   amount    String
   qtd       String
   result    String
+  process   String
   createdAt DateTime @default(now()) @db.Date
 }
 
@@ -40,6 +41,7 @@ model Punching {
   cnc       String
   inspector String
   machine   String
+  process   String
 }
 
 model Threader {
@@ -79,6 +81,7 @@ model Fold {
   inspector String
   createdAt DateTime @default(now()) @db.Date
   machine   String
+  process   String
 }
 
 model Finishing {
@@ -91,6 +94,7 @@ model Finishing {
   result    String
   inspector String
   createdAt DateTime @default(now()) @db.Date
+  process   String
 }
 
 model Plate {
@@ -106,6 +110,7 @@ model Plate {
   inspector String
   images    String[]
   createdAt DateTime @default(now()) @db.Date
+  process   String
 }
 
 model Serigraphy {
@@ -119,6 +124,7 @@ model Serigraphy {
   inspector String
   images    String[]
   createdAt DateTime @default(now()) @db.Date
+  process   String
 }
 
 model Report {

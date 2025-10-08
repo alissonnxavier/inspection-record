@@ -152,7 +152,6 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
 
     const onSubmit = async (formData: SteelPlateFormValues) => {
         try {
-
             if (base64.length < 1) {
                 toast.error('Carregue as imagens!!!', {
                     style: {
@@ -214,7 +213,7 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                 form.setValue('images', '');
                 setBase64([]);
                 setCompressedImages([]);
-                handleEditForm.clearData();
+                //handleEditForm.clearData();
             }
         } catch (error) {
             console.log(error);
@@ -241,11 +240,8 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
     const setPhotos = () => {
         if (compressedImages.length < 1) {
             form.setValue('images', base64)
-            console.log('base64 image was seted');
-
         } else {
             form.setValue('images', compressedImages)
-            console.log('compressed image was seted')
         }
     }
 

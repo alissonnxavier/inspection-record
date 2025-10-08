@@ -105,7 +105,6 @@ const Table = () => {
     )
   }
   if (status === 'authenticated') {
-
   } else {
     redirect('/login')
   }
