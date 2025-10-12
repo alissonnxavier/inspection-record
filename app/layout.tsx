@@ -19,6 +19,7 @@ import { AdminProvider } from '@/providers/admin-provider';
 import { EditFormProvider } from '@/providers/edit-form-provider';
 import { ReportProvider } from '@/providers/report-provider';
 import { Timeline } from '@/providers/timeline-provider';
+import { ChartProvider } from '@/providers/chart-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -67,6 +68,7 @@ export default function RootLayout({
             <ProviderGallery />
             <ReportProvider />
             <Timeline />
+            <ChartProvider />
             {children}
           </ThemeProvider>
         </AuthProvider>

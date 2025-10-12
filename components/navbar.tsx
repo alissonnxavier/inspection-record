@@ -25,6 +25,8 @@ import { useEffect } from "react";
 import { Tip } from "./ui/tip";
 import { useAdminHook } from "@/hooks/use-admin";
 import { useTimeLineDrawer } from "@/hooks/use-drawer-timeline";
+import { useChartsDrawer } from "@/hooks/use-drawer-charts";
+
 
 
 export const Navbar = () => {
@@ -46,6 +48,7 @@ export const Navbar = () => {
     }, [session]);
     const handleCardModal = useCardModal();
     const hadleTimeline = useTimeLineDrawer();
+    const handleCharts = useChartsDrawer();
     const handleLogOut = () => {
         try {
             toast.success(' Usuario deslogado.', {
@@ -74,12 +77,12 @@ export const Navbar = () => {
     return (
         <div className="flex m-auto">
             <div className="flex">
-                <div className="mr-6">
+                <div className="mr-1">
                     <Menu />
                 </div>
                 <Badge
                     variant='destructive'
-                    className="mr-2 p-2 w-32"
+                    className="mr-1 p-2 w-32"
                 >
                     <div className="m-auto truncate">
                         {session?.user?.name ? `Inspetor ${session?.user?.name}`
@@ -93,10 +96,25 @@ export const Navbar = () => {
                             <Button
                                 variant='newuser'
                                 size='icon'
-                                className="bg-blue-900 text-green-300 ml-1 hover:animate-pulse"
+                                className="bg-blue-900 text-green-300 hover:animate-pulse"
                                 onClick={hadleTimeline.onOpen}
                             >
                                 <Activity size={15} />
+                            </Button>
+                        }>
+                    </Tip>
+                </div>
+                <div className="mr-1">
+                    <Tip
+                        message="Gráficos"
+                        content={
+                            <Button
+                                variant='default'
+                                size='icon'
+                                className="bg-red-900 text-pink-300 ml-1 hover:animate-pulse"
+                                onClick={handleCharts.onOpen}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 3v16a2 2 0 0 0 2 2h16" /><rect x="15" y="5" width="4" height="12" rx="1" /><rect x="7" y="8" width="4" height="9" rx="1" /></svg>
                             </Button>
                         }>
                     </Tip>

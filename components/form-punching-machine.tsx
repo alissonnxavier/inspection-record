@@ -431,8 +431,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                                     </SelectTrigger >
                                                                     <SelectContent>
                                                                         <SelectGroup >
-                                                                            <SelectItem value="MT300">MT300</SelectItem>
-                                                                            <SelectItem value="HPE">HPE</SelectItem>
+                                                                            <SelectItem value="MT300">MT300A</SelectItem>
+                                                                            <SelectItem value="HPE">MT300B</SelectItem>
                                                                         </SelectGroup>
                                                                     </SelectContent>
                                                                 </Select>
