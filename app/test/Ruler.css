@@ -1,0 +1,11 @@
+.ruler-container {
+  padding: 20px;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.ruler-svg {
+  border: 1px solid #ccc;
+  cursor: crosshair;
+  background-color: #f9f9f9;
+}
