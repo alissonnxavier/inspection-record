@@ -156,10 +156,8 @@ const FormSteelPlate: React.FC<FormPressProps> = ({ tab, id }) => {
                 toast.error('Carregue as imagens!!!', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#a80a1f',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
 
                     },
@@ -175,10 +173,8 @@ const FormSteelPlate: React.FC<FormPressProps> = ({ tab, id }) => {
                     toast.success('Registro editado com sucesso!!!', {
                         style: {
                             border: '3px solid white',
-                            padding: '30px',
                             color: 'white',
                             backgroundColor: '#706d0c',
-                            borderRadius: '50%',
                             boxShadow: '20px 20px 50px grey',
                         },
                         iconTheme: {
@@ -193,10 +189,8 @@ const FormSteelPlate: React.FC<FormPressProps> = ({ tab, id }) => {
                     toast.success('Registro salvo com sucesso!!!', {
                         style: {
                             border: '3px solid white',
-                            padding: '30px',
                             color: 'white',
                             backgroundColor: '#109c2e',
-                            borderRadius: '50%',
                             boxShadow: '20px 20px 50px grey',
                         },
                         iconTheme: {
@@ -223,10 +217,8 @@ const FormSteelPlate: React.FC<FormPressProps> = ({ tab, id }) => {
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
                     boxShadow: '20px 20px 50px grey',
                 },
                 iconTheme: {
@@ -460,7 +452,7 @@ const FormSteelPlate: React.FC<FormPressProps> = ({ tab, id }) => {
                                                 )}
                                             />
                                             
- */}
+                                                */}
                                             <div className='flex justify-center align-middle items-center'>
                                                 <Tip
                                                     message='Carregar imagens'

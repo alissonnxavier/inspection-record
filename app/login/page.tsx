@@ -89,10 +89,8 @@ const LoginForm: React.FC<FormLoginProps> = ({ tab }) => {
         toast.error('Algo deu errado, verifique seu E-mail e senha.', {
           style: {
             border: '3px solid white',
-            padding: '30px',
             color: 'white',
             backgroundColor: '#870921',
-            borderRadius: '50%',
             boxShadow: '20px 20px 50px grey',
 
           },
@@ -108,10 +106,8 @@ const LoginForm: React.FC<FormLoginProps> = ({ tab }) => {
       toast.success('Login realizado com sucesso!', {
         style: {
           border: '3px solid white',
-          padding: '30px',
           color: 'white',
           backgroundColor: '#109c2e',
-          borderRadius: '50%',
           boxShadow: '20px 20px 50px grey',
 
         },

@@ -65,10 +65,8 @@ const RegisterForm: React.FC<FormLoginProps> = () => {
                 toast.success('Usuario criado com sucesso!', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#109c2e',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
 
                     },
@@ -84,10 +82,8 @@ const RegisterForm: React.FC<FormLoginProps> = () => {
                 toast.error('Impossivel criar, este e-mail ja esta em uso.', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#870921',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
 
                     },
@@ -104,10 +100,8 @@ const RegisterForm: React.FC<FormLoginProps> = () => {
             toast.error('Você nao tem permissão para fazer isso.', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#870921',
-                    borderRadius: '50%',
                     boxShadow: '20px 20px 50px grey',
 
                 },

@@ -54,10 +54,8 @@ export const Navbar = () => {
             toast.success(' Usuario deslogado.', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#020d04',
-                    borderRadius: '50%',
                     boxShadow: '20px 20px 50px grey',
 
                 },

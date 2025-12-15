@@ -24,6 +24,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage,
 } from "@/components/ui/form"
 import {
     ToggleGroup,
@@ -53,7 +54,7 @@ const formSchema = z.object({
     amount: z.string().min(1),
     qtd: z.string().min(1),
     result: z.string().min(1),
-    prefix: z.string().min(1),
+    prefix: z.string().min(1, 'Selecione um prefixo'),
     process: z.string().min(1),
     inspector: z.string().min(1),
 });
@@ -73,6 +74,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     const [inspectorName, setInspectorName] = useState('');
     const handleEditForm = useEditForm();
     const [inspectionData, setInspectionData] = useState([] as any);
+    const [clearToggle, setClearToggle] = useState(true);
 
     const handleData = async (id: string) => {
         if (id?.length > 2 && handleEditForm.tab === tab) {
@@ -107,10 +109,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 toast.success('Registro editado com sucesso!!!', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#706d0c',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
                     },
                     iconTheme: {
@@ -131,10 +131,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 toast.success('Registro salvo com sucesso!!!', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#109c2e',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
 
                     },
@@ -150,15 +148,14 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 form.setValue('qtd', '');
                 form.setValue('process', '');
             }
+            setClearToggle(false);
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
                     boxShadow: '20px 20px 50px grey',
 
                 },
@@ -204,7 +201,12 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                         name="prefix"
                                                         render={({ field }) => (
                                                             <FormItem>
-                                                                <ToggleGroup type="single" onValueChange={field.onChange} defaultValue={field.value}>
+                                                                <ToggleGroup
+                                                                    type="single"
+                                                                    onValueChange={field.onChange}
+                                                                    defaultValue={field.value}
+                                                                    value={clearToggle ? field.value : ''}
+                                                                >
                                                                     <ToggleGroupItem value="ER." aria-label="Toggle ">
                                                                         ER.
                                                                     </ToggleGroupItem>
@@ -218,6 +220,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                                         ENP.
                                                                     </ToggleGroupItem>
                                                                 </ToggleGroup>
+                                                                <FormMessage />
                                                             </FormItem>
                                                         )}
                                                     />
@@ -336,7 +339,10 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                             </div>
                                                             <ToggleGroup
                                                                 type="single"
-                                                                onValueChange={field.onChange} defaultValue={field.value}>
+                                                                onValueChange={field.onChange}
+                                                                defaultValue={field.value}
+                                                                value={clearToggle ? field.value : ''}
+                                                            >
                                                                 <ToggleGroupItem
                                                                     value="Aprovado"
                                                                     aria-label="Toggle"

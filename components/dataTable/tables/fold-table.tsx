@@ -85,7 +85,7 @@ const Table = () => {
   /* const f = format(new Date(createdAt), "MM/dd/yyyy HH:mm");
   console.log(f) */
 
-  if (status === "loading") {
+  if (status === "loading") { 
     return (
       <>
         <div className="flex justify-center p-10">

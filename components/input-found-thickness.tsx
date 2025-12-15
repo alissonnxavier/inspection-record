@@ -75,10 +75,8 @@ const InputFoundThickness = ({ foundThicknessNumber, reportData }: InputEspecifi
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
                     boxShadow: '20px 20px 50px grey',
                 },
                 iconTheme: {

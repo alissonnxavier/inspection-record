@@ -25,6 +25,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage,
 } from "@/components/ui/form"
 import {
     ToggleGroup,
@@ -45,7 +46,7 @@ import { loadUniqueSerigraphyRegister } from '@/actions/load';
 
 const formSchema = z.object({
     id: z.string().default(''),
-    prefix: z.string().min(1),
+    prefix: z.string().min(1, 'Selecione um prefixo'),
     item: z.string().min(4),
     version: z.string(),
     odf: z.string().min(2),
@@ -77,6 +78,7 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
     const [isLoading, setIsLoading] = useState(false);
     const handleEditForm = useEditForm();
     const [inspectionData, setInspectionData] = useState([] as any);
+    const [clearToggle, setClearToggle] = useState(true);
 
     const handleData = async (id: string) => {
         if (id.length > 2 && handleEditForm.tab === tab) {
@@ -156,10 +158,8 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                 toast.error('Carregue as imagens!!!', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#a80a1f',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
 
                     },
@@ -175,10 +175,8 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                     toast.success('Registro editado com sucesso!!!', {
                         style: {
                             border: '3px solid white',
-                            padding: '30px',
                             color: 'white',
                             backgroundColor: '#706d0c',
-                            borderRadius: '50%',
                             boxShadow: '20px 20px 50px grey',
                         },
                         iconTheme: {
@@ -192,10 +190,8 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                     toast.success('Registro salvo com sucesso!!!', {
                         style: {
                             border: '3px solid white',
-                            padding: '30px',
                             color: 'white',
                             backgroundColor: '#109c2e',
-                            borderRadius: '50%',
                             boxShadow: '20px 20px 50px grey',
                         },
                         iconTheme: {
@@ -214,16 +210,15 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                 setBase64([]);
                 setCompressedImages([]);
                 //handleEditForm.clearData();
+                setClearToggle(false);
             }
         } catch (error) {
             console.log(error);
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
                     boxShadow: '20px 20px 50px grey',
                 },
                 iconTheme: {
@@ -279,7 +274,12 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                                                         name="prefix"
                                                         render={({ field }) => (
                                                             <FormItem>
-                                                                <ToggleGroup type="single" onValueChange={field.onChange} defaultValue={field.value}>
+                                                                <ToggleGroup
+                                                                    type="single"
+                                                                    onValueChange={field.onChange}
+                                                                    defaultValue={field.value}
+                                                                    value={clearToggle ? field.value : ''}
+                                                                >
                                                                     <ToggleGroupItem size='sm' value="ME." aria-label="Toggle bold">
                                                                         ME.
                                                                     </ToggleGroupItem>
@@ -293,6 +293,7 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                                                                         ER.
                                                                     </ToggleGroupItem>
                                                                 </ToggleGroup>
+                                                                <FormMessage />
                                                             </FormItem>
                                                         )}
                                                     />
@@ -386,7 +387,10 @@ const FormSerigraphy: React.FC<FormPressProps> = ({ id, tab }) => {
                                                             </div>
                                                             <ToggleGroup
                                                                 type="single"
-                                                                onValueChange={field.onChange} defaultValue={field.value}>
+                                                                onValueChange={field.onChange}
+                                                                defaultValue={field.value}
+                                                                value={clearToggle ? field.value : ''}
+                                                            >
                                                                 <ToggleGroupItem
                                                                     value="Aprovado"
                                                                     aria-label="Toggle"

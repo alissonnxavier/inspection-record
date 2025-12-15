@@ -37,6 +37,10 @@ const InputFoundMeasure = ({ foundMeasureNumber, reportData }: InputEspecifiedMe
     const [meassureNC, setMeassureNC] = useState<boolean>(false);
     const handleDrawer = useReporDrawer();
 
+    const measureSoon = () => {
+        return foundMeasure ? foundMeasure : 0;
+    };
+
     const increment = foundMeasureNumber + 1;
     const formatFoundMeasure = async (especifidMeasure: string) => {
 

@@ -34,6 +34,10 @@ interface Data {
 };
 
 const BarChartComponent = ({ data, tableName }: Data) => {
+
+
+
+
     return (
         <Card className="w-[24rem] m-4">
             <CardHeader>

@@ -24,6 +24,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage
 } from "@/components/ui/form"
 import {
     ToggleGroup,
@@ -43,6 +44,7 @@ import {
 import { AlertOctagon, Trash2 } from 'lucide-react';
 import { loadUniquePunchingMachineRegister } from '@/actions/load';
 import { useEditForm } from '@/hooks/use-edit-form';
+import { set } from 'date-fns';
 
 const formSchema = z.object({
     id: z.string().default(''),
@@ -52,7 +54,7 @@ const formSchema = z.object({
     amount: z.string().min(1),
     qtd: z.string().min(1),
     result: z.string().min(1),
-    prefix: z.string().min(1),
+    prefix: z.string().min(1, 'Selecione um prefixo'),
     thickness: z.string().min(1),
     cnc: z.string().min(2),
     inspector: z.string().min(2),
@@ -76,6 +78,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     const [showTrashIcon, setShowTrashIcon] = useState(false);
     const [inspectionData, setInspectionData] = useState([] as any);
     const handleEditForm = useEditForm();
+    const [clearToggle, setClearToggle] = useState(true);
 
     const handleData = async (id: string) => {
         if (id?.length > 2 && handleEditForm.tab === tab) {
@@ -112,10 +115,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 toast.success('Registro alterado com sucesso!!!', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#706d0c',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
                     },
                     iconTheme: {
@@ -133,15 +134,14 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 form.setValue('thickness', '');
                 setInspectionData([]);
                 handleEditForm.clearData();
+                setClearToggle(false);
             } else {
                 const res = await axios.post('/api/register/punching', formData);
                 toast.success('Registro salvo com sucesso!!!', {
                     style: {
                         border: '3px solid white',
-                        padding: '30px',
                         color: 'white',
                         backgroundColor: '#109c2e',
-                        borderRadius: '50%',
                         boxShadow: '20px 20px 50px grey',
                     },
                     iconTheme: {
@@ -162,10 +162,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
             toast.error('Parece que algo está errado!!!', {
                 style: {
                     border: '3px solid white',
-                    padding: '30px',
                     color: 'white',
                     backgroundColor: '#a80a1f',
-                    borderRadius: '50%',
                     boxShadow: '20px 20px 50px grey',
 
                 },
@@ -193,10 +191,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
         toast.success('Formulário limpo!!!', {
             style: {
                 border: '3px solid white',
-                padding: '30px',
                 color: 'white',
                 backgroundColor: '#2786b3',
-                borderRadius: '50%',
                 boxShadow: '20px 20px 50px grey',
 
             },
@@ -290,7 +286,12 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                         name="prefix"
                                                         render={({ field }) => (
                                                             <FormItem>
-                                                                <ToggleGroup type="single" onValueChange={field.onChange} defaultValue={field.value}>
+                                                                <ToggleGroup
+                                                                    type="single"
+                                                                    onValueChange={field.onChange}
+                                                                    defaultValue={field.value}
+                                                                    value={clearToggle ? field.value : ''}
+                                                                >
                                                                     <ToggleGroupItem value="ME." aria-label="Toggle bold">
                                                                         ME.
                                                                     </ToggleGroupItem>
@@ -301,6 +302,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                                         ENP.
                                                                     </ToggleGroupItem>
                                                                 </ToggleGroup>
+                                                                <FormMessage />
                                                             </FormItem>
                                                         )}
                                                     />
@@ -392,7 +394,6 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                 />
                                             </div>
                                             <div className='flex gap-2'>
-
                                                 <FormField
                                                     control={form.control}
                                                     name='cnc'
@@ -471,7 +472,10 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                             </div>
                                                             <ToggleGroup
                                                                 type="single"
-                                                                onValueChange={field.onChange} defaultValue={field.value}>
+                                                                onValueChange={field.onChange}
+                                                                defaultValue={field.value}
+                                                                value={clearToggle ? field.value : ''}
+                                                            >
                                                                 <ToggleGroupItem
                                                                     value="Aprovado"
                                                                     aria-label="Toggle"
@@ -493,9 +497,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </CardContent>
                             <CardFooter>
                                 <div className='flex w-[390px] justify-center '>

@@ -21,7 +21,7 @@ export async function GET(
         { month: "Agosto", aprovado: 0, reprovado: 0 },
         { month: "Setembro", aprovado: 0, reprovado: 0 },
         { month: "Outubro", aprovado: 0, reprovado: 0 },
-        { month: "Novembro", aprovado: 0, reprovado: 0 },
+        { month: "novembro", aprovado: 0, reprovado: 0 },
         { month: "Dezembro", aprovado: 0, reprovado: 0 },
     ];
 
@@ -36,7 +36,7 @@ export async function GET(
         { month: "Agosto", aprovado: 0, reprovado: 0 },
         { month: "Setembro", aprovado: 0, reprovado: 0 },
         { month: "Outubro", aprovado: 0, reprovado: 0 },
-        { month: "Novembro", aprovado: 0, reprovado: 0 },
+        { month: "novembro", aprovado: 0, reprovado: 0 },
         { month: "Dezembro", aprovado: 0, reprovado: 0 },
     ];
 
@@ -51,7 +51,7 @@ export async function GET(
         { month: "Agosto", aprovado: 0, reprovado: 0 },
         { month: "Setembro", aprovado: 0, reprovado: 0 },
         { month: "Outubro", aprovado: 0, reprovado: 0 },
-        { month: "Novembro", aprovado: 0, reprovado: 0 },
+        { month: "novembro", aprovado: 0, reprovado: 0 },
         { month: "Dezembro", aprovado: 0, reprovado: 0 },
     ];
 
@@ -66,7 +66,7 @@ export async function GET(
         { month: "Agosto", aprovado: 0, reprovado: 0 },
         { month: "Setembro", aprovado: 0, reprovado: 0 },
         { month: "Outubro", aprovado: 0, reprovado: 0 },
-        { month: "Novembro", aprovado: 0, reprovado: 0 },
+        { month: "novembro", aprovado: 0, reprovado: 0 },
         { month: "Dezembro", aprovado: 0, reprovado: 0 },
     ];
 
@@ -81,7 +81,7 @@ export async function GET(
         { month: "Agosto", aprovado: 0, reprovado: 0 },
         { month: "Setembro", aprovado: 0, reprovado: 0 },
         { month: "Outubro", aprovado: 0, reprovado: 0 },
-        { month: "Novembro", aprovado: 0, reprovado: 0 },
+        { month: "novembro", aprovado: 0, reprovado: 0 },
         { month: "Dezembro", aprovado: 0, reprovado: 0 },
     ];
 
@@ -96,7 +96,7 @@ export async function GET(
         { month: "Agosto", aprovado: 0, reprovado: 0 },
         { month: "Setembro", aprovado: 0, reprovado: 0 },
         { month: "Outubro", aprovado: 0, reprovado: 0 },
-        { month: "Novembro", aprovado: 0, reprovado: 0 },
+        { month: "novembro", aprovado: 0, reprovado: 0 },
         { month: "Dezembro", aprovado: 0, reprovado: 0 },
     ];
 
@@ -139,11 +139,11 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             press.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i)) {
+                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
                     if (item.result === 'Aprovado') {
-                        pressChartData[i - 1].aprovado += parseFloat(item.amount);
+                        pressChartData[i].aprovado += parseFloat(item.amount);
                     } else {
-                        pressChartData[i - 1].reprovado += parseFloat(item.amount);
+                        pressChartData[i].reprovado += parseFloat(item.amount);
                     }
                 }
             });
@@ -151,11 +151,11 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             punching.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i)) {
+                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
                     if (item.result === 'Aprovado') {
-                        punchingChartData[i - 1].aprovado += parseFloat(item.amount);
+                        punchingChartData[i].aprovado += parseFloat(item.amount);
                     } else {
-                        punchingChartData[i - 1].reprovado += parseFloat(item.amount);
+                        punchingChartData[i].reprovado += parseFloat(item.amount);
                     }
                 }
             });
@@ -163,11 +163,11 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             trheader.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i)) {
+                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
                     if (item.result === 'Aprovado') {
-                        threaderChartData[i - 1].aprovado += parseFloat(item.amount);
+                        threaderChartData[i].aprovado += parseFloat(item.amount);
                     } else {
-                        threaderChartData[i - 1].reprovado += parseFloat(item.amount);
+                        threaderChartData[i].reprovado += parseFloat(item.amount);
                     }
                 }
             });
@@ -175,11 +175,11 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             fold.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i)) {
+                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
                     if (item.result === 'Aprovado') {
-                        foldChartData[i - 1].aprovado += parseFloat(item.amount);
+                        foldChartData[i].aprovado += parseFloat(item.amount);
                     } else {
-                        foldChartData[i - 1].reprovado += parseFloat(item.amount);
+                        foldChartData[i].reprovado += parseFloat(item.amount);
                     }
                 }
             });
@@ -187,11 +187,11 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             soldier.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i)) {
+                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
                     if (item.result === 'Aprovado') {
-                        soldierChartData[i - 1].aprovado += parseFloat(item.amount);
+                        soldierChartData[i].aprovado += parseFloat(item.amount);
                     } else {
-                        soldierChartData[i - 1].reprovado += parseFloat(item.amount);
+                        soldierChartData[i].reprovado += parseFloat(item.amount);
                     }
                 }
             });
@@ -199,11 +199,11 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             finishing.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i)) {
+                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
                     if (item.result === 'Aprovado') {
-                        finishingChartData[i - 1].aprovado += parseFloat(item.amount);
+                        finishingChartData[i].aprovado += parseFloat(item.amount);
                     } else {
-                        finishingChartData[i - 1].reprovado += parseFloat(item.amount);
+                        finishingChartData[i].reprovado += parseFloat(item.amount);
                     }
                 }
             });

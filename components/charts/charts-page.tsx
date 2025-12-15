@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import BarChartComponent from "@/components/charts/bar-chart"
 import { ScrollArea } from "../ui/scroll-area"
+import { GridLoader } from "react-spinners"
 
 
 type Data = {
@@ -22,7 +23,7 @@ type InspectionData = {
     // add other properties if needed
 }
 
-const ChartsPage = () => {
+const ChartsPage = () => { 
 
     const [inspectionData, setInspectionData] = useState<InspectionData[]>([])
 
@@ -35,6 +36,18 @@ const ChartsPage = () => {
                 console.error('Error fetching inspection data:', error)
             })
     }, []);
+
+    if (inspectionData.length === 0) {
+        return (
+            <>
+                <div className="flex h-5/6 justify-center items-center">
+                    <GridLoader color="#9e0837" size={100} />
+                </div>
+            </>
+        );
+    };
+
+    console.log(inspectionData);
 
     return (
         <ScrollArea className="h-[50rem] mt-10">
