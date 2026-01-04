@@ -14,7 +14,9 @@ import FormSolder from "./form-solder";
 import FormFinishing from "./form-finishing";
 import FormSteelPlate from "./form-steel-plate";
 import FormSerigraphy from "./form-serigraphy";
+import FormNc from "./form-nc";
 import { useEditForm } from "@/hooks/use-edit-form";
+import { Form } from "react-hook-form";
 
 export function AllForms() {
 
@@ -91,6 +93,9 @@ export function AllForms() {
                     <TabsTrigger value="Serigraphy">
                         Serigrafia
                     </TabsTrigger>
+                     <TabsTrigger value="Nc">
+                        NC
+                    </TabsTrigger>
                 </TabsList>
                 <FormSteelPlate tab="PlateSteel" id={handleEditForm.id} />
                 <FormPress tab="Press" id={handleEditForm.id} />
@@ -100,6 +105,7 @@ export function AllForms() {
                 <FormSolder tab='Soldier' id={handleEditForm.id} />
                 <FormFinishing tab='Finishing' id={handleEditForm.id} />
                 <FormSerigraphy tab="Serigraphy" id={handleEditForm.id} />
+                <FormNc tab="Nc" id={handleEditForm.id} />
             </Tabs>
         </div>
     )

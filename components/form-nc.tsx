@@ -44,7 +44,8 @@ import {
 import { AlertOctagon, Trash2 } from 'lucide-react';
 import { loadUniquePunchingMachineRegister } from '@/actions/load';
 import { useEditForm } from '@/hooks/use-edit-form';
-import { set } from 'date-fns';
+import { Textarea } from './ui/textarea';
+import { report } from 'process';
 
 const formSchema = z.object({
     id: z.string().default(''),
@@ -52,13 +53,13 @@ const formSchema = z.object({
     version: z.string().min(1),
     odf: z.string().min(6),
     amount: z.string().min(1),
-    qtd: z.string().min(1),
-    result: z.string().min(1),
+    amountNc: z.string().min(1),
     prefix: z.string().min(1, "Selecione um prefixo"),
     thickness: z.string().min(1),
-    cnc: z.string().min(2),
+    cnc: z.string().optional().default(''),
     inspector: z.string().min(2),
     machine: z.string().min(2),
+    report: z.string().min(5),
 });
 
 type PressFormValues = z.infer<typeof formSchema>;
@@ -68,7 +69,7 @@ interface FormPressProps {
     tab: string;
 }
 
-const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
+const FormNc: React.FC<FormPressProps> = ({ id, tab }) => {
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
@@ -95,8 +96,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                         form.setValue('amount', response?.amount as string);
                         form.setValue('cnc', response?.cnc as string);
                         form.setValue('machine', response?.machine as string);
-                        form.setValue('qtd', response?.qtd as string);
-                        form.setValue('result', response?.result as string);
+                        form.setValue('amountNc', response?.qtd as string);
+                        form.setValue('report', response?.result as string);
                     }
                 });
         }
@@ -130,13 +131,13 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 form.setValue('amount', '');
                 form.setValue('cnc', '');
                 form.setValue('machine', '');
-                form.setValue('result', '');
                 form.setValue('thickness', '');
+                form.setValue('report', '');
                 setInspectionData([]);
                 handleEditForm.clearData();
                 setClearToggle(false);
             } else {
-                const res = await axios.post('/api/register/punching', formData);
+                const res = await axios.post('/api/register/nc', formData);
                 toast.success('Registro salvo com sucesso!!!', {
                     style: {
                         border: '3px solid white',
@@ -153,8 +154,8 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                 form.setValue('version', '');
                 form.setValue('odf', '');
                 form.setValue('amount', '');
-                form.setValue('result', '');
                 form.setValue('prefix', '');
+                form.setValue('report', '');
             }
             //handleEditForm.clearData();
         } catch (error) {
@@ -181,11 +182,11 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
         form.setValue('odf', '');
         form.setValue('amount', '');
         form.setValue('thickness', '');
-        form.setValue('qtd', '');
+        form.setValue('amountNc', '');
         form.setValue('cnc', '');
         form.setValue('machine', '');
-        form.setValue('result', '');
         form.setValue('prefix', '');
+        form.setValue('report', '');
         setShowIcon(false);
         setShowTrashIcon(false);
         toast.success('Formulário limpo!!!', {
@@ -216,7 +217,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     };
 
     const verifyEmpetyForm = () => {
-        if (form.getValues('amount') || form.getValues('cnc') || form.getValues('machine') || form.getValues('thickness') || form.getValues('item') || form.getValues('odf') || form.getValues('prefix') || form.getValues('qtd') || form.getValues('result') || form.getValues('version')) {
+        if (form.getValues('amount') || form.getValues('cnc') || form.getValues('machine') || form.getValues('thickness') || form.getValues('item') || form.getValues('odf') || form.getValues('prefix') || form.getValues('amountNc') || form.getValues('version')) {
             setShowTrashIcon(true);
         } else {
             setShowTrashIcon(false)
@@ -233,7 +234,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                 <div className="flex justify-between">
                                     <CardTitle>
                                         <Badge className="p-1 text-2xl">
-                                            Puncionadeira
+                                            NC
                                         </Badge>
                                     </CardTitle>
                                     <div>
@@ -250,7 +251,7 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                 <div className="">
                                     <div className="space-y-1 mb-4 ">
                                         <div className="">
-                                            <div className='flex mb-3'>
+                                            <div className='flex mb-0.5'>
                                                 <div className='flex absolute gap-5 gap-y-4 ml-3 '>
                                                     {showTrashIcon && !inspectionData?.id ?
                                                         <div
@@ -277,7 +278,6 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                             </Button>
                                                             : <div></div>
                                                         }
-
                                                     </div>
                                                 </div>
                                                 <div className='pt-10 '>
@@ -298,8 +298,11 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                                     <ToggleGroupItem value="PU." aria-label="Toggle italic">
                                                                         PU.
                                                                     </ToggleGroupItem>
-                                                                    <ToggleGroupItem value="ENP." aria-label="Toggle strikethrough">
-                                                                        ENP.
+                                                                    <ToggleGroupItem value="ER." aria-label="Toggle strikethrough">
+                                                                        ER.
+                                                                    </ToggleGroupItem>
+                                                                    <ToggleGroupItem value="IM." aria-label="Toggle strikethrough">
+                                                                        IM.
                                                                     </ToggleGroupItem>
                                                                 </ToggleGroup>
                                                                 <FormMessage />
@@ -434,6 +437,16 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                                         <SelectGroup >
                                                                             <SelectItem value="MT300">MT300A</SelectItem>
                                                                             <SelectItem value="HPE">MT300B</SelectItem>
+                                                                            <SelectItem value="Jiangsu">Jiangsu</SelectItem>
+                                                                            <SelectItem value="JFY">JFY</SelectItem>
+                                                                            <SelectItem value="Durma">Durma</SelectItem>
+                                                                            <SelectItem value="Rosca">Rosca</SelectItem>
+                                                                            <SelectItem value="Escareado">Escareado</SelectItem>
+                                                                            <SelectItem value="Solda ponto">Solda ponto</SelectItem>
+                                                                            <SelectItem value="Solda MIG">Solda MIG</SelectItem>
+                                                                            <SelectItem value="Acabamento">Acabamento</SelectItem>
+                                                                            <SelectItem value="Pintura">Pintura</SelectItem>
+                                                                            <SelectItem value="Montagem">Montagem</SelectItem>
                                                                         </SelectGroup>
                                                                     </SelectContent>
                                                                 </Select>
@@ -443,10 +456,10 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                                 />
                                                 <FormField
                                                     control={form.control}
-                                                    name='qtd'
+                                                    name='amountNc'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel className='truncate'>Inspecionado:</FormLabel>
+                                                            <FormLabel className='truncate'>Quantidade NC:</FormLabel>
                                                             <FormControl
                                                                 onChange={verifyEmpetyField}
                                                             >
@@ -464,33 +477,19 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
                                             <div>
                                                 <FormField
                                                     control={form.control}
-                                                    name='result'
+                                                    name='report'
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <div className='flex justify-center m-4'>
-                                                                <FormLabel>Resultado:</FormLabel>
-                                                            </div>
-                                                            <ToggleGroup
-                                                                type="single"
-                                                                onValueChange={field.onChange}
-                                                                defaultValue={field.value}
-                                                                value={clearToggle ? field.value : ''}
+                                                            <FormLabel className='truncate'>Relato:</FormLabel>
+                                                            <FormControl
+                                                                onChange={verifyEmpetyField}
                                                             >
-                                                                <ToggleGroupItem
-                                                                    value="Aprovado"
-                                                                    aria-label="Toggle"
-                                                                    className="hover:bg-green-100"
-                                                                >
-                                                                    Aprovado
-                                                                </ToggleGroupItem>
-                                                                <ToggleGroupItem
-                                                                    value="Reprovado"
-                                                                    aria-label="Toggle"
-                                                                    className="hover:bg-red-100"
-                                                                >
-                                                                    Reprovado
-                                                                </ToggleGroupItem>
-                                                            </ToggleGroup>
+                                                                <Textarea
+                                                                    placeholder='Digite aqui as não conformidades...'
+                                                                    {...field}
+                                                                    className=''
+                                                                />
+                                                            </FormControl>
                                                         </FormItem>
                                                     )}
                                                 />
@@ -544,4 +543,4 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     )
 }
 
-export default FormPress
+export default FormNc;

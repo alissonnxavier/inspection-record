@@ -4,15 +4,16 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
-} 
+
+  url = env("DATABASE_URL")
+}
 
 model Users {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   name     String
   email    String
   password String
-  admin    String 
+  admin    String
 }
 
 model Press {
@@ -125,6 +126,21 @@ model Serigraphy {
   images    String[]
   createdAt DateTime @default(now()) @db.Date
   process   String
+}
+
+model Nc {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  item      String
+  version   String
+  thickness String
+  odf       String
+  amount    String
+  amountNc  String
+  createdAt DateTime @default(now()) @db.Date
+  cnc       String
+  inspector String
+  machine   String
+  report    String
 }
 
 model Report {

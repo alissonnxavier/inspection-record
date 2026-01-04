@@ -107,20 +107,29 @@ export const loadUniqueFinishingRegister = async (id: string) => {
 };
 
 export const loadUniqueReportRegister = async (id: string) => {
-  try {
-    const report = await db.report.findFirst({
-      where: {
-        id,
-      },
-    });
+    try {
+        const report = await db.report.findFirst({
+            where: {
+                id,
+            },
+        });
 
-    if (!report) {
-      return null;
+        if (!report) {
+            return null;
+        }
+
+        return report;
+    } catch (error) {
+        console.error("Error loading report register:", error);
+        return null;
     }
-
-    return report;
-  } catch (error) {
-    console.error("Error loading report register:", error);
-    return null;
-  }
 };
+
+export const loadUniqueNcRegister = async (id: string) => {
+    const ncRegister = await db.nc.findFirst({
+        where: {
+            id
+        }
+    });
+    return ncRegister;
+}

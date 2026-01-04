@@ -23,6 +23,7 @@ import { useDrawerSoldier } from "@/hooks/use-drawer-soldier";
 import { useDrawerFinishing } from "@/hooks/use-press-finishing";
 import { useDrawerPlate } from "@/hooks/use-plate-drawer";
 import { useDrawerSerigraphy } from "@/hooks/use-serigraphy-drawer";
+import { useDrawerNc } from "@/hooks/use-nc-drawer";
 
 
 export function Menu() {
@@ -34,6 +35,7 @@ export function Menu() {
     const handleDrawerFinishing = useDrawerFinishing();
     const handleDrawerPlate = useDrawerPlate();
     const handleDrawerSerigraphy = useDrawerSerigraphy();
+    const handleDrawerNc = useDrawerNc();
 
     return (
         <NavigationMenu>
@@ -42,7 +44,7 @@ export function Menu() {
                     <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
                     <NavigationMenuContent>
                         <ul className="grid md:w-[500px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr] ">
-                            <li className="row-span-8 m-1 ">
+                            <li className="row-span-9 m-1 ">
                                 <NavigationMenuLink asChild className="justify-center align-middle items-center ">
                                     <a
                                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-5 no-underline outline-none focus:shadow-md hover:opacity-75"
@@ -191,6 +193,23 @@ export function Menu() {
                                     </AlertTitle>
                                     <AlertDescription className="truncate">
                                         Serigrafia
+                                    </AlertDescription>
+                                </Alert>
+                            </ListItem>
+                            <ListItem onClick={handleDrawerNc.onOpen} className="p-0 m-2 cursor-pointer">
+                                <Alert
+                                    variant='default'
+                                    className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">
+                                    <AlertTitle>
+                                        <Image
+                                            width={30}
+                                            height={30}
+                                            alt="excel"
+                                            src={excel}
+                                        />
+                                    </AlertTitle>
+                                    <AlertDescription className="truncate">
+                                        NC
                                     </AlertDescription>
                                 </Alert>
                             </ListItem>

@@ -16,10 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { format } from "date-fns";
 import { deleteRegisterPunching } from "@/actions/delete-registers"
-import { Badge } from "@/components/ui/badge"
 import { useAdminHook } from "@/hooks/use-admin"
-import ButtonEditInspection from "@/components/edit-inspection-button"
-
+import { useDrawerNcSeeMore } from "@/hooks/use-nc-see-more-drawer"
 
 
 
@@ -37,9 +35,10 @@ export type PunchingTypes = {
     createdAt: string
 }
 
-export const ColumnsPunching = () => {
+export const ColumnsNc = () => {
 
     const handleAdmin = useAdminHook();
+    const handleDrawerSeeMore = useDrawerNcSeeMore();
 
     const columns: ColumnDef<PunchingTypes>[] = [
         /* {
@@ -173,19 +172,10 @@ export const ColumnsPunching = () => {
                             <DropdownMenuLabel>Açoẽs</DropdownMenuLabel>
                             {handleAdmin.admin &&
                                 <>
-                                    <DropdownMenuItem>
-                                        <ButtonEditInspection tab="PunchingMachine" id={row.original.id} />
-                                    </DropdownMenuItem>
                                     <DropdownMenuItem
-                                        onClick={() => {
-                                            if (handleAdmin.admin) {
-                                                handleDelete(row.original.id)
-                                            }
-                                        }}
+                                        onClick={() => { handleDrawerSeeMore.onOpen(row.original.id) }}
                                     >
-                                        <Button variant='delete'>
-                                            Deletar registro
-                                        </Button>
+                                        Ver mais
                                     </DropdownMenuItem>
                                 </>
                             }

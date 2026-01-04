@@ -106,7 +106,7 @@ export function DrawerRepor() {
     };
 
     useEffect(() => {
-        if (handleDrawer.id !== "") {
+        if (handleDrawer.id !== "") { 
             loadUniquePressRegister(handleDrawer?.id.id!).then((res) => {
                 setInspectionData(res);
             });

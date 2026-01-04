@@ -66,7 +66,7 @@ interface FormPressProps {
     tab: string;
 }
 
-const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
+const FormSolder: React.FC<FormPressProps> = ({ id, tab }) => {
     const form = useForm<PressFormValues>({
         resolver: zodResolver(formSchema),
     });
@@ -410,4 +410,4 @@ const FormPress: React.FC<FormPressProps> = ({ id, tab }) => {
     )
 }
 
-export default FormPress
+export default FormSolder;

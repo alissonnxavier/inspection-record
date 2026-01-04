@@ -124,7 +124,6 @@ export const Navbar = () => {
                             <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                             <span className="sr-only">Alterar tema</span>
                         </Button>
-
                     </DropdownMenuTrigger>
                     {admin.valueOf() == true ?
                         <Tip

@@ -20,6 +20,8 @@ import { EditFormProvider } from '@/providers/edit-form-provider';
 import { ReportProvider } from '@/providers/report-provider';
 import { Timeline } from '@/providers/timeline-provider';
 import { ChartProvider } from '@/providers/chart-provider';
+import { DrawerNcProvider } from '@/providers/drawer-provider-nc';
+import { DrawerNcSeeMoreProvider } from '@/providers/drawer-provider-nc-see-more';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -69,6 +71,8 @@ export default function RootLayout({
             <ReportProvider />
             <Timeline />
             <ChartProvider />
+            <DrawerNcProvider />
+            <DrawerNcSeeMoreProvider />
             {children}
           </ThemeProvider>
         </AuthProvider>
