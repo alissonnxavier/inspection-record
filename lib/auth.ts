@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import { db } from "./prismadb";
+import NextAuth from "next-auth";
 const bcrypt = require('bcrypt');
 
 export const authConfig: NextAuthOptions = {
@@ -67,6 +68,6 @@ export const authConfig: NextAuthOptions = {
 
 export async function loginIsRequiredServer() {
     const session = await getServerSession(authConfig);
-    if (!session) return redirect("https://inspection-record-rho.vercel.app/");
+    if (!session) return redirect("https://inspection-record-zs7d.vercel.app/");
 }
 
