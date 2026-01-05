@@ -1,11 +1,9 @@
-import { NextAuthOptions, User, getServerSession } from "next-auth";
-import { signIn, useSession } from "next-auth/react";
-import { redirect, useRouter } from "next/navigation";
+import { NextAuthOptions, getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
-import { getToken } from "next-auth/jwt";
 import { db } from "./prismadb";
 const bcrypt = require('bcrypt');
 
@@ -75,8 +73,8 @@ export const authConfig: NextAuthOptions = {
                         email: user?.email,
                     }
                 })
-                session = Object.assign({}, session, { admin: {}})
-                 
+                session = Object.assign({}, session, { admin: {} })
+
             }
             return {
                 ...session,
