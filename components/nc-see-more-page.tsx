@@ -47,10 +47,10 @@ export const NcSeeMorePage = () => {
 
     return (
         <div className='w-full'>
-            <div className="flex justify-center items-center w-full">
-                <ScrollArea className="h-[50rem]">
-                    <div>
-                        <Card className="w-96 max-w-4xl ">
+            <div className="flex flex-row justify-center items-center w-full">
+                <ScrollArea className="h-[50rem] mt-4">
+                    <div className=' flex sm:flex-col md:flex-row  lg:flex-row xl:flex-row 2xl:flex-row justify-center items-start p-4 gap-4'>
+                        <Card className="w-96 max-w-4xl mr-4">
                             <CardHeader className="bg-accent ">
                                 <CardTitle className="text-2xl font-bold text-foreground">Manufacturing Quality Report</CardTitle>
                             </CardHeader>
