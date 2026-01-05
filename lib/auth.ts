@@ -61,30 +61,12 @@ export const authConfig: NextAuthOptions = {
     },
     secret: process.env.NEXTAUTH_JWT_SECRET,
     callbacks: {
-        async jwt({ token, user, profile, trigger, session, account }) {
-            return {
-                ...token,
-            }
-        },
-        async session({ session, token, user }) {
-            if (session) {
-                const admin = await db.users.findFirst({
-                    where: {
-                        email: user?.email,
-                    }
-                })
-                session = Object.assign({}, session, { admin: {} })
-
-            }
-            return {
-                ...session,
-            }
-        },
+       
     },
 };
 
 export async function loginIsRequiredServer() {
     const session = await getServerSession(authConfig);
-    if (!session) return redirect("http://localhost:3000/login");
+    if (!session) return redirect("https://inspection-record-rho.vercel.app/");
 }
 
