@@ -3,6 +3,7 @@
 import { db } from "@/lib/prismadb";
 import { readFile } from "fs/promises";
 
+
 export const loadUniqueSerigraphyRegister = async (id: string) => {
 
     let inspections = [] as any;
@@ -126,6 +127,7 @@ export const loadUniqueReportRegister = async (id: string) => {
 };
 
 export const loadUniqueNcRegister = async (id: string) => {
+
     const ncRegister = await db.nc.findFirst({
         where: {
             id

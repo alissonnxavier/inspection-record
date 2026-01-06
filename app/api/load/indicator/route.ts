@@ -139,7 +139,8 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             press.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
+
+                if (Number(item.createdAt.toISOString().slice(5, 7)) == (i + 1)) {
                     if (item.result === 'Aprovado') {
                         pressChartData[i].aprovado += parseFloat(item.amount);
                     } else {
@@ -151,7 +152,7 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             punching.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
+                if (Number(item.createdAt.toISOString().slice(5, 7)) == (i + 1)) {
                     if (item.result === 'Aprovado') {
                         punchingChartData[i].aprovado += parseFloat(item.amount);
                     } else {
@@ -163,7 +164,7 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             trheader.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
+                if (Number(item.createdAt.toISOString().slice(5, 7)) == (i + 1)) {
                     if (item.result === 'Aprovado') {
                         threaderChartData[i].aprovado += parseFloat(item.amount);
                     } else {
@@ -175,7 +176,7 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             fold.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
+                if (Number(item.createdAt.toISOString().slice(5, 7)) == (i + 1)) {
                     if (item.result === 'Aprovado') {
                         foldChartData[i].aprovado += parseFloat(item.amount);
                     } else {
@@ -187,7 +188,7 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             soldier.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
+                if (Number(item.createdAt.toISOString().slice(5, 7)) == (i + 1)) {
                     if (item.result === 'Aprovado') {
                         soldierChartData[i].aprovado += parseFloat(item.amount);
                     } else {
@@ -199,7 +200,7 @@ export async function GET(
 
         for (let i = 0; i < 12; i++) {
             finishing.forEach(item => {
-                if (item.createdAt.toISOString().slice(5, 7) === String(i + 1)) {
+                if (Number(item.createdAt.toISOString().slice(5, 7)) == (i + 1)) {
                     if (item.result === 'Aprovado') {
                         finishingChartData[i].aprovado += parseFloat(item.amount);
                     } else {

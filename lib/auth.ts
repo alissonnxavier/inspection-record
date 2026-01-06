@@ -1,11 +1,9 @@
 import { NextAuthOptions, getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import { db } from "./prismadb";
-import NextAuth from "next-auth";
 const bcrypt = require('bcrypt');
 
 export const authConfig: NextAuthOptions = {

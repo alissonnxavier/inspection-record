@@ -37,6 +37,8 @@ const ChartsPage = () => {
             })
     }, []);
 
+    console.log(inspectionData);
+
     if (inspectionData.length === 0) {
         return (
             <>

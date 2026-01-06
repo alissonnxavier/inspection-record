@@ -61,9 +61,6 @@ export async function GET(
     if (!timeline) {
       return new NextResponse("No timeline data found", { status: 404 });
     };
-
-
-
     return NextResponse.json(timeline);
   } catch (error) {
     return new NextResponse("Internal error", { status: 500 });
