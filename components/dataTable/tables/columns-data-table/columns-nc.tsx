@@ -15,7 +15,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { format } from "date-fns";
-import { deleteRegisterPunching } from "@/actions/delete-registers"
+import { deleteRegisterNc, deleteRegisterPunching } from "@/actions/delete-registers"
 import { useAdminHook } from "@/hooks/use-admin"
 import { useDrawerNcSeeMore } from "@/hooks/use-nc-see-more-drawer"
 
@@ -153,10 +153,8 @@ export const ColumnsNc = () => {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
-                const pressData = row.original
-
                 function handleDelete(id: string) {
-                    deleteRegisterPunching(id);
+                    deleteRegisterNc(id);
                     location.reload();
                 }
 
@@ -176,6 +174,13 @@ export const ColumnsNc = () => {
                                         onClick={() => { handleDrawerSeeMore.onOpen(row.original.id) }}
                                     >
                                         Ver mais
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        <Button variant='delete' onClick={() => {
+                                            handleDelete(row.original.id)
+                                        }}>
+                                            Deletar
+                                        </Button>
                                     </DropdownMenuItem>
                                 </>
                             }

@@ -14,7 +14,19 @@ export const deleteRegisterPress = async (id: string) => {
     } catch (error) {
         console.log(error);
     }
-}
+};
+
+export const deleteRegisterNc = async (id: string) => {
+    try {
+        const res = await db.nc.delete({
+            where: {
+                id,
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 export const deleteRegisterPunching = async (id: string) => {
     try {

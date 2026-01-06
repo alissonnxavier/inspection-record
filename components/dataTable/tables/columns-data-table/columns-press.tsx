@@ -135,8 +135,6 @@ export const ColumnsPress = () => {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
-                const pressData = row.original
-
                 function handleDelete(id: string) {
                     deleteRegisterPress(id);
                     location.reload();
