@@ -42,7 +42,7 @@ const BarChartComponent = ({ data, tableName }: Data) => {
         <Card className="w-[24rem] m-4">
             <CardHeader>
                 <CardTitle>{tableName} </CardTitle>
-                <CardDescription>Janeiro - Dezembro 2025</CardDescription>
+                <CardDescription>Janeiro - Dezembro 2026</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>

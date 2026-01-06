@@ -36,7 +36,9 @@ export async function GET(
   try {
 
     const res = await db.nc.findMany({
-
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
     return NextResponse.json(res);
