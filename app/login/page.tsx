@@ -154,7 +154,7 @@ const LoginForm: React.FC<FormLoginProps> = ({ tab }) => {
                 <CardDescription>Faça login para salvar as inspeçoẽs.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className='flex justify-around'>
+             {/*    <div className='flex justify-around'>
                   <Button
                     onClick={() => signInGoogle()}
                     variant='outline'
@@ -171,7 +171,7 @@ const LoginForm: React.FC<FormLoginProps> = ({ tab }) => {
                     <Icons.gitHub className='h-5 w-5' />
                     Github
                   </Button>
-                </div>
+                </div> */}
                 <Separator className='my-4' />
 
                 <div className="grid w-full items-center gap-4">
