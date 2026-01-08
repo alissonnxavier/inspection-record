@@ -43,8 +43,8 @@ export function Menu() {
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                        <ul className="grid md:w-[500px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr] ">
-                            <li className="row-span-9 m-1 ">
+                        <ul className="grid md:w-[500px] lg:w-[500px] sm:w-full lg:grid-cols-[.75fr_1fr] w-56">
+                           {/*  <li className="row-span-9 m-1 ">
                                 <NavigationMenuLink asChild className="justify-center align-middle items-center ">
                                     <a
                                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-5 no-underline outline-none focus:shadow-md hover:opacity-75"
@@ -56,8 +56,8 @@ export function Menu() {
                                         </p>
                                     </a>
                                 </NavigationMenuLink>
-                            </li>
-                            <ListItem onClick={handleDrawerPlate.onOpen} title="" className="p-0 m-2 cursor-pointer">
+                            </li> */}
+                            <ListItem onClick={handleDrawerPlate.onOpen} title="" className="p-0 m-2 cursor-pointer ">
                                 <Alert
                                     variant='default'
                                     className="hover:opacity-70 flex justify-start align-middle items-center gap-x-3">

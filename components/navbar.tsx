@@ -73,21 +73,29 @@ export const Navbar = () => {
         }
     }
     return (
-        <div className="flex m-auto">
-            <div className="flex">
-                <div className="mr-1">
+        <div className="flex w-full px-2 py-4">
+            <div className="flex flex-wrap items-center justify-center m-auto gap-1">
+                <div className="flex-shrink-0">
                     <Menu />
                 </div>
                 <Badge
                     variant='destructive'
-                    className="mr-1 p-2 w-32"
+                    className="flex items-center justify-center p-2 min-w-[40px] md:w-40 h-9 transition-all"
                 >
-                    <div className="m-auto truncate">
-                        {session?.user?.name ? `Inspetor ${session?.user?.name}`
-                            : <div><RiseLoader color="#f5f7fa" size={5} /></div>}
+                    <div className="truncate text-xs md:text-sm font-medium">
+                        {session?.user?.name ? (
+                            <>
+                                <span className="hidden md:inline">Inspetor </span>
+                                {session?.user?.name.split(' ')[0]} {/* Mostra apenas 1º nome no mobile */}
+                            </>
+                        ) : (
+                            <div className="flex items-center justify-center w-full">
+                                <RiseLoader color="#f5f7fa" size={4} />
+                            </div>
+                        )}
                     </div>
                 </Badge>
-                <div className="mr-1">
+                <div className="flex items-center gap-1">
                     <Tip
                         message="Linha do tempo"
                         content={
