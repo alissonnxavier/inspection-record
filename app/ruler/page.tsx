@@ -4,10 +4,11 @@ import { Input } from '@/components/ui/input';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Compressor from 'compressorjs';
-import { ImagePlus, Trash2 } from 'lucide-react';
+import { DoorOpen, ImagePlus, LogOut, Trash2 } from 'lucide-react';
 import { Tip } from '@/components/ui/tip';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 
 const Ruler = ({ }) => {
@@ -138,8 +139,14 @@ const Ruler = ({ }) => {
       className='h-screen w-full m-auto justify-center align-middle items-center flex flex-col'
       style={{ userSelect: 'none' }}
     >
-      <h3>Medidor Interativo com Imagem</h3>
-      <div style={{ marginBottom: '10px' }}>
+      <div className='w-full flex justify-between items-center m-1'>
+        <Link href='/'>
+          <DoorOpen size={50} className='ml-20' />
+        </Link>
+        <h3 className='mr-40'>Medidor Interativo com Imagem</h3>
+        <div></div>
+      </div>
+      <div style={{ marginBottom: '10px' }} className='flex justify-center items-center'>
         <div
           className='w-[28rem]'
         >

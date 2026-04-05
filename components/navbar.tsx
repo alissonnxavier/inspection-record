@@ -17,7 +17,7 @@ import { useSession } from "next-auth/react";
 import { Menu } from "./navigation-menu";
 import { RiseLoader } from "react-spinners";
 import { redirect, useRouter } from "next/navigation";
-import { UserPlus, Activity } from "lucide-react";
+import { UserPlus, Activity, Ruler } from "lucide-react";
 import { useState } from "react";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { verifyAdmin } from "@/actions/verify-admin";
@@ -26,6 +26,7 @@ import { Tip } from "./ui/tip";
 import { useAdminHook } from "@/hooks/use-admin";
 import { useTimeLineDrawer } from "@/hooks/use-drawer-timeline";
 import { useChartsDrawer } from "@/hooks/use-drawer-charts";
+import Link from "next/link";
 
 
 
@@ -107,6 +108,23 @@ export const Navbar = () => {
                             >
                                 <Activity size={15} />
                             </Button>
+                        }>
+                    </Tip>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Tip
+                        message="Régua"
+                        content={
+                            <Link href='/ruler'>
+                                <Button
+                                    variant='newuser'
+                                    size='icon'
+                                    className="bg-orange-400 text-black hover:animate-pulse"
+                                //onClick={hadleTimeline.onOpen}
+                                >
+                                    <Ruler size={15} />
+                                </Button>
+                            </Link>
                         }>
                     </Tip>
                 </div>
