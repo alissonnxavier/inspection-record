@@ -217,9 +217,9 @@ const Ruler = ({ }) => {
           {
             measurements.map((measurement, measurementIndex) => (
               <div key={measurementIndex} className='flex gap-1 justify-center items-center m-1'>
-                Medição {measurementIndex + 1}:
+                Med {measurementIndex + 1}:
                 <Input
-                  className='w-16 border'
+                  className='w-14 border'
                   onChange={(e) => {
                     const newMeasurements = [...measurements];
                     newMeasurements[measurementIndex].measure.push({ inputValue: Number(e.target.value) });
@@ -260,7 +260,7 @@ const Ruler = ({ }) => {
               href={img}
               x={index < 2 ? index * 602 : (index - 2) * 600}
               y={index < 2 ? 0 : 602}
-              width={600}
+              width={1280}
               height={600}
             />
 
