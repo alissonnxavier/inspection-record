@@ -132,23 +132,27 @@ const Ruler = ({ }) => {
     return (distancePixels * mmPerPixel).toFixed(2);
   };
 
-
   return (
     <div
       onMouseOver={mouseOverAddMeasure}
       className='h-screen w-full m-auto justify-center align-middle items-center flex flex-col'
       style={{ userSelect: 'none' }}
     >
-      <div className='w-full flex justify-between items-center m-1'>
-        <Link href='/'>
-          <DoorOpen size={50} className='ml-20' />
+      <div className='w-full flex flex-col sm:flex-row justify-between items-center p-4 gap-4'>
+        <Link href='/' className="sm:ml-4 lg:ml-10">
+          <DoorOpen size={50} />
         </Link>
-        <h3 className='mr-40'>Medidor Interativo com Imagem</h3>
-        <div></div>
+
+        <h3 className='text-center text-lg md:text-xl font-medium sm:mr-4 lg:mr-28'>
+          Medidor Interativo com Imagem
+        </h3>
+
+        {/* Div vazia removida ou mantida apenas para manter o equilíbrio do justify-between no desktop */}
+        <div className='hidden sm:block'></div>
       </div>
       <div style={{ marginBottom: '10px' }} className='flex justify-center items-center'>
         <div
-          className='w-[28rem]'
+          className='w-[20rem]'
         >
           <section
             className="
@@ -193,9 +197,22 @@ const Ruler = ({ }) => {
         </div>
       </div>
       <div>
-        <div className='flex justify-center items-center m-1'>
-          resultados
-        </div>
+        {
+          measurements.length > 0 ? (
+            <>
+              <div className='text-center mb-2 text-sm text-gray-500'>
+                Clique na imagem para adicionar pontos de medição. Arraste os pontos para ajustar a posição.
+              </div>
+              <div className='flex justify-center items-center m-1 text-center text-lg md:text-xl font-medium sm:mr-4 lg:mr-10'>
+                resultados
+              </div>
+            </>
+          ) : (
+            <div className='text-center mb-2 text-sm text-gray-500'>
+              Carregue uma imagem e clique nela para adicionar pontos de medição. Arraste os pontos para ajustar a posição.
+            </div>
+          )
+        }
         <div className='flex flex-wrap m-auto justify-center items-center gap-2'>
           {
             measurements.map((measurement, measurementIndex) => (
