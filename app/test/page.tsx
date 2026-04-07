@@ -1,7 +1,7 @@
 'use client'
 
 import { Input } from '@/components/ui/input';
-import React, { useState, useRef, useCallback, use } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Compressor from 'compressorjs';
 import { DoorOpen, ImagePlus, Trash2 } from 'lucide-react';
@@ -11,11 +11,11 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 const Ruler = ({ }) => {
-  // 1. Adicionado 'color' na definição do tipo
   type Measurement = {
     points: { x: number; y: number }[];
     measure: { inputValue: number }[];
     color: string;
+    labelPos?: { x: number; y: number };
   };
 
   const [newValue, setNewValue] = useState(0);
@@ -26,10 +26,11 @@ const Ruler = ({ }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [compressedImages, setCompressedImages] = useState([]);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [lineWidth, setLineWidth] = useState<number>(2);
+  const [lineWidth, setLineWidth] = useState<number>(5);
+
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
   const handleDrop = useCallback(async (files: any) => {
-    const file = files[0];
     let array = [] as any;
     let compressedImages = [] as any;
     try {
@@ -57,16 +58,12 @@ const Ruler = ({ }) => {
     } catch (error) {
       console.log(error);
     }
-  }, [setBase64, setCompressedImages]);
+  }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: handleDrop,
     disabled: isLoading,
-    accept: {
-      'image/jpeg': [],
-      'image/jpg': [],
-      'image/png': [],
-    },
+    accept: { 'image/jpeg': [], 'image/jpg': [], 'image/png': [] },
     maxFiles: 1,
   });
 
@@ -78,7 +75,6 @@ const Ruler = ({ }) => {
   };
 
   const handleAddMeasurement = () => {
-    // 2. Definindo uma cor inicial (Verde padrão)
     const newMeasurements: Measurement[] = [...measurements, { points: [], measure: [], color: '#22c55e' }];
     setMeasurements(newMeasurements);
     setActiveMeasurementIndex(newMeasurements.length - 1);
@@ -91,6 +87,7 @@ const Ruler = ({ }) => {
   };
 
   const handleSvgClick = (event: any) => {
+    if (draggingIndex !== null) return;
     if (!svgRef.current) return;
     const svgRect = svgRef.current.getBoundingClientRect();
     const x = event.clientX - svgRect.left;
@@ -102,15 +99,34 @@ const Ruler = ({ }) => {
 
       if (activeMeasurement?.points.length < 2) {
         activeMeasurement.points.push({ x, y });
+        if (activeMeasurement.points.length === 2) {
+          activeMeasurement.labelPos = {
+            x: (activeMeasurement.points[0].x + activeMeasurement.points[1].x) / 2,
+            y: (activeMeasurement.points[0].y + activeMeasurement.points[1].y) / 2 - 20
+          };
+        }
         setMeasurements(newMeasurements);
       }
     }
   };
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (draggingIndex === null || !svgRef.current) return;
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const x = e.clientX - svgRect.left;
+    const y = e.clientY - svgRect.top;
+
+    const newMeasures = [...measurements];
+    newMeasures[draggingIndex].labelPos = { x, y };
+    setMeasurements(newMeasures);
+  };
+
+  const handleMouseUp = () => setDraggingIndex(null);
+
   return (
     <div
       onMouseOver={mouseOverAddMeasure}
-      className='h-screen w-full m-auto justify-center align-middle items-center flex flex-col'
+      className='w-full min-h-screen bg-background flex flex-col items-center' // Ajustado para scroll
       style={{ userSelect: 'none' }}
     >
       <div className='w-full flex flex-col sm:flex-row justify-between items-center p-4 gap-4'>
@@ -150,7 +166,7 @@ const Ruler = ({ }) => {
         {measurements.length > 0 ? (
           <>
             <div className='text-center mb-2 text-sm text-gray-500'>
-              Clique na imagem para adicionar pontos.
+              Clique na imagem para adicionar pontos. Arraste o texto para mover.
             </div>
             <div className='flex justify-center items-center m-1 text-center text-lg md:text-xl font-medium'>
               resultados
@@ -166,8 +182,6 @@ const Ruler = ({ }) => {
           {measurements.map((measurement, measurementIndex) => (
             <div key={measurementIndex} className='flex gap-1 justify-center items-center m-1 p-2 border border-spacing-2 rounded-md'>
               <span className='text-xs font-bold'>Med {measurementIndex + 1}:</span>
-
-              {/* SELETOR DE COR ADICIONADO */}
               <input
                 type="color"
                 value={measurement.color}
@@ -178,9 +192,8 @@ const Ruler = ({ }) => {
                 }}
                 className="w-6 h-6 cursor-pointer border-none bg-transparent"
               />
-
               <Input
-                className='w-16 border h-8'
+                className='w-20 border h-8'
                 type="number"
                 onChange={(e) => {
                   const newMeasurements = [...measurements];
@@ -201,72 +214,124 @@ const Ruler = ({ }) => {
         </div>
       </div>
 
-      <svg
-        ref={svgRef as any}
-        className='flex'
-        width="100%"
-        height="140%"
-        style={{ border: '1px solid #ccc', marginTop: '10px' }}
-        onClick={handleSvgClick}
-      >
-        {base64.map((img, index) => (
-          <image
-            key={index}
-            href={img}
-            x={index < 2 ? index * 602 : (index - 2) * 600}
-            y={index < 2 ? 0 : 602}
-            width={1280}
-            height={600}
-          />
-        ))}
-
-        {measurements.map((measurement, measurementIndex) => (
-          <React.Fragment key={measurementIndex}>
-            {measurement.points.length === 2 && (
-              <>
-                {/* Linha com cor dinâmica */}
-                <line
-                  x1={measurement.points[0].x}
-                  y1={measurement.points[0].y}
-                  x2={measurement.points[1].x}
-                  y2={measurement.points[1].y}
-                  stroke={measurement.color}
-                  strokeWidth={lineWidth}
-                />
-                <text
-                  x={(measurement.points[0].x + measurement.points[1].x) / 2 + 1}
-                  y={(measurement.points[0].y + measurement.points[1].y) / 2}
-                  fontSize="10"
-                  fill=""
-                  fontWeight="bold"
-                >
-                  Med {measurementIndex + 1}:&#160;
-                </text>
-                <text
-                  x={(measurement.points[0].x + measurement.points[1].x) / 2 + 35}
-                  y={(measurement.points[0].y + measurement.points[1].y) / 2}
-                  fontSize="30"
-                  fill={measurement.color}
-                  fontWeight="bold"
-                >
-                  : {measurement.measure[measurement.measure.length - 1]?.inputValue || 0} mm
-                </text>
-              </>
-            )}
-            {measurement.points.map((point, pointIndex) => (
-              <circle
-                key={`m-${measurementIndex}-${pointIndex}`}
-                cx={point.x}
-                cy={point.y}
-                r="4"
-                fill={measurement.color}
-                opacity="0.9"
-                cursor="pointer"
-              />
+      {/* DIV DE CONTROLE DE SCROLL ADICIONADO AQUI */}
+      <div className='w-full overflow-auto flex-grow flex justify-center p-4'>
+        <svg
+          ref={svgRef}
+          width="1280" // Largura fixa ou baseada na imagem para forçar o scroll se necessário
+          height="1200" // Altura suficiente para as imagens empilhadas
+          style={{ border: '1px solid #ccc', backgroundColor: '', minWidth: '1280px' }}
+          onClick={handleSvgClick}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+        >
+          <defs>
+            {measurements.map((m, i) => (
+              <marker key={`arrow-${i}`} id={`arrowhead-${i}`} markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill={m.color} />
+              </marker>
             ))}
-          </React.Fragment>
-        ))}
-      </svg>
+          </defs>
+
+          {base64.map((img, index) => (
+            <image
+              key={index}
+              href={img}
+              x={index < 2 ? index * 602 : (index - 2) * 600}
+              y={index < 2 ? 0 : 602}
+              width={1280}
+              height={600}
+            />
+          ))}
+
+          {measurements.map((measurement, measurementIndex) => {
+            const hasTwoPoints = measurement.points.length === 2;
+            const center = hasTwoPoints ? {
+              x: (measurement.points[0].x + measurement.points[1].x) / 2,
+              y: (measurement.points[0].y + measurement.points[1].y) / 2
+            } : { x: 0, y: 0 };
+
+            return (
+              <React.Fragment key={measurementIndex}>
+                {hasTwoPoints && (
+                  <>
+                    {measurement.labelPos && (
+                      <line
+                        x1={measurement.labelPos.x + 70}
+                        y1={measurement.labelPos.y + 17}
+                        x2={center.x}
+                        y2={center.y}
+                        stroke={measurement.color}
+                        strokeWidth="5"
+                        strokeDasharray="3"
+                        //markerEnd={`url(#arrowhead-${measurementIndex})`}
+                      />
+                    )}
+
+                    <line
+                      x1={measurement.points[0].x}
+                      y1={measurement.points[0].y}
+                      x2={measurement.points[1].x}
+                      y2={measurement.points[1].y}
+                      stroke={measurement.color}
+                      strokeWidth={lineWidth}
+                    />
+
+                    <g
+                      onMouseDown={(e) => { e.stopPropagation(); setDraggingIndex(measurementIndex); }}
+                      style={{ cursor: 'move' }}
+                    >
+                      <rect
+                        x={(measurement.labelPos?.x || center.x) - 10}
+                        y={(measurement.labelPos?.y || center.y) - 34}
+                        width="40" height="50" fill="white" fillOpacity="0.8" rx="4"
+                      />
+                      <text
+                        x={measurement.labelPos?.x || center.x}
+                        y={measurement.labelPos?.y || center.y}
+                        fontSize="10"
+                        fill={measurement.color}
+                        fontWeight="bold"
+                      >
+                        Med {measurementIndex + 1}:
+                      </text>
+                       <rect
+                        x={(measurement.labelPos?.x || center.x) + 30}
+                        y={(measurement.labelPos?.y || center.y) - 34}
+                        width="160"
+                        height="50"
+                        fill="white"
+                        fillOpacity="0.8"
+                        rx="4"
+                      />
+                      <text
+                        x={(measurement.labelPos?.x || center.x) + 35}
+                        y={measurement.labelPos?.y || center.y}
+                        fontSize="30"
+                        fill={measurement.color}
+                        fontWeight="bold"
+                      >
+                        : {measurement.measure[measurement.measure.length - 1]?.inputValue || 0} mm
+                      </text>
+                    </g>
+                  </>
+                )}
+                {measurement.points.map((point, pointIndex) => (
+                  <circle
+                    key={`m-${measurementIndex}-${pointIndex}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r="4"
+                    fill="red"
+                    opacity="0.9"
+                    cursor="pointer"
+                  />
+                ))}
+              </React.Fragment>
+            );
+          })}
+        </svg>
+      </div>
     </div>
   );
 };
