@@ -9,6 +9,7 @@ import { Tip } from '@/components/ui/tip';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Slider } from '@/components/ui/slider';
 
 const Ruler = ({ }) => {
   type Measurement = {
@@ -26,7 +27,8 @@ const Ruler = ({ }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [compressedImages, setCompressedImages] = useState([]);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [lineWidth, setLineWidth] = useState<number>(5);
+  const [lineWidth, setLineWidth] = useState<any>([5]);
+  const [fontSize, setFontSize] = useState<any>([30]);
 
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
@@ -123,6 +125,8 @@ const Ruler = ({ }) => {
 
   const handleMouseUp = () => setDraggingIndex(null);
 
+  console.log(lineWidth)
+
   return (
     <div
       onMouseOver={mouseOverAddMeasure}
@@ -138,30 +142,62 @@ const Ruler = ({ }) => {
         </h3>
         <div className='hidden sm:block'></div>
       </div>
+      <div className='flex flex-wrap w-full justify-center items-center gap-4 p-4'>
+        {/* Container do Slider de Linha */}
+        <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
+          <span className="text-sm font-medium mb-2">Linha</span>
+          <Slider
 
-      <div style={{ marginBottom: '10px' }} className='flex justify-center items-center'>
-        <div className='w-[20rem]'>
-          <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-lg shadow-red-900/50 hover:shadow-md hover:shadow-red-300/50">
-            <div {...getRootProps({ className: 'dropzone' })}>
-              <input {...getInputProps()} />
-              <div className='flex justify-center align-middle items-center'>
-                <Tip message='Carregar imagem' content={<ImagePlus size={46} />} />
+            value={lineWidth}
+            onValueChange={setLineWidth}
+            min={1}
+            max={100}
+            step={0.1}
+            className="w-full max-w-[200px]"
+          />
+        </div>
+
+        {/* Container do Slider de Fonte */}
+        <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
+          <span className="text-sm font-medium mb-2">Font</span>
+          <Slider
+            value={fontSize}
+            onValueChange={setFontSize}
+            min={1}
+            max={100}
+            step={1}
+            className="w-full max-w-[200px]"
+          />
+        </div>
+
+        {/* Área de Upload (Dropzone) */}
+        <div className='flex justify-center items-center w-full sm:w-auto'>
+          <div className='w-full max-w-[20rem]'>
+            <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-lg shadow-red-900/50 hover:shadow-md hover:shadow-red-300/50">
+              <div {...getRootProps({ className: 'dropzone' })}>
+                <input {...getInputProps()} />
+                <div className='flex justify-center align-middle items-center'>
+                  <Tip message='Carregar imagem' content={<ImagePlus size={46} />} />
+                </div>
               </div>
-            </div>
-            <aside>
-              <ul className='flex justify-center align-middle items-center'>
-                {base64.map((img, index) => (
-                  <Image
-                    className='m-1 aspect-square object-cover rounded hover:scale-150 transition'
-                    key={index} src={img} height={38} width={38} alt='uploaded image'
-                  />
-                ))}
-              </ul>
-            </aside>
-          </section>
+              <aside>
+                <ul className='flex justify-center align-middle items-center'>
+                  {base64.map((img, index) => (
+                    <Image
+                      className='m-1 aspect-square object-cover rounded hover:scale-150 transition'
+                      key={index} src={img} height={38} width={38} alt='uploaded image'
+                    />
+                  ))}
+                </ul>
+              </aside>
+            </section>
+          </div>
+        </div>
+
+        {/* Elemento de teste/espaçador */}
+        <div className="hidden sm:block">
         </div>
       </div>
-
       <div>
         {measurements.length > 0 ? (
           <>
@@ -220,7 +256,7 @@ const Ruler = ({ }) => {
           ref={svgRef}
           width="1280" // Largura fixa ou baseada na imagem para forçar o scroll se necessário
           height="1200" // Altura suficiente para as imagens empilhadas
-          style={{ border: '1px solid #ccc', backgroundColor: '', minWidth: '1280px' }}
+          style={{backgroundColor: '', minWidth: '1280px' }}
           onClick={handleSvgClick}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -262,7 +298,7 @@ const Ruler = ({ }) => {
                         x2={center.x}
                         y2={center.y}
                         stroke={measurement.color}
-                        strokeWidth="5"
+                        strokeWidth={6}
                         strokeDasharray="3"
                       //markerEnd={`url(#arrowhead-${measurementIndex})`}
                       />
@@ -283,12 +319,15 @@ const Ruler = ({ }) => {
                     >
                       <rect
                         x={(measurement.labelPos?.x || center.x) - 10}
-                        y={(measurement.labelPos?.y || center.y) - 34}
-                        width="40" height="50" fill="white" fillOpacity="0.8" rx="4"
+                        y={(measurement.labelPos?.y || center.y) - fontSize - 9}
+                        width="40"
+                        height={fontSize * 1.7}
+                        fill="white"
+                        fillOpacity="0.8" rx="4"
                       />
                       <text
-                        x={measurement.labelPos?.x || center.x}
-                        y={measurement.labelPos?.y || center.y}
+                        x={measurement.labelPos?.x || center.x - 50}
+                        y={measurement.labelPos?.y || center.y - 50}
                         fontSize="10"
                         fill={measurement.color}
                         fontWeight="bold"
@@ -297,17 +336,17 @@ const Ruler = ({ }) => {
                       </text>
                       <rect
                         x={(measurement.labelPos?.x || center.x) + 30}
-                        y={(measurement.labelPos?.y || center.y) - 34}
-                        width="160"
-                        height="50"
+                        y={(measurement.labelPos?.y || center.y) - fontSize -9}
+                        width={fontSize * 4.8}
+                        height={fontSize * 1.7}
                         fill="white"
                         fillOpacity="0.8"
                         rx="4"
                       />
                       <text
-                        x={(measurement.labelPos?.x || center.x) + 35}
+                        x={(measurement.labelPos?.x || center.x) + 30}
                         y={measurement.labelPos?.y || center.y}
-                        fontSize="30"
+                        fontSize={fontSize}
                         fill={measurement.color}
                         fontWeight="bold"
                       >
