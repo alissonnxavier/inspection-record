@@ -75,7 +75,7 @@ const Ruler = ({ }) => {
   };
 
   const handleAddMeasurement = () => {
-    const newMeasurements: Measurement[] = [...measurements, { points: [], measure: [], color: '#22c55e' }];
+    const newMeasurements: Measurement[] = [...measurements, { points: [], measure: [], color: '#060cbd' }];
     setMeasurements(newMeasurements);
     setActiveMeasurementIndex(newMeasurements.length - 1);
   };
