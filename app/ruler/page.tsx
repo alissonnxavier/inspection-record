@@ -294,7 +294,7 @@ const Ruler = ({ }) => {
                     {measurement.labelPos && (
                       <line
                         x1={measurement.labelPos.x + 70}
-                        y1={measurement.labelPos.y + 17}
+                        y1={measurement.labelPos.y - (fontSize / 9)}
                         x2={center.x}
                         y2={center.y}
                         stroke={measurement.color}
@@ -323,7 +323,7 @@ const Ruler = ({ }) => {
                         width="40"
                         height={fontSize * 1.7}
                         fill="white"
-                        fillOpacity="0.8" rx="4"
+                        fillOpacity="" rx="4"
                       />
                       <text
                         x={measurement.labelPos?.x || center.x - 50}
@@ -340,7 +340,7 @@ const Ruler = ({ }) => {
                         width={fontSize * 4.8}
                         height={fontSize * 1.7}
                         fill="white"
-                        fillOpacity="0.8"
+                        fillOpacity=""
                         rx="4"
                       />
                       <text
@@ -349,6 +349,7 @@ const Ruler = ({ }) => {
                         fontSize={fontSize}
                         fill={measurement.color}
                         fontWeight="bold"
+                        stroke='true'
                       >
                         : {measurement.measure[measurement.measure.length - 1]?.inputValue || 0} mm
                       </text>
