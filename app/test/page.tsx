@@ -125,7 +125,7 @@ const Ruler = ({ }) => {
     const p1 = points[0];
     const p2 = points[1]; // Vértice
     const p3 = points[2];
-    const radius = 35; 
+    const radius = 35;
 
     const ang1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
     const ang2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
@@ -254,7 +254,7 @@ const Ruler = ({ }) => {
         </div>
 
         <div className='flex justify-center items-center w-full sm:w-auto gap-2'>
-          <Button onClick={handleAddAngle} variant="outline" className="flex gap-2 border-red-500 text-red-500 hover:bg-red-50">
+          <Button onClick={handleAddAngle} variant="outline" className="flex gap-2 border-red-500 text-red-500 hover:">
             <ChevronRight className="rotate-45" size={20} /> + Ângulo
           </Button>
           <div className='w-full max-w-[20rem]'>
@@ -338,6 +338,7 @@ const Ruler = ({ }) => {
                   <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5,5" />
                   <g onMouseDown={() => setDraggingIndex({ type: 'line', index: i })} style={{ cursor: 'move' }}>
                     <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 5} height={fontSize * 1.2} fill="white" rx="4" />
+                    <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Med {i + 1}</text>
                     <text x={m.labelPos.x} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">: {m.measure[0]?.inputValue || 0} mm</text>
                   </g>
                 </>
@@ -353,16 +354,17 @@ const Ruler = ({ }) => {
             <React.Fragment key={`svg-a-${i}`}>
               {m.points.length >= 2 && (
                 <>
-                  <polyline points={m.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" opacity={9} stroke={m.color} strokeWidth={lineWidth} markerEnd={m.points.length === 3 ? `url(#arrowhead-${i})` : ''} />
-                  
+                  <polyline points={m.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" opacity={9} stroke={m.color} strokeWidth={lineWidth} markerEnd={m.points.length === 3 ? `url(#-${i})` : ''} />
+
                   {/* Renderização da Meia-Lua */}
                   {renderAngleArc(m.points, m.color)}
 
                   {m.points.length === 3 && m.labelPos && (
                     <>
-                      <line x1={m.points[1].x} y1={m.points[1].y} x2={m.labelPos.x + 10} y2={m.labelPos.y - 10} stroke={m.color} strokeWidth="1" strokeDasharray="5,5" />
+                      <line x1={m.points[1].x} y1={m.points[1].y} x2={m.labelPos.x + 10} y2={m.labelPos.y - 10} stroke={m.color} strokeWidth="4" strokeDasharray="5,5" />
                       <g onMouseDown={() => setDraggingIndex({ type: 'angle', index: i })} style={{ cursor: 'move' }}>
                         <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 4} height={fontSize * 1.2} fill="white" rx="4" stroke={m.color} />
+                        <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Âng {i + 1}</text>
                         <text x={m.labelPos.x + 5} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">{m.measure[0]?.inputValue || 0}°</text>
                       </g>
                     </>
@@ -370,7 +372,7 @@ const Ruler = ({ }) => {
                 </>
               )}
               {m.points.map((p, pi) => (
-                <circle key={pi} cx={p.x} cy={p.y} r={pi === 1 ? "10" : "6"} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
+                <circle key={pi} cx={p.x} cy={p.y} r={pi === 1 ? "5" : "6"} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
               ))}
             </React.Fragment>
           ))}
