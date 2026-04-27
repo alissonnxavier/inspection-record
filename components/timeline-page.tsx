@@ -43,10 +43,7 @@ export default function TimeLinePage() {
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-foreground mb-4 text-balance">Linha do tempo</h1>
                 </div>
-               
-                    <DatabaseTimeline inspectionData={inspectionData} />
-                
-
+                <DatabaseTimeline inspectionData={inspectionData} />
             </div>
         </main>
     )
