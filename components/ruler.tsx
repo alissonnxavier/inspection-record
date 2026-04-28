@@ -32,6 +32,7 @@ const Ruler = ({ }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [compressedImages, setCompressedImages] = useState([]);
     const svgRef = useRef<SVGSVGElement>(null);
+    const [markWidth, setMarkWidth] = useState<any>([5]);
     const [lineWidth, setLineWidth] = useState<any>([1]);
     const [fontSize, setFontSize] = useState<any>([30]);
 
@@ -241,11 +242,15 @@ const Ruler = ({ }) => {
                     <DoorOpen size={50} />
                 </Link>
                 <h3 className='text-center text-lg md:text-xl font-medium sm:mr-4 lg:mr-28'>
-                    Medidor Interativo com Imagem
+                    Medidor
                 </h3>
                 <div className='hidden sm:block'></div>
             </div>
             <div className='flex flex-wrap w-full justify-center items-center gap-4 p-4'>
+                <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
+                    <span className="text-sm font-medium mb-2">Marca</span>
+                    <Slider value={markWidth} onValueChange={setMarkWidth} min={1} max={10} step={0.1} className="w-full max-w-[200px]" />
+                </div>
                 <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
                     <span className="text-sm font-medium mb-2">Linha</span>
                     <Slider value={lineWidth} onValueChange={setLineWidth} min={1} max={10} step={0.1} className="w-full max-w-[200px]" />
@@ -336,7 +341,7 @@ const Ruler = ({ }) => {
                             {m.points.length === 2 && m.labelPos && (
                                 <>
                                     <line x1={m.points[0].x} y1={m.points[0].y} x2={m.points[1].x} y2={m.points[1].y} stroke={m.color} strokeWidth={lineWidth} />
-                                    <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5,5" />
+                                    <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5" />
                                     <g onMouseDown={() => setDraggingIndex({ type: 'line', index: i })} style={{ cursor: 'move' }}>
                                         <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 5} height={fontSize * 1.2} fill="white" rx="4" />
                                         <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Med {i + 1}</text>
@@ -345,7 +350,7 @@ const Ruler = ({ }) => {
                                 </>
                             )}
                             {m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r="6" fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
+                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
                             ))}
                         </React.Fragment>
                     ))}
@@ -372,8 +377,9 @@ const Ruler = ({ }) => {
                                     )}
                                 </>
                             )}
+                            {/* r={pi === 1 ? "5" : "6"} */}
                             {m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={pi === 1 ? "5" : "6"} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
+                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
                             ))}
                         </React.Fragment>
                     ))}

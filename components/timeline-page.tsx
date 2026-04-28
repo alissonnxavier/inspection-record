@@ -1,7 +1,6 @@
 'use client';
 
 import { DatabaseTimeline, type DatabaseRecord } from "@/components/timeline"
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { GridLoader } from "react-spinners";
