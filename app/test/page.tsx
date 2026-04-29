@@ -265,7 +265,7 @@ const Ruler = ({ }) => {
                         <ChevronRight className="rotate-45" size={20} /> + Ângulo
                     </Button>
 
-                    <div className='w-full max-w-[12rem]'>
+                    <div className='w-full max-w-[20rem]'>
                         <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-lg shadow-red-900/50 hover:shadow-md hover:shadow-red-300/50">
                             <div {...getRootProps({ className: 'dropzone' })}>
                                 <input {...getInputProps()} />

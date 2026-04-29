@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import React, { useState, useRef, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Compressor from 'compressorjs';
-import { DoorOpen, ImagePlus, Trash2, ChevronRight, Ruler as RulerIcon } from 'lucide-react'; // Importei RulerIcon para o botão
+import { DoorOpen, ImagePlus, Trash2, ChevronRight } from 'lucide-react';
 import { Tip } from '@/components/ui/tip';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -20,12 +20,14 @@ const Ruler = ({ }) => {
         labelPos?: { x: number; y: number };
     };
 
+    const [newValue, setNewValue] = useState(0);
     const [measurements, setMeasurements] = useState<Measurement[]>([]);
     const [angleMeasurements, setAngleMeasurements] = useState<Measurement[]>([]);
 
     const [activeMeasurementIndex, setActiveMeasurementIndex] = useState(-1);
     const [activeAngleIndex, setActiveAngleIndex] = useState(-1);
 
+    const [mmPerPixel, setMmPerPixel] = useState(0.2646);
     const [base64, setBase64] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [compressedImages, setCompressedImages] = useState([]);
@@ -74,9 +76,14 @@ const Ruler = ({ }) => {
         maxFiles: 1,
     });
 
-    // NOVA FUNÇÃO DE ADICIONAR MEDIÇÃO (Agora via botão)
+    const mouseOverAddMeasure = () => {
+        if (base64.length < 1) return;
+        if (measurements[measurements.length - 1]?.points.length === 2 || measurements.length === 0) {
+            handleAddMeasurement();
+        }
+    };
+
     const handleAddMeasurement = () => {
-        if (base64.length < 1) return; // Opcional: só permite se houver imagem
         const newMeasurements: Measurement[] = [...measurements, { points: [], measure: [], color: '#060cbd' }];
         setMeasurements(newMeasurements);
         setActiveMeasurementIndex(newMeasurements.length - 1);
@@ -84,7 +91,6 @@ const Ruler = ({ }) => {
     };
 
     const handleAddAngle = () => {
-        if (base64.length < 1) return;
         const newAngles: Measurement[] = [...angleMeasurements, { points: [], measure: [], color: '#eab308' }];
         setAngleMeasurements(newAngles);
         setActiveAngleIndex(newAngles.length - 1);
@@ -115,10 +121,11 @@ const Ruler = ({ }) => {
         setAngleMeasurements(newAngles);
     };
 
+    // Função para desenhar a meia-lua (arco) do ângulo
     const renderAngleArc = (points: { x: number; y: number }[], color: string, strokeWidth: any) => {
         if (points.length < 3) return null;
         const p1 = points[0];
-        const p2 = points[1];
+        const p2 = points[1]; // Vértice
         const p3 = points[2];
         const radius = 35;
 
@@ -149,14 +156,12 @@ const Ruler = ({ }) => {
         const newArr = [...measurements];
         newArr.splice(index, 1);
         setMeasurements(newArr);
-        setActiveMeasurementIndex(-1);
     };
 
     const handleDeleteAngle = (index: number) => {
         const newArr = [...angleMeasurements];
         newArr.splice(index, 1);
         setAngleMeasurements(newArr);
-        setActiveAngleIndex(-1);
     };
 
     const handleSvgClick = (event: any) => {
@@ -173,7 +178,6 @@ const Ruler = ({ }) => {
                 active.points.push({ x, y });
                 if (active.points.length === 2) {
                     active.labelPos = { x: (active.points[0].x + active.points[1].x) / 2, y: (active.points[0].y + active.points[1].y) / 2 - 40 };
-                    setActiveMeasurementIndex(-1); // Finaliza a edição após o 2º ponto
                 }
                 setMeasurements(newMeasures);
             }
@@ -185,7 +189,6 @@ const Ruler = ({ }) => {
                 active.points.push({ x, y });
                 if (active.points.length === 3) {
                     active.labelPos = { x: active.points[1].x + 30, y: active.points[1].y - 40 };
-                    setActiveAngleIndex(-1); // Finaliza a edição após o 3º ponto
                 }
                 setAngleMeasurements(newAngles);
             }
@@ -226,8 +229,11 @@ const Ruler = ({ }) => {
         setDraggingPoint(null);
     };
 
+    console.log("regua", measurements, "Angulo", angleMeasurements);
+
     return (
         <div
+            onMouseOver={mouseOverAddMeasure}
             className='w-full min-h-screen bg-background flex flex-col items-center'
             style={{ userSelect: 'none' }}
         >
@@ -240,7 +246,6 @@ const Ruler = ({ }) => {
                 </h3>
                 <div className='hidden sm:block'></div>
             </div>
-
             <div className='flex flex-wrap w-full justify-center items-center gap-4 p-4'>
                 <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
                     <span className="text-sm font-medium mb-2">Marca</span>
@@ -254,18 +259,11 @@ const Ruler = ({ }) => {
                     <span className="text-sm font-medium mb-2">Font</span>
                     <Slider value={fontSize} onValueChange={setFontSize} min={1} max={100} step={1} className="w-full max-w-[200px]" />
                 </div>
-
-                {/* BOTÕES DE AÇÃO */}
-                <div className='flex flex-wrap justify-center items-center w-full sm:w-auto gap-2'>
-                    <Button onClick={handleAddMeasurement} variant="outline" className={`flex gap-2 border-blue-500 text-blue-500 ${activeMeasurementIndex !== -1 ? 'bg-blue-50' : ''}`}>
-                        <RulerIcon size={20} /> + Medição
-                    </Button>
-
-                    <Button onClick={handleAddAngle} variant="outline" className={`flex gap-2 border-red-500 text-red-500 ${activeAngleIndex !== -1 ? 'bg-red-50' : ''}`}>
+                <div className='flex justify-center items-center w-full sm:w-auto gap-2'>
+                    <Button onClick={handleAddAngle} variant="outline" className="flex gap-2 border-red-500 text-red-500 hover:">
                         <ChevronRight className="rotate-45" size={20} /> + Ângulo
                     </Button>
-
-                    <div className='w-full max-w-[12rem]'>
+                    <div className='w-full max-w-[20rem]'>
                         <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-lg shadow-red-900/50 hover:shadow-md hover:shadow-red-300/50">
                             <div {...getRootProps({ className: 'dropzone' })}>
                                 <input {...getInputProps()} />
@@ -285,17 +283,16 @@ const Ruler = ({ }) => {
                 </div>
             </div>
 
-            {/* LISTA DE MEDIÇÕES E ÂNGULOS */}
             <div className='flex flex-wrap m-auto justify-center items-center gap-2'>
                 {measurements.map((m, i) => (
-                    <div key={`l-m-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeMeasurementIndex === i ? 'border-blue-500 ' : 'border-spacing-2'}`}>
+                    <div key={`l-m-${i}`} className='flex gap-1 justify-center items-center m-1 p-2 border border-spacing-2 rounded-md'>
                         <span className='text-xs font-bold'>Med {i + 1}:</span>
                         <input type="color" value={m.color} onChange={(e) => {
                             const next = [...measurements];
                             next[i].color = e.target.value;
                             setMeasurements(next);
                         }} className="w-6 h-6 cursor-pointer border-none bg-transparent" />
-                        <Input className='w-20 border h-8' type="number" value={m.measure[0]?.inputValue || ''} onChange={(e) => {
+                        <Input className='w-20 border h-8' type="number" onChange={(e) => {
                             const next = [...measurements];
                             next[i].measure = [{ inputValue: Number(e.target.value) }];
                             setMeasurements(next);
@@ -305,7 +302,7 @@ const Ruler = ({ }) => {
                 ))}
 
                 {angleMeasurements.map((a, i) => (
-                    <div key={`l-a-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeAngleIndex === i ? 'border-yellow-600 ' : 'border-yellow-500'}`}>
+                    <div key={`l-a-${i}`} className='flex gap-1 justify-center items-center m-1 p-2 border border-yellow-500 rounded-md '>
                         <span className='text-xs font-bold'>Âng {i + 1}:</span>
                         <input type="color" value={a.color} onChange={(e) => {
                             const next = [...angleMeasurements];
@@ -325,7 +322,7 @@ const Ruler = ({ }) => {
             </div>
 
             <div className='w-full overflow-auto flex-grow flex justify-center p-4'>
-                <svg ref={svgRef} width="1280" height="1200" style={{ minWidth: '1280px', cursor: (activeMeasurementIndex !== -1 || activeAngleIndex !== -1) ? 'crosshair' : 'default' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+                <svg ref={svgRef} width="1280" height="1200" style={{ backgroundColor: '', minWidth: '1280px' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
                     <defs>
                         {[...measurements, ...angleMeasurements].map((m, i) => (
                             <marker key={`arr-${i}`} id={`arrowhead-${i}`} markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
@@ -341,9 +338,6 @@ const Ruler = ({ }) => {
                     {/* DESENHO RÉGUAS */}
                     {measurements.map((m, i) => (
                         <React.Fragment key={`svg-m-${i}`}>
-                            {m.points.length >= 1 && m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
-                            ))}
                             {m.points.length === 2 && m.labelPos && (
                                 <>
                                     <line x1={m.points[0].x} y1={m.points[0].y} x2={m.points[1].x} y2={m.points[1].y} stroke={m.color} strokeWidth={lineWidth} />
@@ -355,6 +349,9 @@ const Ruler = ({ }) => {
                                     </g>
                                 </>
                             )}
+                            {m.points.map((p, pi) => (
+                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
+                            ))}
                         </React.Fragment>
                     ))}
 
@@ -363,8 +360,11 @@ const Ruler = ({ }) => {
                         <React.Fragment key={`svg-a-${i}`}>
                             {m.points.length >= 2 && (
                                 <>
-                                    <polyline points={m.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" opacity={0.9} stroke={m.color} strokeWidth={lineWidth} />
+                                    <polyline points={m.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" opacity={9} stroke={m.color} strokeWidth={lineWidth} markerEnd={m.points.length === 3 ? `url(#-${i})` : ''} />
+
+                                    {/* Renderização da Meia-Lua */}
                                     {renderAngleArc(m.points, m.color, lineWidth)}
+
                                     {m.points.length === 3 && m.labelPos && (
                                         <>
                                             <line x1={m.points[1].x} y1={m.points[1].y} x2={m.labelPos.x + 10} y2={m.labelPos.y - 10} stroke={m.color} strokeWidth="4" strokeDasharray="5,5" />
@@ -377,6 +377,7 @@ const Ruler = ({ }) => {
                                     )}
                                 </>
                             )}
+                            {/* r={pi === 1 ? "5" : "6"} */}
                             {m.points.map((p, pi) => (
                                 <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
                             ))}
