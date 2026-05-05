@@ -49,7 +49,7 @@ export const NcSeeMorePage = () => {
                         <Card className="w-full lg:max-w-3xl">
                             <CardHeader className="bg-accent">
                                 <CardTitle className="text-xl md:text-2xl font-bold text-foreground text-center lg:text-left">
-                                    Manufacturing Quality Report
+                                    Relatorio da Qualidade
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 md:p-6">
@@ -68,7 +68,7 @@ export const NcSeeMorePage = () => {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="revision" className="text-sm font-bold uppercase text-foreground">Revision</Label>
+                                            <Label htmlFor="revision" className="text-sm font-bold uppercase text-foreground">Revisão</Label>
                                             <div className="flex gap-2 mt-1">
                                                 <Input value={nc?.version} id="revision" readOnly className="border-2 border-border" />
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard("revision", "Revision")} className="shrink-0">
@@ -78,7 +78,7 @@ export const NcSeeMorePage = () => {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="sheet-thickness" className="text-sm font-bold uppercase text-foreground">Sheet Thickness</Label>
+                                            <Label htmlFor="sheet-thickness" className="text-sm font-bold uppercase text-foreground">Espessura da Chapa</Label>
                                             <div className="flex gap-2 mt-1">
                                                 <Input value={nc?.thickness} id="sheet-thickness" readOnly className="border-2 border-border" />
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard("sheet-thickness", "Sheet Thickness")} className="shrink-0">
@@ -88,7 +88,7 @@ export const NcSeeMorePage = () => {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="manufacturing-order" className="text-sm font-bold uppercase text-foreground">Manufacturing Order</Label>
+                                            <Label htmlFor="manufacturing-order" className="text-sm font-bold uppercase text-foreground">Ordem de Fabricação</Label>
                                             <div className="flex gap-2 mt-1">
                                                 <Input value={nc?.odf} id="manufacturing-order" readOnly className="border-2 border-border" />
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard("manufacturing-order", "Manufacturing Order")} className="shrink-0">
@@ -101,7 +101,7 @@ export const NcSeeMorePage = () => {
                                     {/* Right Column */}
                                     <div className="space-y-4">
                                         <div>
-                                            <Label htmlFor="order-quantity" className="text-sm font-bold uppercase text-foreground">Order Quantity</Label>
+                                            <Label htmlFor="order-quantity" className="text-sm font-bold uppercase text-foreground">Quantidade da ordem</Label>
                                             <div className="flex gap-2 mt-1">
                                                 <Input value={nc?.amount} id="order-quantity" type="number" readOnly className="border-2 border-border" />
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard("order-quantity", "Order Quantity")} className="shrink-0">
@@ -111,7 +111,7 @@ export const NcSeeMorePage = () => {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="program-number" className="text-sm font-bold uppercase text-foreground">Program Number</Label>
+                                            <Label htmlFor="program-number" className="text-sm font-bold uppercase text-foreground">Número do Programa</Label>
                                             <div className="flex gap-2 mt-1">
                                                 <Input value={nc?.cnc} id="program-number" readOnly className="border-2 border-border" />
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard("program-number", "Program Number")} className="shrink-0">
@@ -121,7 +121,7 @@ export const NcSeeMorePage = () => {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="machine" className="text-sm font-bold uppercase text-foreground">Machine</Label>
+                                            <Label htmlFor="machine" className="text-sm font-bold uppercase text-foreground">Máquina</Label>
                                             <div className="flex gap-2 mt-1">
                                                 <Input value={nc?.machine} id="machine" readOnly className="border-2 border-border" />
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard("machine", "Machine")} className="shrink-0">
@@ -131,7 +131,7 @@ export const NcSeeMorePage = () => {
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="quantity-problem" className="text-sm font-bold uppercase text-foreground">Quantity with Problem</Label>
+                                            <Label htmlFor="quantity-problem" className="text-sm font-bold uppercase text-foreground">Quantidade com Problema</Label>
                                             <div className="flex gap-2 mt-1">
                                                 <Input value={nc?.amountNc} id="quantity-problem" type="number" readOnly className="border-2 border-border" />
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard("quantity-problem", "Quantity with Problem")} className="shrink-0">
@@ -142,7 +142,7 @@ export const NcSeeMorePage = () => {
                                     </div>
 
                                     <div className="md:col-span-2 mt-2">
-                                        <Label htmlFor="report" className="text-sm font-bold uppercase text-foreground">Report</Label>
+                                        <Label htmlFor="report" className="text-sm font-bold uppercase text-foreground">Relatório</Label>
                                         <div className="flex gap-2 mt-1">
                                             <Textarea
                                                 value={nc?.report}
@@ -162,7 +162,7 @@ export const NcSeeMorePage = () => {
                         {/* Card do Logbook */}
                         <Card className="w-full lg:w-96 shrink-0">
                             <CardHeader className="bg-accent border-b-2 border-primary">
-                                <CardTitle className="text-2xl font-bold text-foreground">Logbook</CardTitle>
+                                <CardTitle className="text-2xl font-bold text-foreground">Diario de bordo</CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 md:p-6">
                                 <div className='flex gap-2'>
@@ -170,7 +170,7 @@ export const NcSeeMorePage = () => {
                                         className="min-h-[250px] lg:h-72 w-full text-sm leading-relaxed"
                                         id='logbook'
                                         readOnly
-                                        value={`Segregado ${nc?.amountNc} un do item ${nc?.item} devido ao seguinte problema: "${nc?.report}" ocorrido na maquina ${nc?.machine} ${nc?.cnc ? `com o programa ${nc?.cnc}` : ``}. da ordem de fabricação ${nc?.odf}. Espessura da chapa ${nc?.thickness}mm, revisão da peça ${nc?.version}. Quantidade total da ordem ${nc?.amount} unidades.`}
+                                        value={`Segregado ${nc?.amountNc} un do item ${nc?.item} devido ao seguinte problema: "${nc?.report}"       -> Maquina: ${nc?.machine}, ${nc?.cnc ? `Programa: ${nc?.cnc}` : ``}, Ordem: ${nc?.odf}, Espessura da chapa ${nc?.thickness}mm, revisão da peça ${nc?.version}, Quantidade total da ordem ${nc?.amount}.`}
                                     />
                                     <Button size="icon" variant="outline" onClick={() => copyToClipboard("logbook", "Logbook")} className="shrink-0">
                                         <Copy className="h-4 w-4" />
