@@ -10,7 +10,9 @@ export function DrawerPlateTable() {
             isOpen={handleDrawer.isOpen}
             onClose={handleDrawer.onClose}
         >
-            <PlateTable />
+            <div className="w-full overflow-auto max-h-[80vh]">
+                <PlateTable />
+            </div>
         </DrawerPatter>
     )
 }

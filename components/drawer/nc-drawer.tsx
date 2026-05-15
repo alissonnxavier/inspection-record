@@ -9,7 +9,9 @@ export function DrawerNcTable() {
             isOpen={handleDrawer.isOpen}
             onClose={handleDrawer.onClose}
         >
-            <Table />
+            <div className="w-full overflow-auto max-h-[80vh]">
+                <Table />
+            </div>
         </DrawerPatter>
     )
 }
