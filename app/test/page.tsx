@@ -1,391 +1,317 @@
 'use client'
 
-import { Input } from '@/components/ui/input';
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, MouseEvent, PointerEvent, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import Compressor from 'compressorjs';
-import { DoorOpen, ImagePlus, Trash2, ChevronRight, Ruler as RulerIcon } from 'lucide-react'; // Importei RulerIcon para o botão
-import { Tip } from '@/components/ui/tip';
-import Image from 'next/image';
+import { ImagePlus, Trash2, DoorOpen, ZoomIn, Move } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { Slider } from '@/components/ui/slider';
+import Link from 'next/link';
 
-const Ruler = ({ }) => {
+export default function MedidorInterativo() {
+  const [image, setImage] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(2);
+  const [pointerPos, setPointerPos] = useState({ x: 0, y: 0 }); // Percentual (0-100) dentro da imagem
+  const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
 
-    type Measurement = {
-        points: { x: number; y: number }[];
-        measure: { inputValue: number }[];
-        color: string;
-        labelPos?: { x: number; y: number };
+  // Estados para o Componente Móvel (Posicionamento em pixels na tela)
+  const [panelPos, setPanelPos] = useState({ x: 100, y: 250 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+
+  // Coordenadas absolutas na tela para desenhar a linha (Stripe) do SVG
+  const [stripeCoords, setStripeCoords] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+
+  const imageRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null); // Referência da mira alvo
+  const panelRef = useRef<HTMLDivElement>(null); // Referência da caixa inteira do painel móvel
+
+  // Configuração do Dropzone para Upload
+  const onDrop = (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setImage(objectUrl);
+      // Reseta posições iniciais padrão do painel móvel na lateral direita
+      setPanelPos({ x: window.innerWidth / 2 + 250, y: window.innerHeight / 2 - 100 });
+    }
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'image/*': [] },
+    multiple: false,
+  });
+
+  const handleRemoveImage = () => {
+    setImage(null);
+    setIsHovering(false);
+    setStripeCoords(null);
+  };
+
+  // Gerencia o movimento do mouse sobre a imagem
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!imageRef.current) return;
+
+    const { left, top, width, height } = imageRef.current.getBoundingClientRect();
+
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+
+    const clampedX = Math.max(0, Math.min(100, x));
+    const clampedY = Math.max(0, Math.min(100, y));
+
+    setPointerPos({ x: clampedX, y: clampedY });
+    setZoomPos({ x: clampedX, y: clampedY });
+  };
+
+  // Lógica de arrastar o Painel de Zoom (Móvel)
+  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    dragStart.current = {
+      x: e.clientX - panelPos.x,
+      y: e.clientY - panelPos.y
     };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
 
-    const [measurements, setMeasurements] = useState<Measurement[]>([]);
-    const [angleMeasurements, setAngleMeasurements] = useState<Measurement[]>([]);
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const newX = e.clientX - dragStart.current.x;
+    const newY = e.clientY - dragStart.current.y;
+    setPanelPos({ x: newX, y: newY });
+  };
 
-    const [activeMeasurementIndex, setActiveMeasurementIndex] = useState(-1);
-    const [activeAngleIndex, setActiveAngleIndex] = useState(-1);
+  const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
+    setIsDragging(false);
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+  };
 
-    const [base64, setBase64] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [compressedImages, setCompressedImages] = useState([]);
-    const svgRef = useRef<SVGSVGElement>(null);
-    const [markWidth, setMarkWidth] = useState<any>([5]);
-    const [lineWidth, setLineWidth] = useState<any>([1]);
-    const [fontSize, setFontSize] = useState<any>([30]);
+  // Otimização matemática: conecta dinamicamente nas laterais do painel flutuante
+  useEffect(() => {
+    if (isHovering && targetRef.current && panelRef.current) {
+      const targetRect = targetRef.current.getBoundingClientRect();
+      const panelRect = panelRef.current.getBoundingClientRect();
 
-    const [draggingIndex, setDraggingIndex] = useState<{ type: 'line' | 'angle', index: number } | null>(null);
-    const [draggingPoint, setDraggingPoint] = useState<{ type: 'line' | 'angle', mIndex: number, pIndex: number } | null>(null);
+      const targetCenterX = targetRect.left + targetRect.width / 2 + window.scrollX;
+      const targetCenterY = targetRect.top + targetRect.height / 2 + window.scrollY;
 
-    const handleDrop = useCallback(async (files: any) => {
-        let array = [] as any;
-        let compressedImages = [] as any;
-        try {
-            for (let i = 0; i < files.length; i++) {
-                const readerPreviwe = new FileReader();
-                readerPreviwe.readAsDataURL(files[i]);
-                readerPreviwe.onload = (e) => {
-                    array.push(e?.target?.result)
-                    setBase64([...array]);
-                }
-            };
-            for (let i = 0; i < files.length; i++) {
-                new Compressor(files[i], {
-                    quality: 0.4,
-                    success: async (compressedFile) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(compressedFile);
-                        reader.onload = async (e) => {
-                            compressedImages.push(e?.target?.result)
-                            setCompressedImages(compressedImages);
-                        }
-                    },
-                });
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }, []);
+      // Centro vertical do painel arrastável
+      const panelCenterY = panelRect.top + panelRect.height / 2 + window.scrollY;
 
-    const { getRootProps, getInputProps } = useDropzone({
-        onDrop: handleDrop,
-        disabled: isLoading,
-        accept: { 'image/jpeg': [], 'image/jpg': [], 'image/png': [] },
-        maxFiles: 1,
-    });
+      // Se a mira estiver à esquerda do painel flutuante, conecta na lateral esquerda da caixa.
+      // Se estiver à direita, conecta na lateral direita.
+      const isTargetLeftOfPanel = targetCenterX < panelRect.left + window.scrollX;
+      const anchorX = isTargetLeftOfPanel
+        ? panelRect.left + window.scrollX
+        : panelRect.right + window.scrollX;
 
-    // NOVA FUNÇÃO DE ADICIONAR MEDIÇÃO (Agora via botão)
-    const handleAddMeasurement = () => {
-        if (base64.length < 1) return; // Opcional: só permite se houver imagem
-        const newMeasurements: Measurement[] = [...measurements, { points: [], measure: [], color: '#060cbd' }];
-        setMeasurements(newMeasurements);
-        setActiveMeasurementIndex(newMeasurements.length - 1);
-        setActiveAngleIndex(-1);
-    };
+      setStripeCoords({
+        x1: targetCenterX,
+        y1: targetCenterY,
+        x2: anchorX,
+        y2: panelCenterY,
+      });
+    } else {
+      setStripeCoords(null);
+    }
+  }, [pointerPos, panelPos, isHovering]);
 
-    const handleAddAngle = () => {
-        if (base64.length < 1) return;
-        const newAngles: Measurement[] = [...angleMeasurements, { points: [], measure: [], color: '#eab308' }];
-        setAngleMeasurements(newAngles);
-        setActiveAngleIndex(newAngles.length - 1);
-        setActiveMeasurementIndex(-1);
-    };
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-50 p-6 flex flex-col justify-between relative overflow-hidden select-none">
 
-    const updateAngleByInput = (index: number, val: number) => {
-        const newAngles = [...angleMeasurements];
-        const item = newAngles[index];
+      {/* SVG Overlay para renderizar a Linha Conectora Lateral */}
+      {stripeCoords && (
+        <svg className="absolute inset-0 pointer-events-none w-full h-full z-40">
+          <defs>
+            <linearGradient id="stripeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.8" />
+            </linearGradient>
+          </defs>
+          {/* Brilho neon inferior */}
+          <line
+            x1={stripeCoords.x1}
+            y1={stripeCoords.y1}
+            x2={stripeCoords.x2}
+            y2={stripeCoords.y2}
+            stroke="#6366f1"
+            strokeWidth="6"
+            className="opacity-15 blur-sm"
+          />
+          {/* Linha pontilhada principal */}
+          <line
+            x1={stripeCoords.x1}
+            y1={stripeCoords.y1}
+            x2={stripeCoords.x2}
+            y2={stripeCoords.y2}
+            stroke="url(#stripeGradient)"
+            strokeWidth="1.5"
+            strokeDasharray="4 4"
+            className="animate-[dash_20s_linear_infinite]"
+          />
+        </svg>
+      )}
 
-        if (item.points.length === 3) {
-            const p1 = item.points[0];
-            const p2 = item.points[1];
-            const p3 = item.points[2];
+      {/* Header / Barra Superior */}
+      <header className="flex  items-center justify-between border-b border-slate-800 pb-4 z-10">
+        <Link href='/' className="sm:ml-4 lg:ml-10 flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors duration-200 ">
+          <DoorOpen size={50} /> Sair
+        </Link>
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="gap-2 text-slate-400 hover:text-slate-100">
+          
+          </Button>
+        </Link>
+      </header>
 
-            const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-            const diffRad = (val * Math.PI) / 180;
-            const angle2 = angle1 + diffRad;
+      {/* Conteúdo Centralizado */}
+      <div className="flex-1 flex flex-col justify-center items-center gap-6 my-4 w-full max-w-5xl mx-auto z-10">
 
-            const dist = Math.sqrt(Math.pow(p3.x - p2.x, 2) + Math.pow(p3.y - p2.y, 2));
+        {/* Painel de Controle Superior (Slider) */}
+        <div className="w-full max-w-xs bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-4 flex flex-col gap-2 shadow-lg">
+          <div className="flex justify-between items-center text-sm font-medium">
+            <span className="text-slate-400">Nível do Zoom</span>
+            <span className="text-indigo-400 font-bold">{zoomLevel.toFixed(1)}x</span>
+          </div>
+          <Slider
+            value={[zoomLevel]}
+            onValueChange={(value) => setZoomLevel(value[0])}
+            min={1.5}
+            max={5}
+            step={0.1}
+            className="py-2"
+          />
 
-            item.points[2] = {
-                x: p2.x + dist * Math.cos(angle2),
-                y: p2.y + dist * Math.sin(angle2)
-            };
-        }
-        item.measure = [{ inputValue: val }];
-        setAngleMeasurements(newAngles);
-    };
-
-    const renderAngleArc = (points: { x: number; y: number }[], color: string, strokeWidth: any) => {
-        if (points.length < 3) return null;
-        const p1 = points[0];
-        const p2 = points[1];
-        const p3 = points[2];
-        const radius = 35;
-
-        const ang1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-        const ang2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
-
-        const startX = p2.x + radius * Math.cos(ang1);
-        const startY = p2.y + radius * Math.sin(ang1);
-        const endX = p2.x + radius * Math.cos(ang2);
-        const endY = p2.y + radius * Math.sin(ang2);
-
-        let diff = ang2 - ang1;
-        while (diff < 0) diff += Math.PI * 2;
-        const largeArcFlag = diff > Math.PI ? 1 : 0;
-
-        return (
-            <path
-                d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`}
-                fill="red"
-                stroke={color}
-                strokeWidth={strokeWidth}
-                fillOpacity={0.3}
-            />
-        );
-    };
-
-    const handleDeleteMeasurement = (index: number) => {
-        const newArr = [...measurements];
-        newArr.splice(index, 1);
-        setMeasurements(newArr);
-        setActiveMeasurementIndex(-1);
-    };
-
-    const handleDeleteAngle = (index: number) => {
-        const newArr = [...angleMeasurements];
-        newArr.splice(index, 1);
-        setAngleMeasurements(newArr);
-        setActiveAngleIndex(-1);
-    };
-
-    const handleSvgClick = (event: any) => {
-        if (draggingIndex !== null || draggingPoint !== null) return;
-        if (!svgRef.current) return;
-        const svgRect = svgRef.current.getBoundingClientRect();
-        const x = event.clientX - svgRect.left;
-        const y = event.clientY - svgRect.top;
-
-        if (activeMeasurementIndex !== -1) {
-            const newMeasures = [...measurements];
-            const active = newMeasures[activeMeasurementIndex];
-            if (active.points.length < 2) {
-                active.points.push({ x, y });
-                if (active.points.length === 2) {
-                    active.labelPos = { x: (active.points[0].x + active.points[1].x) / 2, y: (active.points[0].y + active.points[1].y) / 2 - 40 };
-                    setActiveMeasurementIndex(-1); // Finaliza a edição após o 2º ponto
-                }
-                setMeasurements(newMeasures);
-            }
-        }
-        else if (activeAngleIndex !== -1) {
-            const newAngles = [...angleMeasurements];
-            const active = newAngles[activeAngleIndex];
-            if (active.points.length < 3) {
-                active.points.push({ x, y });
-                if (active.points.length === 3) {
-                    active.labelPos = { x: active.points[1].x + 30, y: active.points[1].y - 40 };
-                    setActiveAngleIndex(-1); // Finaliza a edição após o 3º ponto
-                }
-                setAngleMeasurements(newAngles);
-            }
-        }
-    };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!svgRef.current) return;
-        const svgRect = svgRef.current.getBoundingClientRect();
-        const x = e.clientX - svgRect.left;
-        const y = e.clientY - svgRect.top;
-
-        if (draggingIndex) {
-            if (draggingIndex.type === 'line') {
-                const newMeasures = [...measurements];
-                newMeasures[draggingIndex.index].labelPos = { x, y };
-                setMeasurements(newMeasures);
-            } else {
-                const newAngles = [...angleMeasurements];
-                newAngles[draggingIndex.index].labelPos = { x, y };
-                setAngleMeasurements(newAngles);
-            }
-        } else if (draggingPoint) {
-            if (draggingPoint.type === 'line') {
-                const newMeasures = [...measurements];
-                newMeasures[draggingPoint.mIndex].points[draggingPoint.pIndex] = { x, y };
-                setMeasurements(newMeasures);
-            } else {
-                const newAngles = [...angleMeasurements];
-                newAngles[draggingPoint.mIndex].points[draggingPoint.pIndex] = { x, y };
-                setAngleMeasurements(newAngles);
-            }
-        }
-    };
-
-    const handleMouseUp = () => {
-        setDraggingIndex(null);
-        setDraggingPoint(null);
-    };
-
-    return (
-        <div
-            className='w-full min-h-screen bg-background flex flex-col items-center'
-            style={{ userSelect: 'none' }}
-        >
-            <div className='w-full flex flex-col sm:flex-row justify-between items-center p-4 gap-4'>
-                <Link href='/' className="sm:ml-4 lg:ml-10">
-                    <DoorOpen size={50} />
-                </Link>
-                <h3 className='text-center text-lg md:text-xl font-medium sm:mr-4 lg:mr-28'>
-                    Medidor
-                </h3>
-                <div className='hidden sm:block'></div>
+          {/* Área de Status de Remoção */}
+          {image && (
+            <div className="pt-2 border-t border-slate-800/60 flex justify-between items-center mt-1">
+              <div className="text-[11px] text-slate-400 font-mono">
+                {pointerPos.x.toFixed(0)}%, {pointerPos.y.toFixed(0)}%
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleRemoveImage}
+                className="gap-1.5 h-7 text-xs px-2"
+              >
+                <Trash2 className="w-3 h-3" />
+                Remover
+              </Button>
             </div>
-
-            <div className='flex flex-wrap w-full justify-center items-center gap-4 p-4'>
-                <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Marca</span>
-                    <Slider value={markWidth} onValueChange={setMarkWidth} min={1} max={10} step={0.1} className="w-full max-w-[200px]" />
-                </div>
-                <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Linha</span>
-                    <Slider value={lineWidth} onValueChange={setLineWidth} min={1} max={10} step={0.1} className="w-full max-w-[200px]" />
-                </div>
-                <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Font</span>
-                    <Slider value={fontSize} onValueChange={setFontSize} min={1} max={100} step={1} className="w-full max-w-[200px]" />
-                </div>
-
-                {/* BOTÕES DE AÇÃO */}
-                <div className='flex flex-wrap justify-center items-center w-full sm:w-auto gap-2'>
-                    <Button onClick={handleAddMeasurement} variant="outline" className={`flex gap-2 border-blue-500 text-blue-500 ${activeMeasurementIndex !== -1 ? 'bg-blue-50' : ''}`}>
-                        <RulerIcon size={20} /> + Medição
-                    </Button>
-
-                    <Button onClick={handleAddAngle} variant="outline" className={`flex gap-2 border-red-500 text-red-500 ${activeAngleIndex !== -1 ? 'bg-red-50' : ''}`}>
-                        <ChevronRight className="rotate-45" size={20} /> + Ângulo
-                    </Button>
-
-                    <div className='w-full max-w-[20rem]'>
-                        <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-lg shadow-red-900/50 hover:shadow-md hover:shadow-red-300/50">
-                            <div {...getRootProps({ className: 'dropzone' })}>
-                                <input {...getInputProps()} />
-                                <div className='flex justify-center align-middle items-center'>
-                                    <Tip message='Carregar imagem' content={<ImagePlus size={46} />} />
-                                </div>
-                            </div>
-                            <aside>
-                                <ul className='flex justify-center align-middle items-center'>
-                                    {base64.map((img, index) => (
-                                        <Image className='m-1 aspect-square object-cover rounded hover:scale-150 transition' key={index} src={img} height={38} width={38} alt='uploaded image' />
-                                    ))}
-                                </ul>
-                            </aside>
-                        </section>
-                    </div>
-                </div>
-            </div>
-
-            {/* LISTA DE MEDIÇÕES E ÂNGULOS */}
-            <div className='flex flex-wrap m-auto justify-center items-center gap-2'>
-                {measurements.map((m, i) => (
-                    <div key={`l-m-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeMeasurementIndex === i ? 'border-blue-500 ' : 'border-spacing-2'}`}>
-                        <span className='text-xs font-bold'>Med {i + 1}:</span>
-                        <input type="color" value={m.color} onChange={(e) => {
-                            const next = [...measurements];
-                            next[i].color = e.target.value;
-                            setMeasurements(next);
-                        }} className="w-6 h-6 cursor-pointer border-none bg-transparent" />
-                        <Input className='w-20 border h-8' type="number" value={m.measure[0]?.inputValue || ''} onChange={(e) => {
-                            const next = [...measurements];
-                            next[i].measure = [{ inputValue: Number(e.target.value) }];
-                            setMeasurements(next);
-                        }} />
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteMeasurement(i)}><Trash2 size={16} /></Button>
-                    </div>
-                ))}
-
-                {angleMeasurements.map((a, i) => (
-                    <div key={`l-a-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeAngleIndex === i ? 'border-yellow-600 ' : 'border-yellow-500'}`}>
-                        <span className='text-xs font-bold'>Âng {i + 1}:</span>
-                        <input type="color" value={a.color} onChange={(e) => {
-                            const next = [...angleMeasurements];
-                            next[i].color = e.target.value;
-                            setAngleMeasurements(next);
-                        }} className="w-6 h-6 cursor-pointer border-none bg-transparent" />
-                        <Input
-                            className='w-20 border h-8 border-yellow-300'
-                            type="number"
-                            placeholder="°"
-                            value={a.measure[0]?.inputValue || ''}
-                            onChange={(e) => updateAngleByInput(i, Number(e.target.value))}
-                        />
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteAngle(i)}><Trash2 size={16} /></Button>
-                    </div>
-                ))}
-            </div>
-
-            <div className='w-full overflow-auto flex-grow flex justify-center p-4'>
-                <svg ref={svgRef} width="1280" height="1200" style={{ minWidth: '1280px', cursor: (activeMeasurementIndex !== -1 || activeAngleIndex !== -1) ? 'crosshair' : 'default' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-                    <defs>
-                        {[...measurements, ...angleMeasurements].map((m, i) => (
-                            <marker key={`arr-${i}`} id={`arrowhead-${i}`} markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
-                                <polygon points="0 0, 4 3.5, 0 7" fill={m.color} />
-                            </marker>
-                        ))}
-                    </defs>
-
-                    {base64.map((img, index) => (
-                        <image key={index} href={img} x={index < 2 ? index * 602 : (index - 2) * 600} y={index < 2 ? 0 : 602} width={1280} height={600} />
-                    ))}
-
-                    {/* DESENHO RÉGUAS */}
-                    {measurements.map((m, i) => (
-                        <React.Fragment key={`svg-m-${i}`}>
-                            {m.points.length >= 1 && m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
-                            ))}
-                            {m.points.length === 2 && m.labelPos && (
-                                <>
-                                    <line x1={m.points[0].x} y1={m.points[0].y} x2={m.points[1].x} y2={m.points[1].y} stroke={m.color} strokeWidth={lineWidth} />
-                                    <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5" />
-                                    <g onMouseDown={() => setDraggingIndex({ type: 'line', index: i })} style={{ cursor: 'move' }}>
-                                        <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 5} height={fontSize * 1.2} fill="white" rx="4" />
-                                        <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Med {i + 1}</text>
-                                        <text x={m.labelPos.x} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">: {m.measure[0]?.inputValue || 0} mm</text>
-                                    </g>
-                                </>
-                            )}
-                        </React.Fragment>
-                    ))}
-
-                    {/* DESENHO ÂNGULOS */}
-                    {angleMeasurements.map((m, i) => (
-                        <React.Fragment key={`svg-a-${i}`}>
-                            {m.points.length >= 2 && (
-                                <>
-                                    <polyline points={m.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" opacity={0.9} stroke={m.color} strokeWidth={lineWidth} />
-                                    {renderAngleArc(m.points, m.color, lineWidth)}
-                                    {m.points.length === 3 && m.labelPos && (
-                                        <>
-                                            <line x1={m.points[1].x} y1={m.points[1].y} x2={m.labelPos.x + 10} y2={m.labelPos.y - 10} stroke={m.color} strokeWidth="4" strokeDasharray="5,5" />
-                                            <g onMouseDown={() => setDraggingIndex({ type: 'angle', index: i })} style={{ cursor: 'move' }}>
-                                                <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 4} height={fontSize * 1.2} fill="white" rx="4" stroke={m.color} />
-                                                <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Âng {i + 1}</text>
-                                                <text x={m.labelPos.x + 5} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">{m.measure[0]?.inputValue || 0}°</text>
-                                            </g>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                            {m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
-                            ))}
-                        </React.Fragment>
-                    ))}
-                </svg>
-            </div>
+          )}
         </div>
-    );
-};
 
-export default Ruler;
+        {/* Workspace Central */}
+        <div className="w-full flex justify-center items-center min-h-[450px]">
+          {!image ? (
+            <div
+              {...getRootProps()}
+              className={`w-full max-w-2xl flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 min-h-[350px]
+                ${isDragActive ? 'border-indigo-500 bg-indigo-950/20' : 'border-slate-800 bg-slate-900/40 hover:bg-slate-900/60'}`}
+            >
+              <input {...getInputProps()} />
+              <div className="p-4 bg-slate-800/50 rounded-full mb-4">
+                <ImagePlus className="w-8 h-8 text-slate-400" />
+              </div>
+              <p className="text-base font-medium">Arraste uma imagem ou clique para selecionar</p>
+              <p className="text-xs text-slate-500 mt-1">Formatos suportados: JPEG, PNG, WEBP</p>
+            </div>
+          ) : (
+            <div className="w-full flex justify-center items-center">
+
+              {/* Imagem Original Interativa */}
+              <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center justify-center relative max-w-xl w-full">
+                <div
+                  ref={imageRef}
+                  onMouseMove={handleMouseMove}
+                  onMouseEnter={() => setIsHovering(true)}
+                  onMouseLeave={() => setIsHovering(false)}
+                  className="relative overflow-hidden cursor-none max-w-full max-h-[450px]"
+                >
+                  <img
+                    src={image}
+                    alt="Original"
+                    className="w-full h-auto object-contain max-h-[450px] rounded"
+                    draggable={false}
+                  />
+
+                  {/* Super Mira Alvo Customizada */}
+                  {isHovering && (
+                    <div
+                      ref={targetRef}
+                      className="absolute w-12 h-12 border border-dashed border-red-700 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-green-300/50 shadow-[0_0_15px_rgba(239,68,68,0.4)] z-50"
+                      style={{ left: `${pointerPos.x}%`, top: `${pointerPos.y}%` }}
+                    >
+                      <div className="absolute w-full h-[1px] bg-red-400/60" />
+                      <div className="absolute h-full w-[1px] bg-red-400/60" />
+                      <div className="w-4 h-4 border-2 border-red-500 rounded-full bg-slate-950 flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping absolute" />
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* COMPONENTE MÓVEL: Quadro de Zoom Flutuante e Arrastável */}
+              <div
+                ref={panelRef}
+                style={{
+                  position: 'fixed',
+                  left: `${panelPos.x}px`,
+                  top: `${panelPos.y}px`,
+                }}
+                className={`w-[280px] bg-slate-900/95 backdrop-blur-md border rounded-xl p-3 flex flex-col shadow-2xl z-50 transition-shadow duration-200
+                  ${isDragging ? 'border-indigo-500 shadow-indigo-500/10 cursor-grabbing' : 'border-slate-700/80 shadow-black'}`}
+              >
+                {/* Barra de Arraste Superior */}
+                <div
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  className="flex items-center gap-2 pb-2 mb-2 border-b border-slate-800 cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-200 select-none"
+                >
+                  <Move className="w-3.5 h-3.5 text-indigo-400 pointer-events-none" />
+                  <span className="text-xs font-medium pointer-events-none flex-1">Lupa</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                </div>
+
+                {/* Container de Amostragem do Zoom */}
+                <div className="w-full aspect-square bg-slate-950 border border-slate-800 rounded-lg overflow-hidden relative flex items-center justify-center">
+                  {isHovering ? (
+                    <div
+                      className="w-full h-full pointer-events-none"
+                      style={{
+                        backgroundImage: `url(${image})`,
+                        backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
+                        backgroundSize: `${zoomLevel * 100}%`,
+                        backgroundRepeat: 'no-repeat',
+                      }}
+                    />
+                  ) : (
+                    <div className="text-[11px] text-slate-500 text-center px-4">
+                      Inspecione a imagem
+                    </div>
+                  )}
+
+                  {/* Retícula de centralização */}
+                  {isHovering && (
+                    <div className="absolute inset-0 border border-indigo-500/20 pointer-events-none flex items-center justify-center">
+                      <div className="w-3 h-3 border border-indigo-500/40 rounded-full" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          )}
+        </div>
+      </div>
+
+      <footer className="text-center text-xs text-slate-600 pt-4 border-t border-slate-900">
+
+      </footer>
+    </div>
+  );
+}

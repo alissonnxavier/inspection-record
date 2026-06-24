@@ -17,7 +17,7 @@ import { useSession } from "next-auth/react";
 import { Menu } from "./navigation-menu";
 import { RiseLoader } from "react-spinners";
 import { redirect, useRouter } from "next/navigation";
-import { UserPlus, Activity, Ruler } from "lucide-react";
+import { UserPlus, Activity, Ruler, ZoomIn } from "lucide-react";
 import { useState } from "react";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { verifyAdmin } from "@/actions/verify-admin";
@@ -106,7 +106,7 @@ export const Navbar = () => {
                                 className="bg-blue-900 text-green-300 hover:animate-pulse"
                                 onClick={hadleTimeline.onOpen}
                             >
-                                <Activity size={15} />
+                                <Activity size={20} />
                             </Button>
                         }>
                     </Tip>
@@ -122,7 +122,24 @@ export const Navbar = () => {
                                     className="bg-orange-400 text-black hover:animate-pulse"
                                 //onClick={hadleTimeline.onOpen}
                                 >
-                                    <Ruler size={15} />
+                                    <Ruler size={20} />
+                                </Button>
+                            </Link>
+                        }>
+                    </Tip>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Tip
+                        message="Zoom"
+                        content={
+                            <Link href='/zoom'>
+                                <Button
+                                    variant='newuser'
+                                    size='icon'
+                                    className="bg-purple-700 text-white hover:animate-pulse"
+                                //onClick={hadleTimeline.onOpen}
+                                >
+                                    <ZoomIn size={20} />
                                 </Button>
                             </Link>
                         }>
@@ -138,7 +155,7 @@ export const Navbar = () => {
                                 className="bg-red-900 text-pink-300 ml-1 hover:animate-pulse"
                                 onClick={handleCharts.onOpen}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 3v16a2 2 0 0 0 2 2h16" /><rect x="15" y="5" width="4" height="12" rx="1" /><rect x="7" y="8" width="4" height="9" rx="1" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 3v16a2 2 0 0 0 2 2h16" /><rect x="15" y="5" width="4" height="12" rx="1" /><rect x="7" y="8" width="4" height="9" rx="1" /></svg>
                             </Button>
                         }>
                     </Tip>
@@ -161,7 +178,7 @@ export const Navbar = () => {
                                     className="bg-green-900 text-green-300 ml-1 hover:animate-pulse"
                                     onClick={handleCardModal.onOpen}
                                 >
-                                    <UserPlus size={15} />
+                                    <UserPlus size={20} />
                                 </Button>
                             }>
                         </Tip>
