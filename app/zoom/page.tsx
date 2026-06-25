@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
 import React, { useState, useRef, MouseEvent, PointerEvent, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { ImagePlus, Trash2, DoorOpen, ZoomIn, Move } from 'lucide-react';
+import { ImagePlus, Trash2, DoorOpen, ZoomIn, Move, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import Link from 'next/link';
@@ -21,6 +21,8 @@ export default function MedidorInterativo() {
 
     // Coordenadas absolutas na tela para desenhar a linha (Stripe) do SVG
     const [stripeCoords, setStripeCoords] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+    const [lineWidth, setLineWidth] = useState<number>(4); // Espessura da linha do SVG
+    const [stripeColor, setStripeColor] = useState<string>('#6366f1'); // Cor customizável da linha
 
     const imageRef = useRef<HTMLDivElement>(null);
     const targetRef = useRef<HTMLDivElement>(null); // Referência da mira alvo
@@ -32,7 +34,6 @@ export default function MedidorInterativo() {
         if (file) {
             const objectUrl = URL.createObjectURL(file);
             setImage(objectUrl);
-            // Reseta posições iniciais padrão do painel móvel na lateral direita
             setPanelPos({ x: window.innerWidth / 2 + 250, y: window.innerHeight / 2 - 100 });
         }
     };
@@ -87,7 +88,7 @@ export default function MedidorInterativo() {
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     };
 
-    // Otimização matemática: conecta dinamicamente nas laterais do painel flutuante
+    // Conexão dinâmica lateral e centralização fixa baseada na resposta anterior
     useEffect(() => {
         if (isHovering && targetRef.current && panelRef.current) {
             const targetRect = targetRef.current.getBoundingClientRect();
@@ -95,12 +96,8 @@ export default function MedidorInterativo() {
 
             const targetCenterX = targetRect.left + targetRect.width / 2 + window.scrollX;
             const targetCenterY = targetRect.top + targetRect.height / 2 + window.scrollY;
-
-            // Centro vertical do painel arrastável
             const panelCenterY = panelRect.top + panelRect.height / 2 + window.scrollY;
 
-            // Se a mira estiver à esquerda do painel flutuante, conecta na lateral esquerda da caixa.
-            // Se estiver à direita, conecta na lateral direita.
             const isTargetLeftOfPanel = targetCenterX < panelRect.left + window.scrollX;
             const anchorX = isTargetLeftOfPanel
                 ? panelRect.left + window.scrollX
@@ -120,24 +117,18 @@ export default function MedidorInterativo() {
     return (
         <div className="min-h-screen bg-slate-950 text-slate-50 p-6 flex flex-col justify-between relative overflow-hidden select-none">
 
-            {/* SVG Overlay para renderizar a Linha Conectora Lateral */}
+            {/* SVG Overlay dinâmico com a cor selecionada */}
             {stripeCoords && (
                 <svg className="absolute inset-0 pointer-events-none w-full h-full z-40">
-                    <defs>
-                        <linearGradient id="stripeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.8" />
-                            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.8" />
-                        </linearGradient>
-                    </defs>
-                    {/* Brilho neon inferior */}
+                    {/* Brilho neon inferior acompanhando a cor do estado */}
                     <line
                         x1={stripeCoords.x1}
                         y1={stripeCoords.y1}
                         x2={stripeCoords.x2}
                         y2={stripeCoords.y2}
-                        stroke="#6366f1"
-                        strokeWidth="9"
-                        className="opacity-15 blur-sm"
+                        stroke={stripeColor}
+                        strokeWidth={lineWidth + 3}
+                        className="opacity-20 blur-sm"
                     />
                     {/* Linha pontilhada principal */}
                     <line
@@ -145,31 +136,28 @@ export default function MedidorInterativo() {
                         y1={stripeCoords.y1}
                         x2={stripeCoords.x2}
                         y2={stripeCoords.y2}
-                        stroke="url(#stripeGradient)"
-                        strokeWidth="7.5"
+                        stroke={stripeColor}
+                        strokeWidth={lineWidth}
                         strokeDasharray="4 4"
                         className="animate-[dash_20s_linear_infinite]"
                     />
                 </svg>
             )}
 
-            {/* Header / Barra Superior */}
-            <header className="flex  items-center justify-between border-b border-slate-800 pb-4 z-10">
+            {/* Header */}
+            <header className="flex items-center justify-between border-b border-slate-800 pb-4 z-10">
                 <Link href='/' className="sm:ml-4 lg:ml-10 flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors duration-200 ">
                     <DoorOpen size={50} /> Sair
-                </Link>
-                <Link href="/">
-                    <Button variant="ghost" size="sm" className="gap-2 text-slate-400 hover:text-slate-100">
-
-                    </Button>
                 </Link>
             </header>
 
             {/* Conteúdo Centralizado */}
             <div className="flex-1 flex flex-col justify-center items-center gap-6 my-4 w-full max-w-5xl mx-auto z-10">
 
-                {/* Painel de Controle Superior (Slider) */}
+                {/* Painéis de Controle Superiores */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
+
+                    {/* Painel 1: Zoom */}
                     <div className="w-full max-w-xs bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-4 flex flex-col gap-2 shadow-lg">
                         <div className="flex justify-between items-center text-sm font-medium">
                             <span className="text-slate-400">Nível do Zoom</span>
@@ -183,8 +171,6 @@ export default function MedidorInterativo() {
                             step={0.1}
                             className="py-2"
                         />
-
-                        {/* Área de Status de Remoção */}
                         {image && (
                             <div className="pt-2 border-t border-slate-800/60 flex justify-between items-center mt-1">
                                 <div className="text-[11px] text-slate-400 font-mono">
@@ -202,32 +188,46 @@ export default function MedidorInterativo() {
                             </div>
                         )}
                     </div>
+
+                    {/* Painel 2: Espessura + NOVO Seletor de Cor */}
                     <div className="w-full max-w-xs bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-4 flex flex-col gap-2 shadow-lg">
                         <div className="flex justify-between items-center text-sm font-medium">
                             <span className="text-slate-400">Espessura da linha</span>
-                            <span className="text-indigo-400 font-bold">{zoomLevel.toFixed(1)}x</span>
+                            <span className="text-indigo-400 font-bold">{lineWidth}px</span>
                         </div>
                         <Slider
-                            value={[zoomLevel]}
-                            onValueChange={(value) => setZoomLevel(value[0])}
-                            min={1.5}
-                            max={5}
-                            step={0.1}
+                            value={[lineWidth]}
+                            onValueChange={(value) => setLineWidth(value[0])}
+                            min={1}
+                            max={10}
+                            step={1}
                             className="py-2"
                         />
 
-                        {/* Área de Status de Remoção */}
-                        {image && (
-                            <div className="pt-2 border-t border-slate-800/60 flex justify-between items-center mt-1">
-                                <div className="text-[11px] text-slate-400 font-mono">
-                                    {pointerPos.x.toFixed(0)}%, {pointerPos.y.toFixed(0)}%
-                                </div>
-                             <div className="text-[11px] text-slate-400 font-mono">
-                                    {pointerPos.x.toFixed(0)}%, {pointerPos.y.toFixed(0)}%
+                        {/* Integração do Seletor de Cor */}
+                        <div className="pt-2 border-t border-slate-800/60 flex justify-between items-center mt-1">
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                                <Palette className="w-3.5 h-3.5" style={{ color: stripeColor }} />
+                                <span>Cor da Linha</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500 uppercase">{stripeColor}</span>
+                                <div className="relative w-6 h-6 rounded-md overflow-hidden border border-slate-700 hover:border-slate-500 cursor-pointer transition-colors">
+                                    <input
+                                        type="color"
+                                        value={stripeColor}
+                                        onChange={(e) => setStripeColor(e.target.value)}
+                                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                    />
+                                    <div
+                                        className="w-full h-full rounded-md transition-transform active:scale-95"
+                                        style={{ backgroundColor: stripeColor }}
+                                    />
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
+
                 </div>
 
                 {/* Workspace Central */}
@@ -236,7 +236,7 @@ export default function MedidorInterativo() {
                         <div
                             {...getRootProps()}
                             className={`w-full max-w-2xl flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 min-h-[350px]
-                ${isDragActive ? 'border-indigo-500 bg-indigo-950/20' : 'border-slate-800 bg-slate-900/40 hover:bg-slate-900/60'}`}
+                                ${isDragActive ? 'border-indigo-500 bg-indigo-950/20' : 'border-slate-800 bg-slate-900/40 hover:bg-slate-900/60'}`}
                         >
                             <input {...getInputProps()} />
                             <div className="p-4 bg-slate-800/50 rounded-full mb-4">
@@ -263,25 +263,29 @@ export default function MedidorInterativo() {
                                         draggable={false}
                                     />
 
-                                    {/* Super Mira Alvo Customizada */}
+                                    {/* Super Mira Alvo Customizada (Acompanha a cor escolhida) */}
                                     {isHovering && (
                                         <div
                                             ref={targetRef}
-                                            className="absolute w-12 h-12 border border-dashed border-red-700 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-green-300/50 shadow-[0_0_15px_rgba(239,68,68,0.4)] z-50"
-                                            style={{ left: `${pointerPos.x}%`, top: `${pointerPos.y}%` }}
+                                            className="absolute w-12 h-12 border border-dashed rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-slate-950/20 shadow-lg z-50"
+                                            style={{
+                                                left: `${pointerPos.x}%`,
+                                                top: `${pointerPos.y}%`,
+                                                borderColor: stripeColor,
+                                            }}
                                         >
-                                            <div className="absolute w-full h-[1px] bg-red-400/60" />
-                                            <div className="absolute h-full w-[1px] bg-red-400/60" />
-                                            <div className="w-4 h-4 border-2 border-red-500 rounded-full bg-slate-950 flex items-center justify-center">
-                                                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping absolute" />
-                                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                                            <div className="absolute w-full h-[1px] opacity-40" style={{ backgroundColor: stripeColor }} />
+                                            <div className="absolute h-full w-[1px] opacity-40" style={{ backgroundColor: stripeColor }} />
+                                            <div className="w-4 h-4 border-2 rounded-full bg-slate-950 flex items-center justify-center" style={{ borderColor: stripeColor }}>
+                                                <div className="w-1.5 h-1.5 rounded-full animate-ping absolute" style={{ backgroundColor: stripeColor }} />
+                                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: stripeColor }} />
                                             </div>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* COMPONENTE MÓVEL: Quadro de Zoom Flutuante e Arrastável */}
+                            {/* COMPONENTE MÓVEL: Quadro de Zoom Flutuante */}
                             <div
                                 ref={panelRef}
                                 style={{
@@ -290,7 +294,7 @@ export default function MedidorInterativo() {
                                     top: `${panelPos.y}px`,
                                 }}
                                 className={`w-[280px] bg-slate-900/95 backdrop-blur-md border rounded-xl p-3 flex flex-col shadow-2xl z-50 transition-shadow duration-200
-                  ${isDragging ? 'border-green-500 shadow-indigo-500/10 cursor-grabbing' : 'border-slate-700/80 shadow-black'}`}
+                                    ${isDragging ? 'border-indigo-500 shadow-indigo-500/10 cursor-grabbing' : 'border-slate-700/80 shadow-black'}`}
                             >
                                 {/* Barra de Arraste Superior */}
                                 <div
@@ -299,12 +303,12 @@ export default function MedidorInterativo() {
                                     onPointerUp={handlePointerUp}
                                     className="flex items-center gap-2 pb-2 mb-2 border-b border-slate-800 cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-200 select-none"
                                 >
-                                    <Move className="w-3.5 h-3.5 text-indigo-400 pointer-events-none" />
+                                    <Move className="w-3.5 h-3.5 pointer-events-none" style={{ color: stripeColor }} />
                                     <span className="text-xs font-medium pointer-events-none flex-1">Lupa</span>
-                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: stripeColor }} />
                                 </div>
 
-                                {/* Container de Amostragem do Zoom */}
+                                {/* Container de Amostragem do Zoom Centralizado Perfect */}
                                 <div className="w-full aspect-square bg-slate-950 border border-slate-800 rounded-lg overflow-hidden relative flex items-center justify-center">
                                     {isHovering ? (
                                         <div
@@ -312,7 +316,7 @@ export default function MedidorInterativo() {
                                             style={{
                                                 backgroundImage: `url(${image})`,
                                                 backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
-                                                backgroundSize: `${zoomLevel * 200}%`,
+                                                backgroundSize: `${zoomLevel * 100}%`,
                                                 backgroundRepeat: 'no-repeat',
                                             }}
                                         />
@@ -324,8 +328,8 @@ export default function MedidorInterativo() {
 
                                     {/* Retícula de centralização */}
                                     {isHovering && (
-                                        <div className="absolute inset-0 border border-indigo-500/20 pointer-events-none flex items-center justify-center">
-                                            <div className="w-3 h-3 border border-indigo-500/40 rounded-full" />
+                                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                            <div className="w-3 h-3 border rounded-full opacity-60" style={{ borderColor: stripeColor }} />
                                         </div>
                                     )}
                                 </div>
@@ -336,9 +340,7 @@ export default function MedidorInterativo() {
                 </div>
             </div>
 
-            <footer className="text-center text-xs text-slate-600 pt-4 border-t border-slate-900">
-
-            </footer>
+            <footer className="text-center text-xs text-slate-600 pt-4 border-t border-slate-900"></footer>
         </div>
     );
 }
