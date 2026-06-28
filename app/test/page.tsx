@@ -56,18 +56,17 @@ export default function ScannerPage() {
 
   // Função atualizada com os padrões estritos de OP e Produto
   // Função atualizada para buscar o produto após a palavra-chave "Produto:"
+// Função atualizada com validação de no mínimo 8 dígitos para o Produto
   const parseOPText = (text: string) => {
-    // Remove espaços extras e quebras de linha para linearizar o texto
+    // Remove espaços extras e quebras de linha
     const cleanText = text.replace(/\s+/g, " ");
 
-    // 1. Mantém a busca exata de 11 números isolados para a OP
+    // 1. Busca exata de 11 números isolados para a OP
     const opRegex = /\b\d{11}\b/;
-
-    // 2. Nova Regex para o Produto:
-    // Procura por "produto:" ou "prod:", ignora espaços, e captura o bloco de texto seguinte
-    // que tenha letras, números, pontos ou traços (até encontrar um espaço ou fim de linha)
-    const produtoRegex = /(?:produto|prod):\s*([A-Za-z0-9\.\-]+)/i;
-
+    
+    // 2. Busca o que vem após "Produto:" ou "Prod:"
+    const produtoRegex = /(?:produto|prod):\s*([A-Za-z0-9\.\-_]+)/i;
+    
     // 3. Busca por quantidade
     const qtdRegex = /(?:quantidade|qtd):\s*([0-9\.]+)/i;
 
@@ -75,11 +74,17 @@ export default function ScannerPage() {
     const produtoMatch = cleanText.match(produtoRegex);
     const qtdMatch = cleanText.match(qtdRegex);
 
-    // Tratamento e limpeza do produto encontrado
+    // Validação do Produto (Mínimo de 8 caracteres)
     let produtoDetectado = "Não encontrado";
     if (produtoMatch && produtoMatch[1]) {
-      // Pega o código capturado, remove espaços nas pontas e força maiúsculas
-      produtoDetectado = produtoMatch[1].trim().toUpperCase();
+      const possivelProduto = produtoMatch[1].trim().toUpperCase();
+      
+      // Valida se o código capturado tem pelo menos 8 dígitos/caracteres
+      if (possivelProduto.length >= 8) {
+        produtoDetectado = possivelProduto;
+      } else {
+        console.log(`Produto descartado por ter apenas ${possivelProduto.length} caracteres:`, possivelProduto);
+      }
     }
 
     setScannedData({
