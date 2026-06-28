@@ -55,27 +55,36 @@ export default function ScannerPage() {
   }, []);
 
   // Função atualizada com os padrões estritos de OP e Produto
+  // Função atualizada para buscar o produto após a palavra-chave "Produto:"
   const parseOPText = (text: string) => {
-    // Remove quebras de linha e espaços extras para facilitar a busca
+    // Remove espaços extras e quebras de linha para linearizar o texto
     const cleanText = text.replace(/\s+/g, " ");
 
-    // 1. Procura por EXATAMENTE 11 números seguidos para a OP
-    // \b garante que são apenas 11 números isolados (não pega parte de um número maior)
+    // 1. Mantém a busca exata de 11 números isolados para a OP
     const opRegex = /\b\d{11}\b/;
 
-    // 2. Procura por 2 letras, um ponto literal e 5 números para o Produto (Ex: ME.00000)
-    const produtoRegex = /\b[A-Za-z]{2}\.\d{5}\b/;
+    // 2. Nova Regex para o Produto:
+    // Procura por "produto:" ou "prod:", ignora espaços, e captura o bloco de texto seguinte
+    // que tenha letras, números, pontos ou traços (até encontrar um espaço ou fim de linha)
+    const produtoRegex = /(?:produto|prod):\s*([A-Za-z0-9\.\-]+)/i;
 
-    // 3. Mantém a busca por quantidade (procura por "Qtd:" ou "Quantidade:" seguido de números)
+    // 3. Busca por quantidade
     const qtdRegex = /(?:quantidade|qtd):\s*([0-9\.]+)/i;
 
     const opMatch = cleanText.match(opRegex);
     const produtoMatch = cleanText.match(produtoRegex);
     const qtdMatch = cleanText.match(qtdRegex);
 
+    // Tratamento e limpeza do produto encontrado
+    let produtoDetectado = "Não encontrado";
+    if (produtoMatch && produtoMatch[1]) {
+      // Pega o código capturado, remove espaços nas pontas e força maiúsculas
+      produtoDetectado = produtoMatch[1].trim().toUpperCase();
+    }
+
     setScannedData({
       numeroOP: opMatch ? opMatch[0] : "Não encontrado",
-      produto: produtoMatch ? produtoMatch[0].toUpperCase() : "Não encontrado", // Força o padrão em maiúsculas
+      produto: produtoDetectado,
       quantidade: qtdMatch ? qtdMatch[1].trim() : "Não encontrado",
     });
   };
