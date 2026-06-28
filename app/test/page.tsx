@@ -56,17 +56,17 @@ export default function ScannerPage() {
 
   // Função atualizada com os padrões estritos de OP e Produto
   // Função atualizada para buscar o produto após a palavra-chave "Produto:"
-// Função atualizada com validação de no mínimo 8 dígitos para o Produto
+  // Função atualizada com validação de no mínimo 8 dígitos para o Produto
   const parseOPText = (text: string) => {
     // Remove espaços extras e quebras de linha
     const cleanText = text.replace(/\s+/g, " ");
 
     // 1. Busca exata de 11 números isolados para a OP
     const opRegex = /\b\d{11}\b/;
-    
+
     // 2. Busca o que vem após "Produto:" ou "Prod:"
     const produtoRegex = /(?:produto|prod):\s*([A-Za-z0-9\.\-_]+)/i;
-    
+
     // 3. Busca por quantidade
     const qtdRegex = /(?:quantidade|qtd):\s*([0-9\.]+)/i;
 
@@ -78,7 +78,7 @@ export default function ScannerPage() {
     let produtoDetectado = "Não encontrado";
     if (produtoMatch && produtoMatch[1]) {
       const possivelProduto = produtoMatch[1].trim().toUpperCase();
-      
+
       // Valida se o código capturado tem pelo menos 8 dígitos/caracteres
       if (possivelProduto.length >= 8) {
         produtoDetectado = possivelProduto;
@@ -94,8 +94,7 @@ export default function ScannerPage() {
     });
   };
 
-  // Captura o frame do vídeo e envia para o Tesseract.js
-const captureAndScan = async () => {
+  const captureAndScan = async () => {
     if (!videoRef.current || !canvasRef.current || isProcessing) return;
 
     setIsProcessing(true);
@@ -107,33 +106,42 @@ const captureAndScan = async () => {
 
     if (context) {
       try {
-        // 1. Pausa o vídeo momentaneamente para simular o "clique" de uma foto estável
+        // Pausa o vídeo para dar o feedback visual de "foto tirada"
         video.pause();
 
-        // 2. Garante que o canvas use a resolução REAL máxima que o vídeo está entregando
+        // Configura o canvas com a resolução nativa do vídeo para máxima nitidez
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        
-        // 3. Copia o frame estático e nítido para o canvas
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Opcional: Aplicar um leve filtro de contraste via Canvas ajuda o Tesseract a ler melhor
-        // context.filter = 'contrast(1.2) grayscale(1)'; 
+        // Converte o frame do canvas em uma string Base64 (JPEG para menor tamanho de banda)
+        const base64Image = canvas.toDataURL("image/jpeg", 0.85);
 
-        // 4. Inicializa o worker do Tesseract
-        const worker = await createWorker.createWorker("por");
-        const { data: { text } } = await worker.recognize(canvas);
-        await worker.terminate();
+        // Envia para a API Route do Next.js
+        const response = await fetch("/api/ocr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64Image }),
+        });
 
-        console.log("Texto detectado na foto:", text);
-        parseOPText(text);
-      } catch (err) {
-        setError("Erro ao processar a foto. Tente novamente.");
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        console.log("Texto retornado pelo Google Cloud Vision:", data.text);
+
+        // Executa a sua função de Regex para filtrar Produto, OP e Qtd
+        parseOPText(data.text);
+
+      } catch (err: any) {
+        setError(err.message || "Erro ao processar a imagem com a nuvem.");
         console.error(err);
       } finally {
         setIsProcessing(false);
-        // 5. Retoma o vídeo para que o usuário possa escanear a próxima OP
-        video.play().catch(e => console.log("Erro ao retomar vídeo:", e));
+        // Retoma a câmera
+        video.play().catch((e) => console.log("Erro ao retomar vídeo:", e));
       }
     }
   };
