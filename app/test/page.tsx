@@ -95,7 +95,7 @@ export default function ScannerPage() {
   };
 
   // Captura o frame do vídeo e envia para o Tesseract.js
-  const captureAndScan = async () => {
+const captureAndScan = async () => {
     if (!videoRef.current || !canvasRef.current || isProcessing) return;
 
     setIsProcessing(true);
@@ -106,27 +106,34 @@ export default function ScannerPage() {
     const context = canvas.getContext("2d");
 
     if (context) {
-      // Ajusta o tamanho do canvas para o tamanho real do vídeo
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      // Desenha o frame atual do vídeo no canvas
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
       try {
-        // Inicializa o worker do Tesseract em português (por)
-        const worker = await createWorker.createWorker("por");
+        // 1. Pausa o vídeo momentaneamente para simular o "clique" de uma foto estável
+        video.pause();
 
-        // Executa o OCR na imagem gerada pelo canvas
+        // 2. Garante que o canvas use a resolução REAL máxima que o vídeo está entregando
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // 3. Copia o frame estático e nítido para o canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Opcional: Aplicar um leve filtro de contraste via Canvas ajuda o Tesseract a ler melhor
+        // context.filter = 'contrast(1.2) grayscale(1)'; 
+
+        // 4. Inicializa o worker do Tesseract
+        const worker = await createWorker.createWorker("por");
         const { data: { text } } = await worker.recognize(canvas);
         await worker.terminate();
 
-        console.log("Texto detectado:", text); // Debug para ajustar Regex se necessário
+        console.log("Texto detectado na foto:", text);
         parseOPText(text);
       } catch (err) {
-        setError("Erro ao processar a imagem. Tente novamente.");
+        setError("Erro ao processar a foto. Tente novamente.");
         console.error(err);
       } finally {
         setIsProcessing(false);
+        // 5. Retoma o vídeo para que o usuário possa escanear a próxima OP
+        video.play().catch(e => console.log("Erro ao retomar vídeo:", e));
       }
     }
   };
