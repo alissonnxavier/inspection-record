@@ -1,317 +1,207 @@
-'use client'
+"use client";
 
-import React, { useState, useRef, MouseEvent, PointerEvent, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { ImagePlus, Trash2, DoorOpen, ZoomIn, Move } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import Link from 'next/link';
+import React, { useRef, useState, useEffect } from "react";
+import { Camera, RefreshCw, Loader2, CheckCircle } from "lucide-react";
+import createWorker from "tesseract.js";
 
-export default function MedidorInterativo() {
-  const [image, setImage] = useState<string | null>(null);
-  const [zoomLevel, setZoomLevel] = useState<number>(2);
-  const [pointerPos, setPointerPos] = useState({ x: 0, y: 0 }); // Percentual (0-100) dentro da imagem
-  const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
+interface ScannedData {
+  produto: string;
+  numeroOP: string;
+  quantidade: string;
+}
 
-  // Estados para o Componente Móvel (Posicionamento em pixels na tela)
-  const [panelPos, setPanelPos] = useState({ x: 100, y: 250 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
+export default function ScannerPage() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Coordenadas absolutas na tela para desenhar a linha (Stripe) do SVG
-  const [stripeCoords, setStripeCoords] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const imageRef = useRef<HTMLDivElement>(null);
-  const targetRef = useRef<HTMLDivElement>(null); // Referência da mira alvo
-  const panelRef = useRef<HTMLDivElement>(null); // Referência da caixa inteira do painel móvel
-
-  // Configuração do Dropzone para Upload
-  const onDrop = (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      const objectUrl = URL.createObjectURL(file);
-      setImage(objectUrl);
-      // Reseta posições iniciais padrão do painel móvel na lateral direita
-      setPanelPos({ x: window.innerWidth / 2 + 250, y: window.innerHeight / 2 - 100 });
-    }
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'image/*': [] },
-    multiple: false,
+  const [scannedData, setScannedData] = useState<ScannedData>({
+    produto: "",
+    numeroOP: "",
+    quantidade: "",
   });
 
-  const handleRemoveImage = () => {
-    setImage(null);
-    setIsHovering(false);
-    setStripeCoords(null);
-  };
+  // Inicializa a câmera traseira (environment)
+  const startCamera = async () => {
+    setError(null);
+    try {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
 
-  // Gerencia o movimento do mouse sobre a imagem
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!imageRef.current) return;
-
-    const { left, top, width, height } = imageRef.current.getBoundingClientRect();
-
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-
-    const clampedX = Math.max(0, Math.min(100, x));
-    const clampedY = Math.max(0, Math.min(100, y));
-
-    setPointerPos({ x: clampedX, y: clampedY });
-    setZoomPos({ x: clampedX, y: clampedY });
-  };
-
-  // Lógica de arrastar o Painel de Zoom (Móvel)
-  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    dragStart.current = {
-      x: e.clientX - panelPos.x,
-      y: e.clientY - panelPos.y
-    };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    const newX = e.clientX - dragStart.current.x;
-    const newY = e.clientY - dragStart.current.y;
-    setPanelPos({ x: newX, y: newY });
-  };
-
-  const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
-    setIsDragging(false);
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-  };
-
-  // Otimização matemática: conecta dinamicamente nas laterais do painel flutuante
-  useEffect(() => {
-    if (isHovering && targetRef.current && panelRef.current) {
-      const targetRect = targetRef.current.getBoundingClientRect();
-      const panelRect = panelRef.current.getBoundingClientRect();
-
-      const targetCenterX = targetRect.left + targetRect.width / 2 + window.scrollX;
-      const targetCenterY = targetRect.top + targetRect.height / 2 + window.scrollY;
-
-      // Centro vertical do painel arrastável
-      const panelCenterY = panelRect.top + panelRect.height / 2 + window.scrollY;
-
-      // Se a mira estiver à esquerda do painel flutuante, conecta na lateral esquerda da caixa.
-      // Se estiver à direita, conecta na lateral direita.
-      const isTargetLeftOfPanel = targetCenterX < panelRect.left + window.scrollX;
-      const anchorX = isTargetLeftOfPanel
-        ? panelRect.left + window.scrollX
-        : panelRect.right + window.scrollX;
-
-      setStripeCoords({
-        x1: targetCenterX,
-        y1: targetCenterY,
-        x2: anchorX,
-        y2: panelCenterY,
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
       });
-    } else {
-      setStripeCoords(null);
+
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (err) {
+      setError("Não foi possível acessar a câmera. Verifique as permissões.");
+      console.error(err);
     }
-  }, [pointerPos, panelPos, isHovering]);
+  };
+
+  useEffect(() => {
+    startCamera();
+    return () => {
+      if (stream) stream.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  // Função que processa o texto extraído para encontrar os padrões da OP
+  const parseOPText = (text: string) => {
+    // Normaliza o texto tirando espaços extras e quebras de linha redundantes
+    const cleanText = text.replace(/\s+/g, " ");
+
+    // Regex flexíveis para capturar os dados (ignora maiúsculas/minúsculas)
+    const produtoRegex = /(?:produto|prod):\s*([A-Za-z0-9À-ÿ\s\-\.]+?)(?=\s*(?:número|nº|op|qtd|quantidade|$))/i;
+    const opRegex = /(?:número da op|op|ordem de produção|nº op):\s*([0-9A-Z\-\.]+)/i;
+    const qtdRegex = /(?:quantidade|qtd):\s*([0-9\.]+)/i;
+
+    const produtoMatch = cleanText.match(produtoRegex);
+    const opMatch = cleanText.match(opRegex);
+    const qtdMatch = cleanText.match(qtdRegex);
+
+    setScannedData({
+      produto: produtoMatch ? produtoMatch[1].trim() : "Não encontrado",
+      numeroOP: opMatch ? opMatch[1].trim() : "Não encontrado",
+      quantidade: qtdMatch ? qtdMatch[1].trim() : "Não encontrado",
+    });
+  };
+
+  // Captura o frame do vídeo e envia para o Tesseract.js
+  const captureAndScan = async () => {
+    if (!videoRef.current || !canvasRef.current || isProcessing) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    if (context) {
+      // Ajusta o tamanho do canvas para o tamanho real do vídeo
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      // Desenha o frame atual do vídeo no canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      try {
+        // Inicializa o worker do Tesseract em português (por)
+        const worker = await createWorker.createWorker("por");
+
+        // Executa o OCR na imagem gerada pelo canvas
+        const { data: { text } } = await worker.recognize(canvas);
+        await worker.terminate();
+
+        console.log("Texto detectado:", text); // Debug para ajustar Regex se necessário
+        parseOPText(text);
+      } catch (err) {
+        setError("Erro ao processar a imagem. Tente novamente.");
+        console.error(err);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 p-6 flex flex-col justify-between relative overflow-hidden select-none">
-
-      {/* SVG Overlay para renderizar a Linha Conectora Lateral */}
-      {stripeCoords && (
-        <svg className="absolute inset-0 pointer-events-none w-full h-full z-40">
-          <defs>
-            <linearGradient id="stripeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.8" />
-            </linearGradient>
-          </defs>
-          {/* Brilho neon inferior */}
-          <line
-            x1={stripeCoords.x1}
-            y1={stripeCoords.y1}
-            x2={stripeCoords.x2}
-            y2={stripeCoords.y2}
-            stroke="#6366f1"
-            strokeWidth="6"
-            className="opacity-15 blur-sm"
-          />
-          {/* Linha pontilhada principal */}
-          <line
-            x1={stripeCoords.x1}
-            y1={stripeCoords.y1}
-            x2={stripeCoords.x2}
-            y2={stripeCoords.y2}
-            stroke="url(#stripeGradient)"
-            strokeWidth="1.5"
-            strokeDasharray="4 4"
-            className="animate-[dash_20s_linear_infinite]"
-          />
-        </svg>
-      )}
-
-      {/* Header / Barra Superior */}
-      <header className="flex  items-center justify-between border-b border-slate-800 pb-4 z-10">
-        <Link href='/' className="sm:ml-4 lg:ml-10 flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors duration-200 ">
-          <DoorOpen size={50} /> Sair
-        </Link>
-        <Link href="/">
-          <Button variant="ghost" size="sm" className="gap-2 text-slate-400 hover:text-slate-100">
-          
-          </Button>
-        </Link>
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center p-4 sm:p-6">
+      <header className="w-full max-w-md text-center my-4">
+        <h1 className="text-xl font-bold tracking-tight">Scanner de Ordem de Produção</h1>
+        <p className="text-xs text-slate-400 mt-1">Aponte a câmera para os dados da OP</p>
       </header>
 
-      {/* Conteúdo Centralizado */}
-      <div className="flex-1 flex flex-col justify-center items-center gap-6 my-4 w-full max-w-5xl mx-auto z-10">
+      {/* Container do Vídeo / Câmera */}
+      <div className="relative w-full max-w-md aspect-[4/3] bg-black rounded-2xl overflow-hidden border border-slate-700 shadow-2xl">
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-full object-cover"
+        />
 
-        {/* Painel de Controle Superior (Slider) */}
-        <div className="w-full max-w-xs bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-4 flex flex-col gap-2 shadow-lg">
-          <div className="flex justify-between items-center text-sm font-medium">
-            <span className="text-slate-400">Nível do Zoom</span>
-            <span className="text-indigo-400 font-bold">{zoomLevel.toFixed(1)}x</span>
+        {/* Guia visual para o usuário centralizar o documento */}
+        <div className="absolute inset-4 border-2 border-dashed border-sky-500/50 rounded-xl pointer-events-none flex items-center justify-center">
+          <div className="w-full h-0.5 bg-sky-500/30 animate-pulse dynamic-scan-line" />
+        </div>
+
+        {/* Status de carregamento */}
+        {isProcessing && (
+          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
+            <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
+            <p className="text-sm font-medium text-sky-400">Processando OCR...</p>
           </div>
-          <Slider
-            value={[zoomLevel]}
-            onValueChange={(value) => setZoomLevel(value[0])}
-            min={1.5}
-            max={5}
-            step={0.1}
-            className="py-2"
-          />
-
-          {/* Área de Status de Remoção */}
-          {image && (
-            <div className="pt-2 border-t border-slate-800/60 flex justify-between items-center mt-1">
-              <div className="text-[11px] text-slate-400 font-mono">
-                {pointerPos.x.toFixed(0)}%, {pointerPos.y.toFixed(0)}%
-              </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleRemoveImage}
-                className="gap-1.5 h-7 text-xs px-2"
-              >
-                <Trash2 className="w-3 h-3" />
-                Remover
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Workspace Central */}
-        <div className="w-full flex justify-center items-center min-h-[450px]">
-          {!image ? (
-            <div
-              {...getRootProps()}
-              className={`w-full max-w-2xl flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 min-h-[350px]
-                ${isDragActive ? 'border-indigo-500 bg-indigo-950/20' : 'border-slate-800 bg-slate-900/40 hover:bg-slate-900/60'}`}
-            >
-              <input {...getInputProps()} />
-              <div className="p-4 bg-slate-800/50 rounded-full mb-4">
-                <ImagePlus className="w-8 h-8 text-slate-400" />
-              </div>
-              <p className="text-base font-medium">Arraste uma imagem ou clique para selecionar</p>
-              <p className="text-xs text-slate-500 mt-1">Formatos suportados: JPEG, PNG, WEBP</p>
-            </div>
-          ) : (
-            <div className="w-full flex justify-center items-center">
-
-              {/* Imagem Original Interativa */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center justify-center relative max-w-xl w-full">
-                <div
-                  ref={imageRef}
-                  onMouseMove={handleMouseMove}
-                  onMouseEnter={() => setIsHovering(true)}
-                  onMouseLeave={() => setIsHovering(false)}
-                  className="relative overflow-hidden cursor-none max-w-full max-h-[450px]"
-                >
-                  <img
-                    src={image}
-                    alt="Original"
-                    className="w-full h-auto object-contain max-h-[450px] rounded"
-                    draggable={false}
-                  />
-
-                  {/* Super Mira Alvo Customizada */}
-                  {isHovering && (
-                    <div
-                      ref={targetRef}
-                      className="absolute w-12 h-12 border border-dashed border-red-700 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-green-300/50 shadow-[0_0_15px_rgba(239,68,68,0.4)] z-50"
-                      style={{ left: `${pointerPos.x}%`, top: `${pointerPos.y}%` }}
-                    >
-                      <div className="absolute w-full h-[1px] bg-red-400/60" />
-                      <div className="absolute h-full w-[1px] bg-red-400/60" />
-                      <div className="w-4 h-4 border-2 border-red-500 rounded-full bg-slate-950 flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping absolute" />
-                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* COMPONENTE MÓVEL: Quadro de Zoom Flutuante e Arrastável */}
-              <div
-                ref={panelRef}
-                style={{
-                  position: 'fixed',
-                  left: `${panelPos.x}px`,
-                  top: `${panelPos.y}px`,
-                }}
-                className={`w-[280px] bg-slate-900/95 backdrop-blur-md border rounded-xl p-3 flex flex-col shadow-2xl z-50 transition-shadow duration-200
-                  ${isDragging ? 'border-indigo-500 shadow-indigo-500/10 cursor-grabbing' : 'border-slate-700/80 shadow-black'}`}
-              >
-                {/* Barra de Arraste Superior */}
-                <div
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  className="flex items-center gap-2 pb-2 mb-2 border-b border-slate-800 cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-200 select-none"
-                >
-                  <Move className="w-3.5 h-3.5 text-indigo-400 pointer-events-none" />
-                  <span className="text-xs font-medium pointer-events-none flex-1">Lupa</span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                </div>
-
-                {/* Container de Amostragem do Zoom */}
-                <div className="w-full aspect-square bg-slate-950 border border-slate-800 rounded-lg overflow-hidden relative flex items-center justify-center">
-                  {isHovering ? (
-                    <div
-                      className="w-full h-full pointer-events-none"
-                      style={{
-                        backgroundImage: `url(${image})`,
-                        backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
-                        backgroundSize: `${zoomLevel * 100}%`,
-                        backgroundRepeat: 'no-repeat',
-                      }}
-                    />
-                  ) : (
-                    <div className="text-[11px] text-slate-500 text-center px-4">
-                      Inspecione a imagem
-                    </div>
-                  )}
-
-                  {/* Retícula de centralização */}
-                  {isHovering && (
-                    <div className="absolute inset-0 border border-indigo-500/20 pointer-events-none flex items-center justify-center">
-                      <div className="w-3 h-3 border border-indigo-500/40 rounded-full" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      <footer className="text-center text-xs text-slate-600 pt-4 border-t border-slate-900">
+      {/* Canvas oculto usado apenas para capturar o frame */}
+      <canvas ref={canvasRef} className="hidden" />
 
-      </footer>
+      {/* Botões de Ação */}
+      <div className="w-full max-w-md flex gap-3 my-4">
+        <button
+          onClick={captureAndScan}
+          disabled={isProcessing}
+          className="flex-1 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-700 text-white font-medium py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2"
+        >
+          <Camera className="w-5 h-5" />
+          {isProcessing ? "Eshaneando..." : "Escanear OP"}
+        </button>
+
+        <button
+          onClick={startCamera}
+          className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-3 rounded-xl border border-slate-700 transition"
+          title="Reiniciar Câmera"
+        >
+          <RefreshCw className="w-5 h-5" />
+        </button>
+      </div>
+
+      {error && (
+        <div className="w-full max-w-md bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl text-xs mb-4">
+          {error}
+        </div>
+      )}
+
+      {/* Resultado do Scan */}
+      <div className="w-full max-w-md bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-xl">
+        <div className="flex items-center gap-2 border-b border-slate-700 pb-3 mb-3">
+          <CheckCircle className="w-5 h-5 text-emerald-400" />
+          <h2 className="font-semibold text-sm tracking-wide uppercase text-slate-300">Dados Detectados</h2>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <span className="text-xs text-slate-400 block font-medium">Ordem de Produção (OP)</span>
+            <div className="bg-slate-900/60 border border-slate-700/50 px-3 py-2 rounded-lg text-sm font-mono mt-1 min-h-[36px] flex items-center">
+              {scannedData.numeroOP || <span className="text-slate-600">Aguardando scan...</span>}
+            </div>
+          </div>
+
+          <div>
+            <span className="text-xs text-slate-400 block font-medium">Produto</span>
+            <div className="bg-slate-900/60 border border-slate-700/50 px-3 py-2 rounded-lg text-sm mt-1 min-h-[36px] flex items-center">
+              {scannedData.produto || <span className="text-slate-600">Aguardando scan...</span>}
+            </div>
+          </div>
+
+          <div>
+            <span className="text-xs text-slate-400 block font-medium">Quantidade</span>
+            <div className="bg-slate-900/60 border border-slate-700/50 px-3 py-2 rounded-lg text-sm font-mono mt-1 min-h-[36px] flex items-center">
+              {scannedData.quantidade || <span className="text-slate-600">Aguardando scan...</span>}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
