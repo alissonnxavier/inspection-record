@@ -54,23 +54,28 @@ export default function ScannerPage() {
     };
   }, []);
 
-  // Função que processa o texto extraído para encontrar os padrões da OP
+  // Função atualizada com os padrões estritos de OP e Produto
   const parseOPText = (text: string) => {
-    // Normaliza o texto tirando espaços extras e quebras de linha redundantes
+    // Remove quebras de linha e espaços extras para facilitar a busca
     const cleanText = text.replace(/\s+/g, " ");
 
-    // Regex flexíveis para capturar os dados (ignora maiúsculas/minúsculas)
-    const produtoRegex = /(?:produto|prod):\s*([A-Za-z0-9À-ÿ\s\-\.]+?)(?=\s*(?:número|nº|op|qtd|quantidade|$))/i;
-    const opRegex = /(?:número da op|op|ordem de produção|nº op):\s*([0-9A-Z\-\.]+)/i;
+    // 1. Procura por EXATAMENTE 11 números seguidos para a OP
+    // \b garante que são apenas 11 números isolados (não pega parte de um número maior)
+    const opRegex = /\b\d{11}\b/;
+
+    // 2. Procura por 2 letras, um ponto literal e 5 números para o Produto (Ex: ME.00000)
+    const produtoRegex = /\b[A-Za-z]{2}\.\d{5}\b/;
+
+    // 3. Mantém a busca por quantidade (procura por "Qtd:" ou "Quantidade:" seguido de números)
     const qtdRegex = /(?:quantidade|qtd):\s*([0-9\.]+)/i;
 
-    const produtoMatch = cleanText.match(produtoRegex);
     const opMatch = cleanText.match(opRegex);
+    const produtoMatch = cleanText.match(produtoRegex);
     const qtdMatch = cleanText.match(qtdRegex);
 
     setScannedData({
-      produto: produtoMatch ? produtoMatch[1].trim() : "Não encontrado",
-      numeroOP: opMatch ? opMatch[1].trim() : "Não encontrado",
+      numeroOP: opMatch ? opMatch[0] : "Não encontrado",
+      produto: produtoMatch ? produtoMatch[0].toUpperCase() : "Não encontrado", // Força o padrão em maiúsculas
       quantidade: qtdMatch ? qtdMatch[1].trim() : "Não encontrado",
     });
   };
