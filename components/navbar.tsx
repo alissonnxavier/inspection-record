@@ -17,7 +17,7 @@ import { useSession } from "next-auth/react";
 import { Menu } from "./navigation-menu";
 import { RiseLoader } from "react-spinners";
 import { redirect, useRouter } from "next/navigation";
-import { UserPlus, Activity, Ruler, ZoomIn } from "lucide-react";
+import { UserPlus, Activity, Ruler, ZoomIn, Component } from "lucide-react";
 import { useState } from "react";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { verifyAdmin } from "@/actions/verify-admin";
@@ -140,6 +140,23 @@ export const Navbar = () => {
                                 //onClick={hadleTimeline.onOpen}
                                 >
                                     <ZoomIn size={20} />
+                                </Button>
+                            </Link>
+                        }>
+                    </Tip>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Tip
+                        message="Eurocard"
+                        content={
+                            <Link href='/eurocard'>
+                                <Button
+                                    variant='newuser'
+                                    size='icon'
+                                    className="bg-gray-500 text-white hover:animate-pulse"
+                                //onClick={hadleTimeline.onOpen}
+                                >
+                                    <Component size={20} />
                                 </Button>
                             </Link>
                         }>
