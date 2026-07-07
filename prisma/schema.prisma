@@ -176,3 +176,24 @@ model Report {
 
   createdAt DateTime @default(now()) @db.Date
 }
+
+model EurocardMeasurement {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt  DateTime @default(now())
+  
+  // Novo campo para armazenar o número do módulo (Quantidade total + 1)
+  moduloNum  Int
+  
+  spl01_out1 Float
+  spl01_out2 Float
+  spl02_out1 Float
+  spl02_out2 Float
+  spl03_out1 Float
+  spl03_out2 Float
+  spl04_out1 Float
+  spl04_out2 Float
+  spl05_out1 Float
+  spl05_out2 Float
+  spl06_out1 Float
+  spl06_out2 Float
+}
