@@ -40,7 +40,6 @@ export default function ListaEurocard() {
   const fetchModulos = async (page: number) => {
     setLoading(true);
     try {
-      // Alterado o parâmetro limit de 20 para 40
       const response = await axios.get(`/api/register/eurocard/list?page=${page}&limit=40`);
       setModulos(response.data.modulos);
       setTotalPaginas(response.data.meta.totalPaginas);
@@ -64,18 +63,14 @@ export default function ListaEurocard() {
     window.print();
   };
 
-  // Função para deletar o módulo com mensagem de confirmação
   const handleDelete = async (id: string, moduloNum: number) => {
     const confirmado = window.confirm(`Tem certeza de que deseja excluir permanentemente o MÓDULO ${moduloNum}?`);
 
     if (!confirmado) return;
 
     try {
-      // Faz a chamada DELETE passando o ID (ObjectId do MongoDB)
       await axios.delete(`/api/register/eurocard/list?id=${id}`);
       toast.success(`Módulo ${moduloNum} excluído com sucesso!`);
-
-      // Recarrega a página atual para atualizar a lista
       fetchModulos(paginaAtual);
     } catch (error) {
       console.error(error);
@@ -92,7 +87,7 @@ export default function ListaEurocard() {
         }
       `}</style>
 
-      {/* Header - Adicionado 'print:hidden' para sumir completamente na impressão */}
+      {/* Header */}
       <header className="print:hidden flex items-center justify-between border-b border-slate-800 pb-4 z-10 mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Módulos Salvos</h1>
@@ -132,28 +127,28 @@ export default function ListaEurocard() {
             {modulos.map((modulo) => (
               <details
                 key={modulo.id}
-                className="group border border-zinc-200 rounded-lg  shadow-sm overflow-hidden open:shadow-md transition-all duration-200 break-inside-avoid print:border-none print:shadow-none print:hidden print:open:block"
+                className="group border border-zinc-200 rounded-lg shadow-sm overflow-hidden open:shadow-md transition-all duration-200 break-inside-avoid print:border-none print:shadow-none print:hidden print:open:block"
               >
-                <summary className="print:hidden flex items-center justify-between p-4 font-semibold  cursor-pointer hover:bg-slate-800 list-none select-none">
+                <summary className="print:hidden flex items-center justify-between p-4 font-semibold cursor-pointer list-none select-none">
                   <div className="flex items-center gap-4">
-                    <span className=" text-xs px-2.5 py-1 rounded-full font-bold">
+                    <span className="text-xs px-2.5 py-1 rounded-full font-bold">
                       MÓDULO {modulo.moduloNum}
                     </span>
-                    <span className="text-xs text-zinc-400 font-normal">
+                    <span className="text-xs font-normal">
                       Salvo em: {new Date(modulo.createdAt).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                   <ChevronDown className="h-5 w-5 text-zinc-400 transition-transform duration-200 group-open:rotate-180" />
                 </summary>
 
-                <div className="p-4 border-t border-zinc-100  group-open:block print:p-0 print:border-none">
+                <div className="p-4 border-t border-zinc-100 group-open:block print:p-0 print:border-none">
                   {/* Container de Botões de Ação */}
                   <div className="print:hidden flex justify-end gap-2 mb-3">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handlePrint}
-                      className="gap-2 text-xs border-zinc-300 hover:bg-slate-800 "
+                      className="gap-2 text-xs border-zinc-300 hover:bg-slate-800"
                     >
                       <Printer className="h-3.5 w-3.5" />
                       Imprimir Módulo {modulo.moduloNum}
@@ -163,7 +158,7 @@ export default function ListaEurocard() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(modulo.id, modulo.moduloNum)}
-                      className="gap-2 text-xs bg-red-600 hover:bg-red-700 "
+                      className="gap-2 text-xs bg-red-600 hover:bg-red-700"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Excluir
@@ -172,10 +167,11 @@ export default function ListaEurocard() {
 
                   {/* Tabela */}
                   <div className="border-2 border-zinc-900 text-sm w-full max-w-4xl mx-auto print:max-w-full">
-                    <div className="grid grid-cols-12  border-b-2 border-zinc-900 font-bold text-center divide-x-2 ">
-                      <div className="col-span-4 py-3 uppercase tracking-wider  font-extrabold text-base">Eurocard</div>
-                      <div className="col-span-4 py-3 uppercase tracking-wider  font-extrabold text-base">MÓDULO {modulo.moduloNum}</div>
-                      <div className="col-span-4 py-3 uppercase tracking-wider  font-extrabold text-base">dB</div>
+                    {/* Cabeçalho da Tabela */}
+                    <div className="grid grid-cols-12 border-b-2 border-zinc-900 font-bold text-center divide-x-2">
+                      <div className="col-span-4 py-3 uppercase tracking-wider border-zinc-900 divide-zinc-900 font-extrabold text-base print:text-xl print:py-1.5">Eurocard</div>
+                      <div className="col-span-4 py-3 uppercase tracking-wider border-zinc-900 divide-zinc-900 font-extrabold text-base print:text-xl print:py-1.5">MÓDULO {modulo.moduloNum}</div>
+                      <div className="col-span-4 py-3 uppercase tracking-wider border-zinc-900 divide-zinc-900 font-extrabold text-base print:text-xl print:py-1.5">dB</div>
                     </div>
 
                     {eurocardRows.map((row, index) => {
@@ -187,18 +183,22 @@ export default function ListaEurocard() {
                           key={row.id}
                           className={`grid grid-cols-12 divide-x-2 divide-zinc-900 ${index !== eurocardRows.length - 1 ? 'border-b-2 border-zinc-900' : ''}`}
                         >
-                          <div className="col-span-4 flex items-center justify-center font-extrabold text-base ">
+                          {/* Coluna Lateral (SPL XX) */}
+                          <div className="col-span-4 flex items-center border-zinc-900 justify-center font-extrabold text-base print:text-2xl print:font-black">
                             {row.label}
                           </div>
 
-                          <div className="col-span-8 grid grid-rows-2 divide-y-2 divide-zinc-900">
+                          {/* Sub-grade OUT 1 e OUT 2 */}
+                          <div className="col-span-8 grid grid-rows-2 divide-y-2 border-zinc-900 divide-zinc-900">
+                            {/* Linha OUT 1 */}
                             <div className="grid grid-cols-8 divide-x-2 divide-zinc-900">
-                              <div className="col-span-4 flex items-center justify-center font-bold py-2.5  text-sm">OUT 1</div>
-                              <div className="col-span-4 flex items-center justify-center font-black bg-transparent text-base">{formatDBValue(valOut1)}</div>
+                              <div className="col-span-4 flex items-center justify-center font-bold py-2.5 text-sm print:text-lg print:py-1">OUT 1</div>
+                              <div className="col-span-4 flex items-center justify-center font-black bg-transparent text-base print:text-2xl print:font-black">{formatDBValue(valOut1)}</div>
                             </div>
-                            <div className="grid grid-cols-8 divide-x-2 ">
-                              <div className="col-span-4 flex items-center justify-center font-bold py-2.5  text-sm">OUT 2</div>
-                              <div className="col-span-4 flex items-center justify-center font-black bg-transparent text-base">{formatDBValue(valOut2)}</div>
+                            {/* Linha OUT 2 */}
+                            <div className="grid grid-cols-8 divide-x-2">
+                              <div className="col-span-4 flex items-center border-zinc-900 divide-zinc-900 justify-center font-bold py-2.5 text-sm print:text-lg print:py-1">OUT 2</div>
+                              <div className="col-span-4 flex items-center border-zinc-900 divide-zinc-900 justify-center font-black bg-transparent text-base print:text-2xl print:font-black">{formatDBValue(valOut2)}</div>
                             </div>
                           </div>
                         </div>
