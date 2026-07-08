@@ -132,11 +132,11 @@ export default function ListaEurocard() {
             {modulos.map((modulo) => (
               <details
                 key={modulo.id}
-                className="group border border-zinc-200 rounded-lg bg-white shadow-sm overflow-hidden open:shadow-md transition-all duration-200 break-inside-avoid print:border-none print:shadow-none print:hidden print:open:block"
+                className="group border border-zinc-200 rounded-lg  shadow-sm overflow-hidden open:shadow-md transition-all duration-200 break-inside-avoid print:border-none print:shadow-none print:hidden print:open:block"
               >
-                <summary className="print:hidden flex items-center justify-between p-4 font-semibold text-zinc-800 cursor-pointer hover:bg-zinc-50 list-none select-none">
+                <summary className="print:hidden flex items-center justify-between p-4 font-semibold  cursor-pointer hover:bg-slate-800 list-none select-none">
                   <div className="flex items-center gap-4">
-                    <span className="bg-zinc-900 text-white text-xs px-2.5 py-1 rounded-full font-bold">
+                    <span className=" text-xs px-2.5 py-1 rounded-full font-bold">
                       MÓDULO {modulo.moduloNum}
                     </span>
                     <span className="text-xs text-zinc-400 font-normal">
@@ -146,14 +146,14 @@ export default function ListaEurocard() {
                   <ChevronDown className="h-5 w-5 text-zinc-400 transition-transform duration-200 group-open:rotate-180" />
                 </summary>
 
-                <div className="p-4 border-t border-zinc-100 bg-white group-open:block print:p-0 print:border-none">
+                <div className="p-4 border-t border-zinc-100  group-open:block print:p-0 print:border-none">
                   {/* Container de Botões de Ação */}
                   <div className="print:hidden flex justify-end gap-2 mb-3">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handlePrint}
-                      className="gap-2 text-xs border-zinc-300 hover:bg-zinc-50 text-zinc-700"
+                      className="gap-2 text-xs border-zinc-300 hover:bg-slate-800 "
                     >
                       <Printer className="h-3.5 w-3.5" />
                       Imprimir Módulo {modulo.moduloNum}
@@ -163,7 +163,7 @@ export default function ListaEurocard() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(modulo.id, modulo.moduloNum)}
-                      className="gap-2 text-xs bg-red-600 hover:bg-red-700 text-white"
+                      className="gap-2 text-xs bg-red-600 hover:bg-red-700 "
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Excluir
@@ -172,10 +172,10 @@ export default function ListaEurocard() {
 
                   {/* Tabela */}
                   <div className="border-2 border-zinc-900 text-sm w-full max-w-4xl mx-auto print:max-w-full">
-                    <div className="grid grid-cols-12 bg-zinc-100 border-b-2 border-zinc-900 font-bold text-center divide-x-2 divide-zinc-900">
-                      <div className="col-span-4 py-3 uppercase tracking-wider text-zinc-900 font-extrabold text-base">Eurocard</div>
-                      <div className="col-span-4 py-3 uppercase tracking-wider text-zinc-900 font-extrabold text-base">MÓDULO {modulo.moduloNum}</div>
-                      <div className="col-span-4 py-3 uppercase tracking-wider text-zinc-900 font-extrabold text-base">dB</div>
+                    <div className="grid grid-cols-12  border-b-2 border-zinc-900 font-bold text-center divide-x-2 ">
+                      <div className="col-span-4 py-3 uppercase tracking-wider  font-extrabold text-base">Eurocard</div>
+                      <div className="col-span-4 py-3 uppercase tracking-wider  font-extrabold text-base">MÓDULO {modulo.moduloNum}</div>
+                      <div className="col-span-4 py-3 uppercase tracking-wider  font-extrabold text-base">dB</div>
                     </div>
 
                     {eurocardRows.map((row, index) => {
@@ -187,18 +187,18 @@ export default function ListaEurocard() {
                           key={row.id}
                           className={`grid grid-cols-12 divide-x-2 divide-zinc-900 ${index !== eurocardRows.length - 1 ? 'border-b-2 border-zinc-900' : ''}`}
                         >
-                          <div className="col-span-4 flex items-center justify-center font-extrabold text-base bg-zinc-50 text-zinc-900">
+                          <div className="col-span-4 flex items-center justify-center font-extrabold text-base ">
                             {row.label}
                           </div>
 
                           <div className="col-span-8 grid grid-rows-2 divide-y-2 divide-zinc-900">
                             <div className="grid grid-cols-8 divide-x-2 divide-zinc-900">
-                              <div className="col-span-4 flex items-center justify-center font-bold py-2.5 bg-white text-zinc-800 text-sm">OUT 1</div>
-                              <div className="col-span-4 flex items-center justify-center font-black bg-transparent text-zinc-900 text-base">{formatDBValue(valOut1)}</div>
+                              <div className="col-span-4 flex items-center justify-center font-bold py-2.5  text-sm">OUT 1</div>
+                              <div className="col-span-4 flex items-center justify-center font-black bg-transparent text-base">{formatDBValue(valOut1)}</div>
                             </div>
-                            <div className="grid grid-cols-8 divide-x-2 divide-zinc-900">
-                              <div className="col-span-4 flex items-center justify-center font-bold py-2.5 bg-white text-zinc-800 text-sm">OUT 2</div>
-                              <div className="col-span-4 flex items-center justify-center font-black bg-transparent text-zinc-900 text-base">{formatDBValue(valOut2)}</div>
+                            <div className="grid grid-cols-8 divide-x-2 ">
+                              <div className="col-span-4 flex items-center justify-center font-bold py-2.5  text-sm">OUT 2</div>
+                              <div className="col-span-4 flex items-center justify-center font-black bg-transparent text-base">{formatDBValue(valOut2)}</div>
                             </div>
                           </div>
                         </div>

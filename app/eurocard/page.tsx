@@ -177,7 +177,7 @@ const FormEurocard = () => {
       </header>
 
       <Card className="w-full max-w-3xl mx-auto border border-zinc-300 shadow-md">
-        <CardHeader className="bg-zinc-50 border-b border-zinc-200">
+        <CardHeader className=" border-b border-zinc-200">
           <CardTitle className="text-xl font-bold tracking-tight text-center uppercase">
             MÓDULO {moduloNum} {/* Exibe dinamicamente no Título */}
           </CardTitle>
@@ -193,7 +193,7 @@ const FormEurocard = () => {
               <div className="border border-zinc-400 rounded-sm overflow-hidden text-sm">
 
                 {/* Cabeçalho da Tabela Dinâmico */}
-                <div className="grid grid-cols-12 bg-zinc-100 border-b border-zinc-400 font-bold text-center divide-x divide-zinc-400">
+                <div className="grid grid-cols-12 border-b border-zinc-400 font-bold text-center divide-x divide-zinc-400">
                   <div className="col-span-4 py-3 uppercase tracking-wider">Eurocard</div>
                   <div className="col-span-4 py-3 uppercase tracking-wider">MÓDULO {moduloNum}</div>
                   <div className="col-span-4 py-3 uppercase tracking-wider">dB</div>
@@ -210,7 +210,7 @@ const FormEurocard = () => {
                       className={`grid grid-cols-12 divide-x divide-zinc-400 ${index !== eurocardRows.length - 1 ? 'border-b border-zinc-400' : ''
                         }`}
                     >
-                      <div className="col-span-4 flex items-center justify-center font-semibold bg-zinc-50 text-zinc-700">
+                      <div className="col-span-4 flex items-center justify-center font-semibold  ">
                         {row.label}
                       </div>
 
@@ -218,7 +218,7 @@ const FormEurocard = () => {
 
                         {/* Linha OUT 1 */}
                         <div className="grid grid-cols-8 divide-x divide-zinc-400">
-                          <div className="col-span-4 flex items-center justify-center font-medium py-2 bg-white">
+                          <div className="col-span-4 flex items-center justify-center font-medium py-2 ">
                             OUT 1
                           </div>
                           <div className="col-span-4 p-1 flex items-center justify-center">
@@ -246,7 +246,7 @@ const FormEurocard = () => {
 
                         {/* Linha OUT 2 */}
                         <div className="grid grid-cols-8 divide-x divide-zinc-400">
-                          <div className="col-span-4 flex items-center justify-center font-medium py-2 bg-white">
+                          <div className="col-span-4 flex items-center justify-center font-medium py-2 ">
                             OUT 2
                           </div>
                           <div className="col-span-4 p-1 flex items-center justify-center">
