@@ -1,12 +1,14 @@
 import { db } from "@/lib/prismadb";
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 import Workbook from 'exceljs';
 
+// FORÇA O NEXT.JS A NÃO CACHEAR ESTA ROTA (Busca sempre dados em tempo real)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Busca todos os módulos ordenados pelo número
+    // Busca todos os módulos ordenados pelo número de forma sempre atualizada
     const modulos = await db.eurocardMeasurement.findMany({
       orderBy: { moduloNum: 'asc' },
     });
@@ -50,20 +52,20 @@ export async function GET() {
 
     // Varre cada módulo gerando uma tabela dedicada
     for (const modulo of modulos) {
-      
+
       // 1. CRIA O CABEÇALHO DA TABELA DO MÓDULO
       const headerRow = worksheet.getRow(currentRow);
       headerRow.values = ['Eurocard', `MÓDULO ${modulo.moduloNum}`, 'dB'];
       headerRow.font = { bold: true, name: 'Arial', size: 11 };
       headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-      
+
       // Aplica fundo cinza claro e bordas no cabeçalho
       ['A', 'B', 'C'].forEach(col => {
         const cell = headerRow.getCell(col);
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F2F2F2' } };
         cell.border = thBorders;
       });
-      
+
       headerRow.height = 25;
       currentRow++;
 
@@ -72,9 +74,9 @@ export async function GET() {
         const startRow = currentRow;
         const endRow = currentRow + 1;
 
-        // Valores vindos do banco de dados
-        const valOut1 = modulo[`${rowSpec.id}_out1` as keyof typeof modulo] as number;
-        const valOut2 = modulo[`${rowSpec.id}_out2` as keyof typeof modulo] as number;
+        // Garante que o valor venha como número ou caia para zero se nulo
+        const valOut1 = (modulo[`${rowSpec.id}_out1` as keyof typeof modulo] as number) ?? 0;
+        const valOut2 = (modulo[`${rowSpec.id}_out2` as keyof typeof modulo] as number) ?? 0;
 
         // Linha OUT 1
         const r1 = worksheet.getRow(currentRow);
@@ -103,7 +105,7 @@ export async function GET() {
             cell.font = { name: 'Arial', size: 10, bold: col === 'A' || col === 'B' };
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
             cell.border = tdBorders;
-            
+
             // Força a formatação numérica com duas casas decimais na coluna C (dB)
             if (col === 'C') {
               cell.numFmt = '0.00';
@@ -113,12 +115,17 @@ export async function GET() {
         }
       }
 
-      // Adiciona uma bordas mais grossas no contorno final da tabela para simular o papel
-      worksheet.getRow(currentRow - 1).getCell('A').border.bottom = { style: 'medium', color: { argb: '000000' } };
-      worksheet.getRow(currentRow - 1).getCell('B').border.bottom = { style: 'medium', color: { argb: '000000' } };
-      worksheet.getRow(currentRow - 1).getCell('C').border.bottom = { style: 'medium', color: { argb: '000000' } };
+      // Adiciona uma borda mais grossa no contorno final da tabela
+      const lastRowOfBlock = worksheet.getRow(currentRow - 1);
+      ['A', 'B', 'C'].forEach(col => {
+        const cell = lastRowOfBlock.getCell(col);
+        cell.border = {
+          ...cell.border,
+          bottom: { style: 'medium', color: { argb: '000000' } }
+        };
+      });
 
-      // Pula 3 linhas em branco para separar a tabela do próximo Módulo na mesma folha
+      // Pula 3 linhas em branco para separar a tabela do próximo Módulo
       currentRow += 3;
     }
 
@@ -130,6 +137,9 @@ export async function GET() {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': 'attachment; filename="Medicoes_Eurocard_Modulos.xlsx"',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
 

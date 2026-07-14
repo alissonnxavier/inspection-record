@@ -16,6 +16,11 @@ export default function ExportarEurocard() {
             // Faz a requisição esperando um arquivo binário (blob)
             const response = await axios.get('/api/register/eurocard/export', {
                 responseType: 'blob',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
+                }
             });
 
             // Cria um link temporário oculto no DOM para disparar o download
@@ -49,11 +54,11 @@ export default function ExportarEurocard() {
                     <CardTitle className="text-xl font-bold tracking-tight text-zinc-900">
                         Exportar Dados para Excel
                     </CardTitle>
-                   
+
                 </CardHeader>
 
                 <CardContent className="space-y-4 pt-2">
-                   
+
 
                     <Button
                         onClick={handleExportExcel}
