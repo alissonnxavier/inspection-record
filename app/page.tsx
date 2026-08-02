@@ -4,7 +4,6 @@ import { Navbar } from '@/components/navbar'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation';
 import { authConfig } from '@/lib/auth';
-import { useEditForm } from '@/hooks/use-edit-form';
 
 export default async function Home() {
   const session = await getServerSession(authConfig);
