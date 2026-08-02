@@ -184,11 +184,11 @@ export default function GestaoBooksPage() {
 
                 {loading ? (
                     <div className="text-center py-12">
-                        <p className="text-sm text-muted-foreground">Carregando books...</p>
+                        <p className="text-sm text-muted-foreground">Carregando ordens de fabricação...</p>
                     </div>
                 ) : !Array.isArray(books) || books.length === 0 ? (
                     <Card className="border-dashed p-12 text-center text-muted-foreground max-w-lg mx-auto">
-                        <p className="mb-4">Nenhum Book criado ainda.</p>
+                        <p className="mb-4">Nenhuma ordem de fabricação cadastrada.</p>
                         <Button
                             onClick={() => setIsDialogOpen(true)}
                             variant="outline"

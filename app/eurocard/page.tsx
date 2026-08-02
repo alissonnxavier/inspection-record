@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { Button } from "@/components/ui/button"
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/form"
 import toast from 'react-hot-toast';
 import { Tip } from '@/components/ui/tip';
-import { DoorOpen, List, ArrowLeft } from 'lucide-react';
+import { DoorOpen, List, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 const formSchema = z.object({
@@ -177,157 +177,163 @@ const FormEurocard = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 md:p-8 mb-12">
+    <Suspense fallback={
+      <div className="flex py-20 w-full items-center justify-center gap-2">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <div className="w-full max-w-4xl mx-auto p-4 md:p-8 mb-12">
 
-      <header className="flex items-center justify-between border-b border-slate-800 pb-4 z-10">
-        <div className="print:hidden">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Salvar Módulo</h1>
-        </div>
+        <header className="flex items-center justify-between border-b border-slate-800 pb-4 z-10">
+          <div className="print:hidden">
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Salvar Módulo</h1>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Link href="/eurocard/books">
-            <Button variant="outline" size="sm" className="flex items-center gap-1 text-slate-700">
-              <ArrowLeft size={16} /> Voltar aos Books
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/eurocard/books">
+              <Button variant="outline" size="sm" className="flex items-center gap-1 text-slate-700">
+                <ArrowLeft size={16} /> Voltar aos Books
+              </Button>
+            </Link>
 
-          <Tip
-            message="Lista Eurocard"
-            content={
-              <Link href='/eurocard/list'>
-                <Button
-                  variant='newuser'
-                  size='icon'
-                  className="bg-gray-500 text-white hover:animate-pulse"
-                >
-                  <List size={20} />
-                </Button>
-              </Link>
-            }
-          />
+            <Tip
+              message="Lista Eurocard"
+              content={
+                <Link href='/eurocard/list'>
+                  <Button
+                    variant='newuser'
+                    size='icon'
+                    className="bg-gray-500 text-white hover:animate-pulse"
+                  >
+                    <List size={20} />
+                  </Button>
+                </Link>
+              }
+            />
 
-          <Link href='/' className="sm:ml-4 lg:ml-6 flex items-center gap-2 text-slate-400 hover:text-slate-500 transition-colors duration-200">
-            <DoorOpen size={30} /> Sair
-          </Link>
-        </div>
-      </header>
+            <Link href='/' className="sm:ml-4 lg:ml-6 flex items-center gap-2 text-slate-400 hover:text-slate-500 transition-colors duration-200">
+              <DoorOpen size={30} /> Sair
+            </Link>
+          </div>
+        </header>
 
-      <Card className="w-full max-w-3xl mx-auto border border-zinc-300 shadow-md mt-6">
-        <CardHeader className="border-b border-zinc-200 bg-slate-50">
+        <Card className="w-full max-w-3xl mx-auto border border-zinc-300 shadow-md mt-6">
+          <CardHeader className="border-b border-zinc-200 bg-slate-50">
 
-          {/* Exibição da Ordem de Fabricação (OF) vinculada */}
+            {/* Exibição da Ordem de Fabricação (OF) vinculada */}
 
-          <CardTitle className="text-xl font-bold tracking-tight text-center uppercase pt-2">
-            MÓDULO {moduloNum}
-          </CardTitle>
-          <CardDescription className="text-center">
-            Formulário de medição de atenuação (dB) por canal Eurocard
-          </CardDescription>
-        </CardHeader>
+            <CardTitle className="text-xl font-bold tracking-tight text-center uppercase pt-2">
+              MÓDULO {moduloNum}
+            </CardTitle>
+            <CardDescription className="text-center">
+              Formulário de medição de atenuação (dB) por canal Eurocard
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="p-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <CardContent className="p-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-              <div className="border border-zinc-400 rounded-sm overflow-hidden text-sm">
+                <div className="border border-zinc-400 rounded-sm overflow-hidden text-sm">
 
-                {/* Cabeçalho da Tabela */}
-                <div className="grid grid-cols-12 border-b border-zinc-400 font-bold text-center divide-x divide-zinc-400 bg-slate-100">
-                  <div className="col-span-4 py-3 uppercase tracking-wider">Eurocard</div>
-                  <div className="col-span-4 py-3 uppercase tracking-wider">MÓDULO {moduloNum}</div>
-                  <div className="col-span-4 py-3 uppercase tracking-wider">dB</div>
+                  {/* Cabeçalho da Tabela */}
+                  <div className="grid grid-cols-12 border-b border-zinc-400 font-bold text-center divide-x divide-zinc-400 bg-slate-100">
+                    <div className="col-span-4 py-3 uppercase tracking-wider">Eurocard</div>
+                    <div className="col-span-4 py-3 uppercase tracking-wider">MÓDULO {moduloNum}</div>
+                    <div className="col-span-4 py-3 uppercase tracking-wider">dB</div>
+                  </div>
+
+                  {/* Corpo da Tabela */}
+                  {eurocardRows.map((row, index) => {
+                    const fieldOut1 = `${row.id}_out1` as keyof FormValues;
+                    const fieldOut2 = `${row.id}_out2` as keyof FormValues;
+
+                    return (
+                      <div
+                        key={row.id}
+                        className={`grid grid-cols-12 divide-x divide-zinc-400 ${index !== eurocardRows.length - 1 ? 'border-b border-zinc-400' : ''
+                          }`}
+                      >
+                        <div className="col-span-4 flex items-center justify-center font-semibold bg-slate-50/50">
+                          {row.label}
+                        </div>
+
+                        <div className="col-span-8 grid grid-rows-2 divide-y divide-zinc-400">
+
+                          {/* Linha OUT 1 */}
+                          <div className="grid grid-cols-8 divide-x divide-zinc-400">
+                            <div className="col-span-4 flex items-center justify-center font-medium py-2">
+                              OUT 1
+                            </div>
+                            <div className="col-span-4 p-1 flex items-center justify-center">
+                              <FormField
+                                control={form.control}
+                                name={fieldOut1}
+                                render={({ field }) => (
+                                  <FormItem className="w-full space-y-0">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="0,00"
+                                        onChange={(e) => handleInputChange(e, fieldOut1, field.onChange)}
+                                        className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-zinc-400 shadow-none bg-transparent"
+                                      />
+                                    </FormControl>
+                                    <FormMessage className="text-[10px] text-center mt-0.5" />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Linha OUT 2 */}
+                          <div className="grid grid-cols-8 divide-x divide-zinc-400">
+                            <div className="col-span-4 flex items-center justify-center font-medium py-2">
+                              OUT 2
+                            </div>
+                            <div className="col-span-4 p-1 flex items-center justify-center">
+                              <FormField
+                                control={form.control}
+                                name={fieldOut2}
+                                render={({ field }) => (
+                                  <FormItem className="w-full space-y-0">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="0,00"
+                                        onChange={(e) => handleInputChange(e, fieldOut2, field.onChange)}
+                                        className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-zinc-400 shadow-none bg-transparent"
+                                      />
+                                    </FormControl>
+                                    <FormMessage className="text-[10px] text-center mt-0.5" />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    );
+                  })}
+
                 </div>
 
-                {/* Corpo da Tabela */}
-                {eurocardRows.map((row, index) => {
-                  const fieldOut1 = `${row.id}_out1` as keyof FormValues;
-                  const fieldOut2 = `${row.id}_out2` as keyof FormValues;
-
-                  return (
-                    <div
-                      key={row.id}
-                      className={`grid grid-cols-12 divide-x divide-zinc-400 ${index !== eurocardRows.length - 1 ? 'border-b border-zinc-400' : ''
-                        }`}
-                    >
-                      <div className="col-span-4 flex items-center justify-center font-semibold bg-slate-50/50">
-                        {row.label}
-                      </div>
-
-                      <div className="col-span-8 grid grid-rows-2 divide-y divide-zinc-400">
-
-                        {/* Linha OUT 1 */}
-                        <div className="grid grid-cols-8 divide-x divide-zinc-400">
-                          <div className="col-span-4 flex items-center justify-center font-medium py-2">
-                            OUT 1
-                          </div>
-                          <div className="col-span-4 p-1 flex items-center justify-center">
-                            <FormField
-                              control={form.control}
-                              name={fieldOut1}
-                              render={({ field }) => (
-                                <FormItem className="w-full space-y-0">
-                                  <FormControl>
-                                    <Input
-                                      {...field}
-                                      type="text"
-                                      inputMode="decimal"
-                                      placeholder="0,00"
-                                      onChange={(e) => handleInputChange(e, fieldOut1, field.onChange)}
-                                      className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-zinc-400 shadow-none bg-transparent"
-                                    />
-                                  </FormControl>
-                                  <FormMessage className="text-[10px] text-center mt-0.5" />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Linha OUT 2 */}
-                        <div className="grid grid-cols-8 divide-x divide-zinc-400">
-                          <div className="col-span-4 flex items-center justify-center font-medium py-2">
-                            OUT 2
-                          </div>
-                          <div className="col-span-4 p-1 flex items-center justify-center">
-                            <FormField
-                              control={form.control}
-                              name={fieldOut2}
-                              render={({ field }) => (
-                                <FormItem className="w-full space-y-0">
-                                  <FormControl>
-                                    <Input
-                                      {...field}
-                                      type="text"
-                                      inputMode="decimal"
-                                      placeholder="0,00"
-                                      onChange={(e) => handleInputChange(e, fieldOut2, field.onChange)}
-                                      className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-zinc-400 shadow-none bg-transparent"
-                                    />
-                                  </FormControl>
-                                  <FormMessage className="text-[10px] text-center mt-0.5" />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-                  );
-                })}
-
-              </div>
-
-              <CardFooter className="p-0 pt-4 flex justify-end">
-                <Button type="submit" className="w-full sm:w-auto px-8 bg-zinc-900 text-white hover:bg-zinc-800">
-                  Salvar Módulo {moduloNum} {ordemFabricacao ? `(${ordemFabricacao})` : ''}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+                <CardFooter className="p-0 pt-4 flex justify-end">
+                  <Button type="submit" className="w-full sm:w-auto px-8 bg-zinc-900 text-white hover:bg-zinc-800">
+                    Salvar Módulo {moduloNum} {ordemFabricacao ? `(${ordemFabricacao})` : ''}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </Suspense>
   );
 };
 
