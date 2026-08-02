@@ -40,7 +40,7 @@ const eurocardRows = [
   { id: 'spl06', label: 'SPL 06' },
 ];
 
-export default function ListaEurocard() {
+const ListaEurocard = () => {
   const searchParams = useSearchParams();
   const ofParam = searchParams.get('of') || '';
 
@@ -361,4 +361,6 @@ export default function ListaEurocard() {
       )}
     </div>
   );
-}
+};
+
+export default ListaEurocard;

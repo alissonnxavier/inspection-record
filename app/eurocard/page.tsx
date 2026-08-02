@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/form"
 import toast from 'react-hot-toast';
 import { Tip } from '@/components/ui/tip';
-import { DoorOpen, List, BookOpen, ArrowLeft } from 'lucide-react';
+import { DoorOpen, List, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 const formSchema = z.object({
