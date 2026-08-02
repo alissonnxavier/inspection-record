@@ -1,8 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useState } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";

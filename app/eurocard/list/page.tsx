@@ -1,8 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
