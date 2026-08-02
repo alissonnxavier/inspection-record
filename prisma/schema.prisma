@@ -177,13 +177,25 @@ model Report {
   createdAt DateTime @default(now()) @db.Date
 }
 
+model Book {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  ordemFabricacao String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  modulos EurocardMeasurement[]
+}
+
 model EurocardMeasurement {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt  DateTime @default(now())
-  
+  createdAt DateTime @default(now())
+
+  ordemFabricacao String // <--- NOVO CAMPO (Ex: "OF-2024-001")
+  book            Book     @relation(fields: [ordemFabricacao], references: [ordemFabricacao], onDelete: Cascade)
+
   // Novo campo para armazenar o número do módulo (Quantidade total + 1)
-  moduloNum  Int
-  
+  moduloNum Int
+
   spl01_out1 Float
   spl01_out2 Float
   spl02_out1 Float

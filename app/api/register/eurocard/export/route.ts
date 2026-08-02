@@ -9,9 +9,21 @@ export const revalidate = 0;
 export async function GET(request: Request) {
   try {
     // Busca todos os módulos ordenados pelo número de forma sempre atualizada
+    const { searchParams } = new URL(request.url);
+    const ofParam = searchParams.get('of') || searchParams.get('ordemFabricacao') || searchParams.get('bookId');
+
+    const whereCondition = ofParam
+      ? { ordemFabricacao: ofParam.trim().toUpperCase() }
+      : {};
+
     const modulos = await db.eurocardMeasurement.findMany({
+      where: whereCondition,
       orderBy: { moduloNum: 'asc' },
     });
+
+    if (!modulos || modulos.length === 0) {
+      return NextResponse.json({ error: "Nenhum módulo encontrado para exportar." }, { status: 404 });
+    }
 
     // Cria o arquivo Excel
     const workbook = new Workbook.Workbook();

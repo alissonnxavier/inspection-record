@@ -149,7 +149,7 @@ export const Navbar = () => {
                     <Tip
                         message="Eurocard"
                         content={
-                            <Link href='/eurocard'>
+                            <Link href='/eurocard/books'>
                                 <Button
                                     variant='newuser'
                                     size='icon'

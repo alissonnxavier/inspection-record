@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { Button } from "@/components/ui/button"
 import {
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/form"
 import toast from 'react-hot-toast';
 import { Tip } from '@/components/ui/tip';
-import { Component, DoorOpen, List } from 'lucide-react';
+import { DoorOpen, List, BookOpen, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 const formSchema = z.object({
@@ -60,7 +61,14 @@ eurocardRows.forEach(row => {
 });
 
 const FormEurocard = () => {
-  // Estado para armazenar o número do próximo módulo vindo do banco
+  // Captura parâmetro da Ordem de Fabricação (OF) enviado pela URL
+  const searchParams = useSearchParams();
+  const ofParam = searchParams.get('of') || '';
+
+  // Estado local para guardar/editar a OF
+  const [ordemFabricacao, setOrdemFabricacao] = useState<string>(ofParam);
+
+  // Estado para armazenar o número do próximo módulo
   const [moduloNum, setModuloNum] = useState<number | string>('...');
 
   const form = useForm<FormValues>({
@@ -75,21 +83,35 @@ const FormEurocard = () => {
     }
   });
 
-  // Função para buscar o número sequencial do banco de dados
-  const fetchProximoNumero = async () => {
+  // Função para buscar o número sequencial do banco de dados filtrado por OF
+  const fetchProximoNumero = useCallback(async (ofTarget?: string) => {
+    const targetOF = ofTarget !== undefined ? ofTarget : ordemFabricacao;
+
+    if (!targetOF.trim()) {
+      setModuloNum(1); // Se não tiver OF preenchida, assume 1 por padrão
+      return;
+    }
+
     try {
-      const response = await axios.get('/api/register/eurocard');
+      const response = await axios.get('/api/register/eurocard', {
+        params: { of: targetOF.trim().toUpperCase() }
+      });
       setModuloNum(response.data.proximoNumero);
     } catch (error) {
       console.error("Erro ao carregar o número do módulo", error);
       setModuloNum('Erro');
     }
-  };
+  }, [ordemFabricacao]);
 
-  // Carrega ao montar o componente na tela
+  // Atualiza o estado da OF e refaz a busca se a URL mudar
   useEffect(() => {
-    fetchProximoNumero();
-  }, []);
+    if (ofParam) {
+      setOrdemFabricacao(ofParam);
+      fetchProximoNumero(ofParam);
+    } else {
+      fetchProximoNumero();
+    }
+  }, [ofParam, fetchProximoNumero]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -118,8 +140,15 @@ const FormEurocard = () => {
   };
 
   const onSubmit = async (data: FormValues) => {
+    if (!ordemFabricacao.trim()) {
+      toast.error("Por favor, informe a Ordem de Fabricação.");
+      return;
+    }
+
     try {
       const formattedData = {
+        ordemFabricacao: ordemFabricacao.trim().toUpperCase(),
+        moduloNum: Number(moduloNum), // Envia o número sequencial específico dessa OF
         spl01_out1: parseFloat(data.spl01_out1.replace(',', '.')),
         spl01_out2: parseFloat(data.spl01_out2.replace(',', '.')),
         spl02_out1: parseFloat(data.spl02_out1.replace(',', '.')),
@@ -136,11 +165,11 @@ const FormEurocard = () => {
 
       await axios.post('/api/register/eurocard', formattedData);
 
-      toast.success(`Módulo ${moduloNum} salvo com sucesso!`);
+      toast.success(`Módulo ${moduloNum} salvo com sucesso para a ${ordemFabricacao.toUpperCase()}!`);
       form.reset();
 
-      // Atualiza o contador na tela automaticamente para o próximo número após salvar
-      fetchProximoNumero();
+      // Recarrega a contagem para o próximo módulo referente a ESTA mesma OF
+      fetchProximoNumero(ordemFabricacao);
     } catch (error) {
       console.error(error);
       toast.error("Erro ao salvar os dados.");
@@ -151,35 +180,45 @@ const FormEurocard = () => {
     <div className="w-full max-w-4xl mx-auto p-4 md:p-8 mb-12">
 
       <header className="flex items-center justify-between border-b border-slate-800 pb-4 z-10">
-        <div className="print:hidden ">
+        <div className="print:hidden">
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Salvar Módulo</h1>
         </div>
-        <div className="flex items-center gap-1">
+
+        <div className="flex items-center gap-2">
+          <Link href="/eurocard/books">
+            <Button variant="outline" size="sm" className="flex items-center gap-1 text-slate-700">
+              <ArrowLeft size={16} /> Voltar aos Books
+            </Button>
+          </Link>
+
           <Tip
-            message="Eurocard"
+            message="Lista Eurocard"
             content={
               <Link href='/eurocard/list'>
                 <Button
                   variant='newuser'
                   size='icon'
                   className="bg-gray-500 text-white hover:animate-pulse"
-                //onClick={hadleTimeline.onOpen}
                 >
                   <List size={20} />
                 </Button>
               </Link>
-            }>
-          </Tip>
+            }
+          />
+
+          <Link href='/' className="sm:ml-4 lg:ml-6 flex items-center gap-2 text-slate-400 hover:text-slate-500 transition-colors duration-200">
+            <DoorOpen size={30} /> Sair
+          </Link>
         </div>
-        <Link href='/' className="sm:ml-4 lg:ml-10 flex items-center gap-2 text-slate-400 hover:text-slate-500 transition-colors duration-200 ">
-          <DoorOpen size={50} /> Sair
-        </Link>
       </header>
 
-      <Card className="w-full max-w-3xl mx-auto border border-zinc-300 shadow-md">
-        <CardHeader className=" border-b border-zinc-200">
-          <CardTitle className="text-xl font-bold tracking-tight text-center uppercase">
-            MÓDULO {moduloNum} {/* Exibe dinamicamente no Título */}
+      <Card className="w-full max-w-3xl mx-auto border border-zinc-300 shadow-md mt-6">
+        <CardHeader className="border-b border-zinc-200 bg-slate-50">
+
+          {/* Exibição da Ordem de Fabricação (OF) vinculada */}
+
+          <CardTitle className="text-xl font-bold tracking-tight text-center uppercase pt-2">
+            MÓDULO {moduloNum}
           </CardTitle>
           <CardDescription className="text-center">
             Formulário de medição de atenuação (dB) por canal Eurocard
@@ -192,8 +231,8 @@ const FormEurocard = () => {
 
               <div className="border border-zinc-400 rounded-sm overflow-hidden text-sm">
 
-                {/* Cabeçalho da Tabela Dinâmico */}
-                <div className="grid grid-cols-12 border-b border-zinc-400 font-bold text-center divide-x divide-zinc-400">
+                {/* Cabeçalho da Tabela */}
+                <div className="grid grid-cols-12 border-b border-zinc-400 font-bold text-center divide-x divide-zinc-400 bg-slate-100">
                   <div className="col-span-4 py-3 uppercase tracking-wider">Eurocard</div>
                   <div className="col-span-4 py-3 uppercase tracking-wider">MÓDULO {moduloNum}</div>
                   <div className="col-span-4 py-3 uppercase tracking-wider">dB</div>
@@ -210,7 +249,7 @@ const FormEurocard = () => {
                       className={`grid grid-cols-12 divide-x divide-zinc-400 ${index !== eurocardRows.length - 1 ? 'border-b border-zinc-400' : ''
                         }`}
                     >
-                      <div className="col-span-4 flex items-center justify-center font-semibold  ">
+                      <div className="col-span-4 flex items-center justify-center font-semibold bg-slate-50/50">
                         {row.label}
                       </div>
 
@@ -218,7 +257,7 @@ const FormEurocard = () => {
 
                         {/* Linha OUT 1 */}
                         <div className="grid grid-cols-8 divide-x divide-zinc-400">
-                          <div className="col-span-4 flex items-center justify-center font-medium py-2 ">
+                          <div className="col-span-4 flex items-center justify-center font-medium py-2">
                             OUT 1
                           </div>
                           <div className="col-span-4 p-1 flex items-center justify-center">
@@ -246,7 +285,7 @@ const FormEurocard = () => {
 
                         {/* Linha OUT 2 */}
                         <div className="grid grid-cols-8 divide-x divide-zinc-400">
-                          <div className="col-span-4 flex items-center justify-center font-medium py-2 ">
+                          <div className="col-span-4 flex items-center justify-center font-medium py-2">
                             OUT 2
                           </div>
                           <div className="col-span-4 p-1 flex items-center justify-center">
@@ -281,7 +320,7 @@ const FormEurocard = () => {
 
               <CardFooter className="p-0 pt-4 flex justify-end">
                 <Button type="submit" className="w-full sm:w-auto px-8 bg-zinc-900 text-white hover:bg-zinc-800">
-                  Salvar Módulo {moduloNum}
+                  Salvar Módulo {moduloNum} {ordemFabricacao ? `(${ordemFabricacao})` : ''}
                 </Button>
               </CardFooter>
             </form>

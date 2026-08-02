@@ -1,6 +1,5 @@
 import { db } from "@/lib/prismadb";
-import { NextResponse } from "next/server"
-
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   try {
@@ -8,20 +7,30 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
 
+    // Captura a OF enviada pela URL (aceita ?of=..., ?ordemFabricacao=... ou ?bookId=...)
+    const ofParam = searchParams.get('of') || searchParams.get('ordemFabricacao') || searchParams.get('bookId');
+
+    // Define o filtro para o Prisma
+    // Importante: Altere 'ordemFabricacao' abaixo caso o campo no seu schema.prisma tenha outro nome
+    const whereCondition = ofParam ? { ordemFabricacao: ofParam.trim().toUpperCase() } : {};
+
     // Calcula quantos registros pular
     const skip = (page - 1) * limit;
 
-    // Busca os dados paginados e o total ao mesmo tempo
+    // Busca os dados paginados e o total ao mesmo tempo com a cláusula 'where'
     const [modulos, totalRegistros] = await db.$transaction([
       db.eurocardMeasurement.findMany({
+        where: whereCondition,
         skip,
         take: limit,
         orderBy: { moduloNum: 'desc' },
       }),
-      db.eurocardMeasurement.count()
+      db.eurocardMeasurement.count({
+        where: whereCondition,
+      })
     ]);
 
-    const totalPaginas = Math.ceil(totalRegistros / limit);
+    const totalPaginas = Math.ceil(totalRegistros / limit) || 1;
 
     return NextResponse.json({
       modulos,
@@ -35,7 +44,7 @@ export async function GET(request: Request) {
     console.error("Erro ao listar módulos paginados:", error);
     return NextResponse.json({ error: "Erro ao buscar a lista." }, { status: 500 });
   }
-};
+}
 
 export async function DELETE(request: Request) {
   try {
