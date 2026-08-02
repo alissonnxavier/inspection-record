@@ -162,7 +162,7 @@ const ListaEurocard = () => {
                     <Button
                         onClick={handleExportExcel}
                         disabled={exporting || modulos.length === 0}
-                        className="flex items-center gap-2"
+                        className=" bg-green-700 hover:bg-green-800 text-white font-medium gap-2 text-base transition-all"
                     >
                         {exporting ? (
                             <>

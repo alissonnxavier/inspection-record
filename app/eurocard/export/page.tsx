@@ -47,7 +47,7 @@ export default function ExportarEurocard() {
     return (
         <div className="w-full max-w-xl mx-auto p-4 md:p-12">
             <Card className="border border-zinc-200 shadow-sm">
-                <CardHeader className="text-center">
+                <CardHeader className="text-center"> 
                     <div className="mx-auto bg-green-50 text-green-600 p-3 rounded-full w-fit mb-3">
                         <FileSpreadsheet className="h-8 w-8" />
                     </div>
