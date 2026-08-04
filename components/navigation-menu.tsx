@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { FcInspection } from "react-icons/fc";
 import { cn } from "@/lib/utils"
 import excel from '@/public/excel.svg';
 

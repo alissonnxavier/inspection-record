@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/prismadb';
 
-// GET: Lista todos os Books e traz a quantidade exata de módulos de cada um
+// GET: Lista todos os Books com a quantidade de medições/módulos
 export async function GET() {
   try {
     const books = await db.book.findMany({
       include: {
         _count: {
-          select: { modulos: true } // Conta quantos registros existem na relação 'modulos'
+          select: { modulos: true }
         }
       },
       orderBy: {
@@ -15,7 +15,6 @@ export async function GET() {
       }
     });
 
-    // Mapeia para entregar o valor no campo modulosCount no JSON de resposta
     const booksFormatted = books.map((book) => ({
       id: book.id,
       ordemFabricacao: book.ordemFabricacao,
@@ -60,5 +59,35 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Erro ao criar book:", error);
     return NextResponse.json({ error: "Erro ao criar o Book" }, { status: 500 });
+  }
+}
+
+// DELETE: Exclui o Book e, devido ao 'onDelete: Cascade', exclui também todos os EurocardMeasurement vinculados
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "O ID do Book é obrigatório para exclusão." },
+        { status: 400 }
+      );
+    }
+
+    await db.book.delete({
+      where: { id }
+    });
+
+    return NextResponse.json(
+      { message: "Book e suas medições foram excluídos com sucesso." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Erro ao excluir book:", error);
+    return NextResponse.json(
+      { error: "Erro interno ao tentar excluir o Book." },
+      { status: 500 }
+    );
   }
 }

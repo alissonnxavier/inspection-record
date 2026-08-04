@@ -16,7 +16,7 @@ import { Badge } from "./ui/badge";
 import { useSession } from "next-auth/react";
 import { Menu } from "./navigation-menu";
 import { RiseLoader } from "react-spinners";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { UserPlus, Activity, Ruler, ZoomIn, Component } from "lucide-react";
 import { useState } from "react";
 import { useCardModal } from "@/hooks/use-card-modal";
@@ -31,7 +31,6 @@ import Link from "next/link";
 
 
 export const Navbar = () => {
-    const route = useRouter();
     const { setTheme } = useTheme();
     const { data: session } = useSession();
     const [admin, setAdmin] = useState(false);

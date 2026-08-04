@@ -1,5 +1,7 @@
 'use client'
 
+import { useSession } from "next-auth/react";
+import { verifyAdmin } from "@/actions/verify-admin";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -14,7 +16,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { BookOpen, Plus, Layers, DoorOpen, ExternalLink, Cpu, ListFilter } from 'lucide-react';
+import { BookOpen, Plus, Layers, DoorOpen, ExternalLink, Cpu, ListFilter, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -24,8 +26,10 @@ interface Book {
     modulosCount?: number;
 }
 
-export default function GestaoBooksPage() {
+const GestaoBooksPage = () => {
     const router = useRouter();
+    const { data: session } = useSession();
+    const [admin, setAdmin] = useState(false);
 
     // Lista de Books criados
     const [books, setBooks] = useState<Book[]>([]);
@@ -35,10 +39,19 @@ export default function GestaoBooksPage() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const AdminOrNot = async () => {
+        const res = await verifyAdmin(session?.user?.email);
+        if (res === 'true') {
+            setAdmin(true);
+        }
+    }
 
     useEffect(() => {
+        AdminOrNot();
         fetchBooks();
-    }, []);
+    }, [session]);
 
     const fetchBooks = async () => {
         try {
@@ -89,6 +102,28 @@ export default function GestaoBooksPage() {
             toast.error("Erro ao criar o Book.");
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    // Exclui a OF cadastrada
+    const handleDeleteBook = async (e: React.MouseEvent, bookId: string, ofName: string) => {
+        e.stopPropagation(); // Evita abrir a página da OF ao clicar em deletar
+
+        const confirmDelete = window.confirm(`Tem certeza que deseja excluir a OF: ${ofName}?`);
+        if (!confirmDelete) return;
+
+        try {
+            setDeletingId(bookId);
+            await axios.delete(`/api/books/eurocard?id=${bookId}`);
+
+            toast.success(`OF ${ofName} excluída com sucesso!`);
+            // Atualiza a lista local filtrando o item removido
+            setBooks((prev) => prev.filter((b) => b.id !== bookId));
+        } catch (error) {
+            console.error("Erro ao excluir o Book:", error);
+            toast.error("Erro ao excluir a Ordem de Fabricação.");
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -193,13 +228,14 @@ export default function GestaoBooksPage() {
                             onClick={() => setIsDialogOpen(true)}
                             variant="outline"
                         >
-                            <Plus size={16} className="mr-2" /> Criar o primeiro Book
+                            <Plus size={16} className="mr-2" /> Criar Ordem de Fabricação
                         </Button>
                     </Card>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {books.map((book) => {
                             const qtdModulos = book.modulosCount ?? 0;
+                            const isDeleting = deletingId === book.id;
 
                             return (
                                 <Card
@@ -209,8 +245,25 @@ export default function GestaoBooksPage() {
                                 >
                                     <CardHeader className="bg-muted/50 border-b border-border py-3">
                                         <CardTitle className="text-base font-bold text-foreground group-hover:text-primary flex justify-between items-center transition-colors">
-                                            <span>OF: {book.ordemFabricacao}</span>
-                                            <BookOpen size={18} className="text-primary" />
+                                            <span className="flex items-center gap-2">
+                                                <BookOpen size={18} className="text-primary" />
+                                                OF: {book.ordemFabricacao}
+                                            </span>
+
+                                            {/* Botão Excluir */}
+                                            {admin.valueOf() == true ?
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                                    title="Excluir OF"
+                                                    disabled={isDeleting}
+                                                    onClick={(e) => handleDeleteBook(e, book.id, book.ordemFabricacao)}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </Button>
+                                                : <div className=""></div>
+                                            }
                                         </CardTitle>
                                     </CardHeader>
 
@@ -249,4 +302,6 @@ export default function GestaoBooksPage() {
             </main>
         </div>
     );
-}
+};
+
+export default GestaoBooksPage;
