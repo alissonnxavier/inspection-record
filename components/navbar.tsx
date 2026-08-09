@@ -30,7 +30,7 @@ import Link from "next/link";
 
 
 
-export const Navbar = () => {
+export const Navbar = () => { 
     const { setTheme } = useTheme();
     const { data: session } = useSession();
     const [admin, setAdmin] = useState(false);

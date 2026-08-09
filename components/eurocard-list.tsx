@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useSession } from "next-auth/react";
+import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { verifyAdmin } from "@/actions/verify-admin";
 
 interface ModuloData {
     id: string;
@@ -41,6 +43,20 @@ const eurocardRows = [
 ];
 
 const ListaEurocard = () => {
+
+    const { data: session } = useSession();
+    const [admin, setAdmin] = useState(false);
+
+    const AdminOrNot = async () => {
+        const res = await verifyAdmin(session?.user?.email);
+        if (res === 'true') {
+            setAdmin(true);
+        }
+    }
+    useEffect(() => {
+        AdminOrNot();
+    }, [session]);
+
     const searchParams = useSearchParams();
     const ofParam = searchParams.get('of') || '';
 
@@ -243,15 +259,17 @@ const ListaEurocard = () => {
                                             Imprimir Módulo {modulo.moduloNum}
                                         </Button>
 
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => handleDelete(modulo.id, modulo.moduloNum)}
-                                            className="gap-2 text-xs"
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                            Excluir
-                                        </Button>
+                                        {admin && (
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleDelete(modulo.id, modulo.moduloNum)}
+                                                className="gap-2 text-xs"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                                Excluir
+                                            </Button>
+                                        )}
                                     </div>
 
                                     {/* Tabela de Medições */}

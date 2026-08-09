@@ -1,13 +1,32 @@
 'use client'
 
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
+import { verifyAdmin } from "@/actions/verify-admin";
 import { useState } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Loader2, Database, Trash2, ArrowLeft, PlusCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { GridLoader } from "react-spinners";
 
-export default function AdminEurocard() {
+const AdminEurocard = () => {
+
+    const { data: session } = useSession();
+    const [admin, setAdmin] = useState(false);
+
+    const AdminOrNot = async () => {
+        const res = await verifyAdmin(session?.user?.email);
+        if (res === 'true') {
+            setAdmin(true);
+        }
+    }
+    useEffect(() => {
+        AdminOrNot();
+    }, [session]);
+
     const [quantidade, setQuantidade] = useState<number>(10);
     const [loadingGerar, setLoadingGerar] = useState(false);
     const [loadingLimpar, setLoadingLimpar] = useState(false);
@@ -44,7 +63,7 @@ export default function AdminEurocard() {
         );
 
         if (!confirmadoSegundavez) return;
-
+ 
         setLoadingLimpar(true);
         try {
             const response = await axios.delete('/api/register/eurocard/bulk');
@@ -56,6 +75,16 @@ export default function AdminEurocard() {
             setLoadingLimpar(false);
         }
     };
+
+    if (!admin) {
+        return (
+            <>
+                <div className="flex h-5/6 justify-center items-center">
+                    <GridLoader color="#9e0837" size={100} />
+                </div>
+            </>
+        )
+    }
 
     return (
         <div className="w-full max-w-xl mx-auto p-4 md:p-8 mt-10">
@@ -148,4 +177,6 @@ export default function AdminEurocard() {
             </div>
         </div>
     );
-}
+};
+
+export default AdminEurocard;

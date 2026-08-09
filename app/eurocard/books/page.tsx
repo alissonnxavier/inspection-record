@@ -1,6 +1,8 @@
 'use client'
 
 import { useSession } from "next-auth/react";
+import { redirect } from 'next/navigation';
+
 import { verifyAdmin } from "@/actions/verify-admin";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -27,6 +29,7 @@ interface Book {
 }
 
 const GestaoBooksPage = () => {
+
     const router = useRouter();
     const { data: session } = useSession();
     const [admin, setAdmin] = useState(false);
@@ -40,6 +43,10 @@ const GestaoBooksPage = () => {
     const [submitting, setSubmitting] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    if (!session) {
+        redirect("/login");
+    }
 
     const AdminOrNot = async () => {
         const res = await verifyAdmin(session?.user?.email);
