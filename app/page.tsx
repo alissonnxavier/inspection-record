@@ -1,5 +1,4 @@
 
-import { FormsInspectionRecords } from '@/components/forms-inspections-record'
 import { Navbar } from '@/components/navbar'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation';

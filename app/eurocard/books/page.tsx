@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
+    DialogHeader, 
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
@@ -200,7 +200,7 @@ const GestaoBooksPage = () => {
                                         type="submit"
                                         disabled={submitting}
                                     >
-                                        {submitting ? 'Criando...' : 'Criar Book por OF'}
+                                        {submitting ? 'Criando...' : 'Criar Ordem de Fabricação'}
                                     </Button>
                                 </div>
                             </form>

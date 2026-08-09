@@ -178,25 +178,25 @@ const FormEurocard = () => {
 
     return (
         <div className="w-full max-w-4xl mx-auto p-4 md:p-8 mb-12">
-            <header className="flex items-center justify-between border-b border-slate-800 pb-4 z-10">
+            <header className="flex items-center justify-between border-b border-border pb-4 z-10">
                 <div className="print:hidden">
-                    <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Salvar Módulo</h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Salvar Módulo</h1>
                 </div>
 
                 <div className="flex items-center gap-2">
                     <Link href="/eurocard/books">
-                        <Button variant="outline" size="sm" className="flex items-center gap-1 text-slate-700">
+                        <Button variant="outline" size="sm" className="flex items-center gap-1">
                             <ArrowLeft size={16} /> Voltar aos Books
                         </Button>
                     </Link>
-                    <Link href='/' className="sm:ml-4 lg:ml-6 flex items-center gap-2 text-slate-400 hover:text-slate-500 transition-colors duration-200">
+                    <Link href="/" className="sm:ml-4 lg:ml-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200">
                         <DoorOpen size={30} /> Sair
                     </Link>
                 </div>
             </header>
 
-            <Card className="w-full max-w-3xl mx-auto border border-zinc-300 shadow-md mt-6">
-                <CardHeader className="border-b border-zinc-200 bg-slate-50">
+            <Card className="w-full max-w-3xl mx-auto mt-6">
+                <CardHeader className="border-b border-border bg-muted/30">
 
                     {/* Exibição da Ordem de Fabricação (OF) vinculada */}
 
@@ -212,10 +212,10 @@ const FormEurocard = () => {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-                            <div className="border border-zinc-400 rounded-sm overflow-hidden text-sm">
+                            <div className="border border-border rounded-sm overflow-hidden text-sm">
 
                                 {/* Cabeçalho da Tabela */}
-                                <div className="grid grid-cols-12 border-b border-zinc-400 font-bold text-center divide-x divide-zinc-400 bg-slate-100">
+                                <div className="grid grid-cols-12 border-b border-border font-bold text-center divide-x divide-border bg-muted/60">
                                     <div className="col-span-4 py-3 uppercase tracking-wider">Eurocard</div>
                                     <div className="col-span-4 py-3 uppercase tracking-wider">MÓDULO {moduloNum}</div>
                                     <div className="col-span-4 py-3 uppercase tracking-wider">dB</div>
@@ -229,17 +229,17 @@ const FormEurocard = () => {
                                     return (
                                         <div
                                             key={row.id}
-                                            className={`grid grid-cols-12 divide-x divide-zinc-400 ${index !== eurocardRows.length - 1 ? 'border-b border-zinc-400' : ''
+                                            className={`grid grid-cols-12 divide-x divide-border ${index !== eurocardRows.length - 1 ? 'border-b border-border' : ''
                                                 }`}
                                         >
-                                            <div className="col-span-4 flex items-center justify-center font-semibold bg-slate-50/50">
+                                            <div className="col-span-4 flex items-center justify-center font-semibold bg-muted/20">
                                                 {row.label}
                                             </div>
 
-                                            <div className="col-span-8 grid grid-rows-2 divide-y divide-zinc-400">
+                                            <div className="col-span-8 grid grid-rows-2 divide-y divide-border">
 
                                                 {/* Linha OUT 1 */}
-                                                <div className="grid grid-cols-8 divide-x divide-zinc-400">
+                                                <div className="grid grid-cols-8 divide-x divide-border">
                                                     <div className="col-span-4 flex items-center justify-center font-medium py-2">
                                                         OUT 1
                                                     </div>
@@ -256,7 +256,7 @@ const FormEurocard = () => {
                                                                             inputMode="decimal"
                                                                             placeholder="0,00"
                                                                             onChange={(e) => handleInputChange(e, fieldOut1, field.onChange)}
-                                                                            className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-zinc-400 shadow-none bg-transparent"
+                                                                            className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-ring shadow-none bg-transparent"
                                                                         />
                                                                     </FormControl>
                                                                     <FormMessage className="text-[10px] text-center mt-0.5" />
@@ -267,7 +267,7 @@ const FormEurocard = () => {
                                                 </div>
 
                                                 {/* Linha OUT 2 */}
-                                                <div className="grid grid-cols-8 divide-x divide-zinc-400">
+                                                <div className="grid grid-cols-8 divide-x divide-border">
                                                     <div className="col-span-4 flex items-center justify-center font-medium py-2">
                                                         OUT 2
                                                     </div>
@@ -284,7 +284,7 @@ const FormEurocard = () => {
                                                                             inputMode="decimal"
                                                                             placeholder="0,00"
                                                                             onChange={(e) => handleInputChange(e, fieldOut2, field.onChange)}
-                                                                            className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-zinc-400 shadow-none bg-transparent"
+                                                                            className="h-8 text-center border-none focus-visible:ring-1 focus-visible:ring-ring shadow-none bg-transparent"
                                                                         />
                                                                     </FormControl>
                                                                     <FormMessage className="text-[10px] text-center mt-0.5" />
@@ -302,7 +302,7 @@ const FormEurocard = () => {
                             </div>
 
                             <CardFooter className="p-0 pt-4 flex justify-end">
-                                <Button type="submit" className="w-full sm:w-auto px-8 bg-zinc-900 text-white hover:bg-zinc-800">
+                                <Button type="submit" className="w-full sm:w-auto px-8">
                                     Salvar Módulo {moduloNum} {ordemFabricacao ? `(${ordemFabricacao})` : ''}
                                 </Button>
                             </CardFooter>
