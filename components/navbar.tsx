@@ -30,7 +30,7 @@ import Link from "next/link";
 
 
 
-export const Navbar = () => { 
+export const Navbar = () => {
     const { setTheme } = useTheme();
     const { data: session } = useSession();
     const [admin, setAdmin] = useState(false);
@@ -76,7 +76,9 @@ export const Navbar = () => {
         <div className="flex w-full px-2 py-4">
             <div className="flex flex-wrap items-center justify-center m-auto gap-1">
                 <div className="flex-shrink-0">
-                    <Menu />
+                    {admin && (
+                        <Menu />
+                    )}
                 </div>
                 <Badge
                     variant='destructive'
@@ -110,40 +112,44 @@ export const Navbar = () => {
                         }>
                     </Tip>
                 </div>
-                <div className="flex items-center gap-1">
-                    <Tip
-                        message="Régua"
-                        content={
-                            <Link href='/ruler'>
-                                <Button
-                                    variant='newuser'
-                                    size='icon'
-                                    className="bg-orange-400 text-black hover:animate-pulse"
-                                //onClick={hadleTimeline.onOpen}
-                                >
-                                    <Ruler size={20} />
-                                </Button>
-                            </Link>
-                        }>
-                    </Tip>
-                </div>
-                <div className="flex items-center gap-1">
-                    <Tip
-                        message="Zoom"
-                        content={
-                            <Link href='/zoom'>
-                                <Button
-                                    variant='newuser'
-                                    size='icon'
-                                    className="bg-purple-700 text-white hover:animate-pulse"
-                                //onClick={hadleTimeline.onOpen}
-                                >
-                                    <ZoomIn size={20} />
-                                </Button>
-                            </Link>
-                        }>
-                    </Tip>
-                </div>
+                {admin && (
+                    <>
+                        <div className="flex items-center gap-1">
+                            <Tip
+                                message="Régua"
+                                content={
+                                    <Link href='/ruler'>
+                                        <Button
+                                            variant='newuser'
+                                            size='icon'
+                                            className="bg-orange-400 text-black hover:animate-pulse"
+                                        //onClick={hadleTimeline.onOpen}
+                                        >
+                                            <Ruler size={20} />
+                                        </Button>
+                                    </Link>
+                                }>
+                            </Tip>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Tip
+                                message="Zoom"
+                                content={
+                                    <Link href='/zoom'>
+                                        <Button
+                                            variant='newuser'
+                                            size='icon'
+                                            className="bg-purple-700 text-white hover:animate-pulse"
+                                        //onClick={hadleTimeline.onOpen}
+                                        >
+                                            <ZoomIn size={20} />
+                                        </Button>
+                                    </Link>
+                                }>
+                            </Tip>
+                        </div>
+                    </>
+                )}
                 <div className="flex items-center gap-1">
                     <Tip
                         message="Eurocard"

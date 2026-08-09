@@ -4,6 +4,7 @@ import { Navbar } from '@/components/navbar'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation';
 import { authConfig } from '@/lib/auth';
+import HomePage from '@/components/home-page';
 
 export default async function Home() {
   const session = await getServerSession(authConfig);
@@ -24,7 +25,7 @@ export default async function Home() {
           justify-center
           items-center 
       '>
-        <FormsInspectionRecords />
+        <HomePage />
       </div>
     </div>
   )
