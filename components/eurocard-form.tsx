@@ -24,23 +24,31 @@ import {
     FormMessage
 } from "@/components/ui/form"
 import toast from 'react-hot-toast';
-import { Tip } from '@/components/ui/tip';
-import { DoorOpen, List, ArrowLeft, Loader2 } from 'lucide-react';
+import { DoorOpen, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+// Validação customizada para permitir até 3,90
+const fieldSchema = z
+    .string()
+    .nonempty("Obrigatório")
+    .refine((val) => {
+        const num = parseFloat(val.replace(',', '.'));
+        return !isNaN(num) && num <= 3.90;
+    }, "O valor máximo permitido é 3,90");
+
 const formSchema = z.object({
-    spl01_out1: z.string().nonempty("Obrigatório"),
-    spl01_out2: z.string().nonempty("Obrigatório"),
-    spl02_out1: z.string().nonempty("Obrigatório"),
-    spl02_out2: z.string().nonempty("Obrigatório"),
-    spl03_out1: z.string().nonempty("Obrigatório"),
-    spl03_out2: z.string().nonempty("Obrigatório"),
-    spl04_out1: z.string().nonempty("Obrigatório"),
-    spl04_out2: z.string().nonempty("Obrigatório"),
-    spl05_out1: z.string().nonempty("Obrigatório"),
-    spl05_out2: z.string().nonempty("Obrigatório"),
-    spl06_out1: z.string().nonempty("Obrigatório"),
-    spl06_out2: z.string().nonempty("Obrigatório"),
+    spl01_out1: fieldSchema,
+    spl01_out2: fieldSchema,
+    spl02_out1: fieldSchema,
+    spl02_out2: fieldSchema,
+    spl03_out1: fieldSchema,
+    spl03_out2: fieldSchema,
+    spl04_out1: fieldSchema,
+    spl04_out2: fieldSchema,
+    spl05_out1: fieldSchema,
+    spl05_out2: fieldSchema,
+    spl06_out1: fieldSchema,
+    spl06_out2: fieldSchema,
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -61,14 +69,10 @@ eurocardRows.forEach(row => {
 });
 
 const FormEurocard = () => {
-    // Captura parâmetro da Ordem de Fabricação (OF) enviado pela URL
     const searchParams = useSearchParams();
     const ofParam = searchParams.get('of') || '';
 
-    // Estado local para guardar/editar a OF
     const [ordemFabricacao, setOrdemFabricacao] = useState<string>(ofParam);
-
-    // Estado para armazenar o número do próximo módulo
     const [moduloNum, setModuloNum] = useState<number | string>('...');
 
     const form = useForm<FormValues>({
@@ -83,12 +87,11 @@ const FormEurocard = () => {
         }
     });
 
-    // Função para buscar o número sequencial do banco de dados filtrado por OF
     const fetchProximoNumero = useCallback(async (ofTarget?: string) => {
         const targetOF = ofTarget !== undefined ? ofTarget : ordemFabricacao;
 
         if (!targetOF.trim()) {
-            setModuloNum(1); // Se não tiver OF preenchida, assume 1 por padrão
+            setModuloNum(1);
             return;
         }
 
@@ -103,7 +106,6 @@ const FormEurocard = () => {
         }
     }, [ordemFabricacao]);
 
-    // Atualiza o estado da OF e refaz a busca se a URL mudar
     useEffect(() => {
         if (ofParam) {
             setOrdemFabricacao(ofParam);
@@ -118,9 +120,23 @@ const FormEurocard = () => {
         fieldName: string,
         onChangeProps: (value: string) => void
     ) => {
-        let value = e.target.value.replace(/\D/g, '');
+        let rawDigits = e.target.value.replace(/\D/g, '');
+
+        if (!rawDigits) {
+            onChangeProps('');
+            return;
+        }
+
+        // Se passar de 390, trava em 390
+        if (parseInt(rawDigits, 10) > 390) {
+            rawDigits = '390';
+        }
+
+        let value = rawDigits;
         if (value.length > 3) value = value.slice(0, 3);
-        if (value.length === 3) value = value.charAt(0) + ',' + value.slice(1);
+        if (value.length === 3) {
+            value = value.charAt(0) + ',' + value.slice(1);
+        }
 
         onChangeProps(value);
 
@@ -148,7 +164,7 @@ const FormEurocard = () => {
         try {
             const formattedData = {
                 ordemFabricacao: ordemFabricacao.trim().toUpperCase(),
-                moduloNum: Number(moduloNum), // Envia o número sequencial específico dessa OF
+                moduloNum: Number(moduloNum),
                 spl01_out1: parseFloat(data.spl01_out1.replace(',', '.')),
                 spl01_out2: parseFloat(data.spl01_out2.replace(',', '.')),
                 spl02_out1: parseFloat(data.spl02_out1.replace(',', '.')),
@@ -168,7 +184,6 @@ const FormEurocard = () => {
             toast.success(`Módulo ${moduloNum} salvo com sucesso para a ordem de fabricação ${ordemFabricacao.toUpperCase()}!`);
             form.reset();
 
-            // Recarrega a contagem para o próximo módulo referente a ESTA mesma OF
             fetchProximoNumero(ordemFabricacao);
         } catch (error) {
             console.error(error);
@@ -186,7 +201,7 @@ const FormEurocard = () => {
                 <div className="flex items-center gap-2">
                     <Link href="/eurocard/books">
                         <Button variant="outline" size="sm" className="flex items-center gap-1">
-                            <ArrowLeft size={16} /> Voltar aos Books
+                            <ArrowLeft size={16} /> Voltar para ordens de fabricação
                         </Button>
                     </Link>
                     <Link href="/" className="sm:ml-4 lg:ml-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200">
@@ -197,9 +212,6 @@ const FormEurocard = () => {
 
             <Card className="w-full max-w-3xl mx-auto mt-6">
                 <CardHeader className="border-b border-border bg-muted/30">
-
-                    {/* Exibição da Ordem de Fabricação (OF) vinculada */}
-
                     <CardTitle className="text-xl font-bold tracking-tight text-center uppercase pt-2">
                         MÓDULO {moduloNum}
                     </CardTitle>
