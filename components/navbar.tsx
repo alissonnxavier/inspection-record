@@ -27,6 +27,7 @@ import { useAdminHook } from "@/hooks/use-admin";
 import { useTimeLineDrawer } from "@/hooks/use-drawer-timeline";
 import { useChartsDrawer } from "@/hooks/use-drawer-charts";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 
 
@@ -35,6 +36,7 @@ export const Navbar = () => {
     const { data: session } = useSession();
     const [admin, setAdmin] = useState(false);
     const handleAdmin = useAdminHook();
+    const router = useRouter();
 
     const AdminOrNot = async () => {
         const res = await verifyAdmin(session?.user?.email);
@@ -192,13 +194,13 @@ export const Navbar = () => {
                     </DropdownMenuTrigger>
                     {admin.valueOf() == true ?
                         <Tip
-                            message="Criar novo usuário"
+                            message="Gerenciar usuários"
                             content={
                                 <Button
                                     variant='newuser'
                                     size='icon'
                                     className="bg-green-900 text-green-300 ml-1 hover:animate-pulse"
-                                    onClick={handleCardModal.onOpen}
+                                    onClick={() => { router.push('/adminpage') }}
                                 >
                                     <UserPlus size={20} />
                                 </Button>
