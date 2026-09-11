@@ -11,6 +11,18 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Slider } from '@/components/ui/slider';
 
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarProvider,
+    SidebarTrigger,
+} from "@/components/ui/sidebar";
+
 // Importações para captura e geração de Word
 import { toPng } from 'html-to-image';
 import { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType } from 'docx';
@@ -302,17 +314,14 @@ const Ruler = ({ }) => {
         setIsExporting(true);
 
         try {
-            // 1. Capturar o Canvas como imagem Data URL (PNG)
             //@ts-ignore
             const dataUrl = await toPng(svgRef.current, { backgroundColor: '#ffffff' });
 
-            // Converter DataURL base64 para Uint8Array para o docx
             const imageBytes = Uint8Array.from(
                 atob(dataUrl.split(',')[1]),
                 c => c.charCodeAt(0)
             );
 
-            // 2. Montar Tabela de Medições
             const tableRows = [
                 new TableRow({
                     children: [
@@ -324,7 +333,6 @@ const Ruler = ({ }) => {
                 }),
             ];
 
-            // Adicionar Medições de Distância
             measurements.forEach((m, idx) => {
                 tableRows.push(
                     new TableRow({
@@ -336,7 +344,6 @@ const Ruler = ({ }) => {
                 );
             });
 
-            // Adicionar Medições de Ângulo
             angleMeasurements.forEach((a, idx) => {
                 tableRows.push(
                     new TableRow({
@@ -348,7 +355,6 @@ const Ruler = ({ }) => {
                 );
             });
 
-            // 3. Criar a Estrutura do Documento Word
             const doc = new Document({
                 sections: [{
                     properties: {},
@@ -362,10 +368,10 @@ const Ruler = ({ }) => {
                             text: `Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
                             alignment: AlignmentType.CENTER,
                         }),
-                        new Paragraph({ text: "" }), // Espaçamento
+                        new Paragraph({ text: "" }),
 
                         new Paragraph({
-                            text: "1.Visual da Medição",
+                            text: "1. Visual da Medição",
                             heading: HeadingLevel.HEADING_2,
                         }),
                         //@ts-ignore
@@ -382,7 +388,7 @@ const Ruler = ({ }) => {
                             ],
                             alignment: AlignmentType.CENTER,
                         }),
-                        new Paragraph({ text: "" }), // Espaçamento
+                        new Paragraph({ text: "" }),
 
                         new Paragraph({
                             text: "2. Tabela de Valores Medidos",
@@ -396,7 +402,6 @@ const Ruler = ({ }) => {
                 }],
             });
 
-            // 4. Gerar e Salvar Arquivo .docx
             const buffer = await Packer.toBlob(doc);
             saveAs(buffer, `Relatorio_Medicao_${Date.now()}.docx`);
 
@@ -411,296 +416,330 @@ const Ruler = ({ }) => {
     const refHeight = 600 * (refScale[0] / 100);
 
     return (
-        <div
-            className='w-full min-h-screen bg-background flex flex-col items-center'
-            style={{ userSelect: 'none' }}
-        >
-            <div className='w-full flex flex-col sm:flex-row justify-between items-center p-4 gap-4'>
-                <Link href='/' className="sm:ml-4 lg:ml-10">
-                    <DoorOpen size={50} />
-                </Link>
-                <h3 className='text-center text-lg md:text-xl font-medium sm:mr-4 lg:mr-28'>
-                    Medidor
-                </h3>
-                <div className='hidden sm:block'></div>
-            </div>
+        <SidebarProvider>
+            <div className='flex min-h-screen w-full bg-background' style={{ userSelect: 'none' }}>
+                <Sidebar>
+                    <SidebarHeader className="p-4 flex flex-row items-center justify-between border-b">
+                        <Link href='/'>
+                            <DoorOpen size={40} />
+                        </Link>
+                        <h3 className='text-lg font-medium'>
+                            Medidor
+                        </h3>
+                    </SidebarHeader>
 
-            <div className='flex flex-wrap w-full justify-center items-center gap-4 p-4'>
-                <div className='flex flex-col items-center min-w-[130px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Marca</span>
-                    <Slider value={markWidth} onValueChange={setMarkWidth} min={1} max={10} step={0.1} className="w-full max-w-[180px]" />
-                </div>
-                <div className='flex flex-col items-center min-w-[130px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Linha</span>
-                    <Slider value={lineWidth} onValueChange={setLineWidth} min={1} max={10} step={0.1} className="w-full max-w-[180px]" />
-                </div>
-                <div className='flex flex-col items-center min-w-[130px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Font</span>
-                    <Slider value={fontSize} onValueChange={setFontSize} min={1} max={100} step={1} className="w-full max-w-[180px]" />
-                </div>
-
-                {base64.length > 0 && (
-                    <div className='flex flex-col items-center min-w-[130px] w-full sm:w-auto border-l pl-4 border-gray-300'>
-                        <span className="text-sm font-medium mb-2 text-red-600">Resize Medição ({baseScale[0]}%)</span>
-                        <Slider value={baseScale} onValueChange={setBaseScale} min={10} max={200} step={1} className="w-full max-w-[180px]" />
-                    </div>
-                )}
-
-                {refImage && (
-                    <div className='flex flex-col items-center min-w-[130px] w-full sm:w-auto border-l pl-4 border-gray-300'>
-                        <span className="text-sm font-medium mb-2 text-blue-600">Resize Ref. ({refScale[0]}%)</span>
-                        <Slider value={refScale} onValueChange={setRefScale} min={10} max={200} step={1} className="w-full max-w-[180px]" />
-                    </div>
-                )}
-
-                {/* BOTÕES DE AÇÃO */}
-                <div className='flex flex-wrap justify-center items-center w-full sm:w-auto gap-2'>
-                    <Button onClick={handleAddMeasurement} variant="outline" className={`flex gap-2 border-blue-500 text-blue-500 ${activeMeasurementIndex !== -1 ? 'bg-blue-50' : ''}`}>
-                        <RulerIcon size={20} /> + Medição
-                    </Button>
-
-                    <Button onClick={handleAddAngle} variant="outline" className={`flex gap-2 border-red-500 text-red-500 ${activeAngleIndex !== -1 ? 'bg-red-50' : ''}`}>
-                        <ChevronRight className="rotate-45" size={20} /> + Ângulo
-                    </Button>
-
-                    {/* BOTÃO EXPORTAR DOCX */}
-                    <Button
-                        onClick={handleExportDocx}
-                        disabled={isExporting || base64.length === 0}
-                        className="flex gap-2 bg-blue-700 hover:bg-green-700 text-white"
-                    >
-                        {isExporting ? <Loader2 className="animate-spin" size={20} /> : <FileDown size={20} />}
-                        Exportar Relatório
-                    </Button>
-
-                    {/* DROPZONE 1 */}
-                    <div className='w-full max-w-[12rem]'>
-                        <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-lg shadow-red-900/50 hover:shadow-md hover:shadow-red-300/50">
-                            <div {...getRootProps({ className: 'dropzone' })}>
-                                <input {...getInputProps()} />
-                                <div className='flex justify-center align-middle items-center cursor-pointer'>
-                                    <Tip message='Carregar imagem para medição' content={<ImagePlus size={46} />} />
+                    <SidebarContent className="p-4 space-y-6">
+                        {/* GRUPO DE CONFIGURAÇÕES DE ESTILO */}
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Ajustes de Exibição</SidebarGroupLabel>
+                            <SidebarGroupContent className="space-y-4 pt-2">
+                                <div className='flex flex-col'>
+                                    <span className="text-sm font-medium mb-1">Marca</span>
+                                    <Slider value={markWidth} onValueChange={setMarkWidth} min={1} max={10} step={0.1} />
                                 </div>
-                            </div>
-                            <aside>
-                                <ul className='flex justify-center align-middle items-center'>
-                                    {base64.map((img, index) => (
-                                        <Image className='m-1 aspect-square object-cover rounded hover:scale-150 transition' key={index} src={img} height={38} width={38} alt='uploaded image' />
-                                    ))}
-                                </ul>
-                            </aside>
-                        </section>
-                    </div>
-
-                    {/* DROPZONE 2 */}
-                    <div className='w-full max-w-[12rem]'>
-                        <section className="flex justify-around border-dashed border-2 p-3 border-blue-500 rounded-lg shadow-lg shadow-blue-900/50 hover:shadow-md hover:shadow-blue-300/50">
-                            <div {...getRefRootProps({ className: 'dropzone' })}>
-                                <input {...getRefInputProps()} />
-                                <div className='flex justify-center align-middle items-center cursor-pointer'>
-                                    <Tip message='Carregar imagem de referência' content={<FileSpreadsheet size={46} className='text-blue-500' />} />
+                                <div className='flex flex-col'>
+                                    <span className="text-sm font-medium mb-1">Linha</span>
+                                    <Slider value={lineWidth} onValueChange={setLineWidth} min={1} max={10} step={0.1} />
                                 </div>
-                            </div>
-                            {refImage && (
-                                <aside>
-                                    <Image className='m-1 aspect-square object-cover rounded' src={refImage} height={38} width={38} alt='reference image' />
-                                </aside>
-                            )}
-                        </section>
-                    </div>
-                </div>
-            </div>
+                                <div className='flex flex-col'>
+                                    <span className="text-sm font-medium mb-1">Font</span>
+                                    <Slider value={fontSize} onValueChange={setFontSize} min={1} max={100} step={1} />
+                                </div>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
 
-            {/* LISTA DE MEDIÇÕES E ÂNGULOS */}
-            <div className='flex flex-wrap m-auto justify-center items-center gap-2'>
-                {measurements.map((m, i) => (
-                    <div key={`l-m-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeMeasurementIndex === i ? 'border-blue-500 ' : 'border-spacing-2'}`}>
-                        <span className='text-xs font-bold'>Med {i + 1}:</span>
-                        <input type="color" value={m.color} onChange={(e) => {
-                            const next = [...measurements];
-                            next[i].color = e.target.value;
-                            setMeasurements(next);
-                        }} className="w-6 h-6 cursor-pointer border-none bg-transparent" />
-                        <Input className='w-20 border h-8' type="number" value={m.measure[0]?.inputValue || ''} onChange={(e) => {
-                            const next = [...measurements];
-                            next[i].measure = [{ inputValue: Number(e.target.value) }];
-                            setMeasurements(next);
-                        }} />
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteMeasurement(i)}><Trash2 size={16} /></Button>
-                    </div>
-                ))}
-
-                {angleMeasurements.map((a, i) => (
-                    <div key={`l-a-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeAngleIndex === i ? 'border-yellow-600 ' : 'border-yellow-500'}`}>
-                        <span className='text-xs font-bold'>Âng {i + 1}:</span>
-                        <input type="color" value={a.color} onChange={(e) => {
-                            const next = [...angleMeasurements];
-                            next[i].color = e.target.value;
-                            setAngleMeasurements(next);
-                        }} className="w-6 h-6 cursor-pointer border-none bg-transparent" />
-                        <Input
-                            className='w-20 border h-8 border-yellow-300'
-                            type="number"
-                            placeholder="°"
-                            value={a.measure[0]?.inputValue || ''}
-                            onChange={(e) => updateAngleByInput(i, Number(e.target.value))}
-                        />
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteAngle(i)}><Trash2 size={16} /></Button>
-                    </div>
-                ))}
-            </div>
-
-            <div className='w-full overflow-auto flex-grow flex justify-center p-4'>
-                <svg ref={svgRef} width="1920" height="1200" style={{ minWidth: '1280px', cursor: (activeMeasurementIndex !== -1 || activeAngleIndex !== -1) ? 'crosshair' : 'default' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-                    <defs>
-                        {[...measurements, ...angleMeasurements].map((m, i) => (
-                            <marker key={`arr-${i}`} id={`arrowhead-${i}`} markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
-                                <polygon points="0 0, 4 3.5, 0 7" fill={m.color} />
-                            </marker>
-                        ))}
-                    </defs>
-
-                    {/* IMAGEM A SER MEDIDA */}
-                    {base64.length > 0 && (
-                        <g>
-                            {/* Renderiza a moldura e o ícone de arrastar apenas se NÃO estiver exportando */}
-                            {!isExporting && (
-                                <>
-                                    <rect
-                                        x={basePos.x - 2}
-                                        y={basePos.y - 2}
-                                        width={baseWidth + 4}
-                                        height={baseHeight + 4}
-                                        fill="none"
-                                        stroke="#dc2626"
-                                        strokeWidth="2"
-                                        strokeDasharray="4"
-                                        rx="4"
-                                        pointerEvents="none"
-                                    />
-                                    <g
-                                        transform={`translate(${basePos.x + baseWidth / 2 - 12}, ${basePos.y - 28})`}
-                                        onMouseDown={handleBaseMouseDown}
-                                        style={{ cursor: 'grab' }}
-                                    >
-                                        <rect width="24" height="24" rx="12" fill="#dc2626" />
-                                        <path d="M12 6v12M6 12h12" stroke="white" strokeWidth="2" />
-                                    </g>
-                                </>
-                            )}
-
-                            {/* A imagem continua visível sempre */}
-                            {base64.map((img, index) => (
-                                <image
-                                    key={index}
-                                    href={img}
-                                    x={basePos.x}
-                                    y={basePos.y}
-                                    width={baseWidth}
-                                    height={baseHeight}
-                                />
-                            ))}
-                        </g>
-                    )}
-
-                    {/* CONEXÃO E IMAGEM DE REFERÊNCIA MOVEL */}
-                    {refImage && (
-                        <g>
-                            {/* Oculta a linha de conexão, borda e ícone durante a exportação */}
-                            {!isExporting && (
-                                <>
-                                    <line
-                                        x1={baseTopRight.x}
-                                        y1={baseTopRight.y}
-                                        x2={refPos.x}
-                                        y2={refPos.y}
-                                        stroke="#2563eb"
-                                        strokeWidth="2"
-                                        strokeDasharray="5,5"
-                                    />
-                                    <circle cx={baseTopRight.x} cy={baseTopRight.y} r={5} fill="#2563eb" />
-
-                                    <rect
-                                        x={refPos.x - 2}
-                                        y={refPos.y - 2}
-                                        width={refWidth + 4}
-                                        height={refHeight + 4}
-                                        fill="none"
-                                        stroke="#2563eb"
-                                        strokeWidth="2"
-                                        strokeDasharray="4"
-                                        rx="4"
-                                    />
-
-                                    <g
-                                        transform={`translate(${refPos.x + refWidth / 2 - 12}, ${refPos.y - 28})`}
-                                        onMouseDown={handleRefMouseDown}
-                                        style={{ cursor: 'grab' }}
-                                    >
-                                        <rect width="24" height="24" rx="12" fill="#2563eb" />
-                                        <path d="M12 6v12M6 12h12" stroke="white" strokeWidth="2" />
-                                    </g>
-                                </>
-                            )}
-
-                            {/* A imagem de referência continua visível sempre */}
-                            <image
-                                href={refImage}
-                                x={refPos.x}
-                                y={refPos.y}
-                                width={refWidth}
-                                height={refHeight}
-                            />
-                        </g>
-                    )}
-
-                    {/* DESENHO RÉGUAS */}
-                    {measurements.map((m, i) => (
-                        <React.Fragment key={`svg-m-${i}`}>
-                            {m.points.length >= 1 && m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
-                            ))}
-                            {m.points.length === 2 && m.labelPos && (
-                                <>
-                                    <line x1={m.points[0].x} y1={m.points[0].y} x2={m.points[1].x} y2={m.points[1].y} stroke={m.color} strokeWidth={lineWidth} />
-                                    <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5" />
-                                    <g onMouseDown={() => setDraggingIndex({ type: 'line', index: i })} style={{ cursor: 'move' }}>
-                                        <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 5} height={fontSize * 1.2} fill="white" rx="4" />
-                                        <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Med {i + 1}</text>
-                                        <text x={m.labelPos.x} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">: {m.measure[0]?.inputValue || 0} mm</text>
-                                    </g>
-                                </>
-                            )}
-                        </React.Fragment>
-                    ))}
-
-                    {/* DESENHO ÂNGULOS */}
-                    {angleMeasurements.map((a, i) => (
-                        <React.Fragment key={`svg-a-${i}`}>
-                            {a.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="yellow" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
-                            ))}
-                            {a.points.length >= 2 && (
-                                <line x1={a.points[0].x} y1={a.points[0].y} x2={a.points[1].x} y2={a.points[1].y} stroke={a.color} strokeWidth={lineWidth} />
-                            )}
-                            {a.points.length === 3 && (
-                                <>
-                                    <line x1={a.points[1].x} y1={a.points[1].y} x2={a.points[2].x} y2={a.points[2].y} stroke={a.color} strokeWidth={lineWidth} />
-                                    {renderAngleArc(a.points, a.color, lineWidth)}
-                                    {a.labelPos && (
-                                        <g onMouseDown={() => setDraggingIndex({ type: 'angle', index: i })} style={{ cursor: 'move' }}>
-                                            <rect x={a.labelPos.x} y={a.labelPos.y - fontSize} width={fontSize * 4} height={fontSize * 1.2} fill="white" rx="4" />
-                                            <text x={a.labelPos.x - 55} y={a.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Âng {i + 1}</text>
-                                            <text x={a.labelPos.x} y={a.labelPos.y} fontSize={fontSize} fill={a.color} fontWeight="bold">: {a.measure[0]?.inputValue || 0}°</text>
-                                        </g>
+                        {/* GRUPO DE REDIMENSIONAMENTO DE IMAGENS */}
+                        {(base64.length > 0 || refImage) && (
+                            <SidebarGroup>
+                                <SidebarGroupLabel>Redimensionamento</SidebarGroupLabel>
+                                <SidebarGroupContent className="space-y-4 pt-2">
+                                    {base64.length > 0 && (
+                                        <div className='flex flex-col'>
+                                            <span className="text-sm font-medium mb-1 text-red-600">Resize Medição ({baseScale[0]}%)</span>
+                                            <Slider value={baseScale} onValueChange={setBaseScale} min={10} max={200} step={1} />
+                                        </div>
                                     )}
-                                </>
+                                    {refImage && (
+                                        <div className='flex flex-col'>
+                                            <span className="text-sm font-medium mb-1 text-blue-600">Resize Ref. ({refScale[0]}%)</span>
+                                            <Slider value={refScale} onValueChange={setRefScale} min={10} max={200} step={1} />
+                                        </div>
+                                    )}
+                                </SidebarGroupContent>
+                            </SidebarGroup>
+                        )}
+
+                        {/* GRUPO DE FERRAMENTAS E AÇÕES */}
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Ferramentas</SidebarGroupLabel>
+                            <SidebarGroupContent className="flex flex-col gap-2 pt-2">
+                                <Button onClick={handleAddMeasurement} variant="outline" className={`w-full flex gap-2 border-blue-500 text-blue-500 ${activeMeasurementIndex !== -1 ? 'bg-blue-50' : ''}`}>
+                                    <RulerIcon size={20} /> + Medição
+                                </Button>
+
+                                <Button onClick={handleAddAngle} variant="outline" className={`w-full flex gap-2 border-red-500 text-red-500 ${activeAngleIndex !== -1 ? 'bg-red-50' : ''}`}>
+                                    <ChevronRight className="rotate-45" size={20} /> + Ângulo
+                                </Button>
+
+                                <Button
+                                    onClick={handleExportDocx}
+                                    disabled={isExporting || base64.length === 0}
+                                    className="w-full flex gap-2 bg-blue-700 hover:bg-green-700 text-white"
+                                >
+                                    {isExporting ? <Loader2 className="animate-spin" size={20} /> : <FileDown size={20} />}
+                                    Exportar Relatório
+                                </Button>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+
+                        {/* GRUPO DE UPLOADS */}
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Uploads</SidebarGroupLabel>
+                            <SidebarGroupContent className="space-y-3 pt-2">
+                                <div className='w-full'>
+                                    <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-sm hover:shadow-md transition-all">
+                                        <div {...getRootProps({ className: 'dropzone' })}>
+                                            <input {...getInputProps()} />
+                                            <div className='flex justify-center align-middle items-center cursor-pointer'>
+                                                <Tip message='Carregar imagem para medição' content={<ImagePlus size={36} />} />
+                                            </div>
+                                        </div>
+                                        <aside>
+                                            <ul className='flex justify-center align-middle items-center'>
+                                                {base64.map((img, index) => (
+                                                    <Image className='m-1 aspect-square object-cover rounded hover:scale-150 transition' key={index} src={img} height={38} width={38} alt='uploaded image' />
+                                                ))}
+                                            </ul>
+                                        </aside>
+                                    </section>
+                                </div>
+
+                                <div className='w-full'>
+                                    <section className="flex justify-around border-dashed border-2 p-3 border-blue-500 rounded-lg shadow-sm hover:shadow-md transition-all">
+                                        <div {...getRefRootProps({ className: 'dropzone' })}>
+                                            <input {...getRefInputProps()} />
+                                            <div className='flex justify-center align-middle items-center cursor-pointer'>
+                                                <Tip message='Carregar imagem de referência' content={<FileSpreadsheet size={36} className='text-blue-500' />} />
+                                            </div>
+                                        </div>
+                                        {refImage && (
+                                            <aside>
+                                                <Image className='m-1 aspect-square object-cover rounded' src={refImage} height={38} width={38} alt='reference image' />
+                                            </aside>
+                                        )}
+                                    </section>
+                                </div>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+
+                        {/* GRUPO DE ELEMENTOS ATIVOS (MEDIÇÕES E ÂNGULOS) */}
+                        {(measurements.length > 0 || angleMeasurements.length > 0) && (
+                            <SidebarGroup>
+                                <SidebarGroupLabel>Itens Medidos</SidebarGroupLabel>
+                                <SidebarGroupContent className="space-y-2 pt-2">
+                                    {measurements.map((m, i) => (
+                                        <div key={`l-m-${i}`} className={`flex gap-1 justify-between items-center p-2 border rounded-md ${activeMeasurementIndex === i ? 'border-blue-500' : 'border-border'}`}>
+                                            <span className='text-xs font-bold whitespace-nowrap'>Med {i + 1}:</span>
+                                            <input type="color" value={m.color} onChange={(e) => {
+                                                const next = [...measurements];
+                                                next[i].color = e.target.value;
+                                                setMeasurements(next);
+                                            }} className="w-5 h-5 cursor-pointer border-none bg-transparent" />
+                                            <Input className='w-16 border h-7 text-xs p-1' type="number" value={m.measure[0]?.inputValue || ''} onChange={(e) => {
+                                                const next = [...measurements];
+                                                next[i].measure = [{ inputValue: Number(e.target.value) }];
+                                                setMeasurements(next);
+                                            }} />
+                                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleDeleteMeasurement(i)}><Trash2 size={14} /></Button>
+                                        </div>
+                                    ))}
+
+                                    {angleMeasurements.map((a, i) => (
+                                        <div key={`l-a-${i}`} className={`flex gap-1 justify-between items-center p-2 border rounded-md ${activeAngleIndex === i ? 'border-yellow-600' : 'border-yellow-500'}`}>
+                                            <span className='text-xs font-bold whitespace-nowrap'>Âng {i + 1}:</span>
+                                            <input type="color" value={a.color} onChange={(e) => {
+                                                const next = [...angleMeasurements];
+                                                next[i].color = e.target.value;
+                                                setAngleMeasurements(next);
+                                            }} className="w-5 h-5 cursor-pointer border-none bg-transparent" />
+                                            <Input
+                                                className='w-16 border h-7 text-xs p-1 border-yellow-300'
+                                                type="number"
+                                                placeholder="°"
+                                                value={a.measure[0]?.inputValue || ''}
+                                                onChange={(e) => updateAngleByInput(i, Number(e.target.value))}
+                                            />
+                                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleDeleteAngle(i)}><Trash2 size={14} /></Button>
+                                        </div>
+                                    ))}
+                                </SidebarGroupContent>
+                            </SidebarGroup>
+                        )}
+                    </SidebarContent>
+
+                    <SidebarFooter className="p-4 border-t text-xs text-muted-foreground text-center">
+                        Controles do Medidor
+                    </SidebarFooter>
+                </Sidebar>
+
+                <main className='flex-1 flex flex-col items-center justify-start overflow-hidden relative'>
+                    <div className="absolute top-4 left-4 z-10">
+                        <SidebarTrigger />
+                    </div>
+
+                    <div className='w-full overflow-auto flex-grow flex justify-center p-4'>
+                        <svg ref={svgRef} width="1920" height="1200" style={{ minWidth: '1280px', cursor: (activeMeasurementIndex !== -1 || activeAngleIndex !== -1) ? 'crosshair' : 'default' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+                            <defs>
+                                {[...measurements, ...angleMeasurements].map((m, i) => (
+                                    <marker key={`arr-${i}`} id={`arrowhead-${i}`} markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 4 3.5, 0 7" fill={m.color} />
+                                    </marker>
+                                ))}
+                            </defs>
+
+                            {/* IMAGEM A SER MEDIDA */}
+                            {base64.length > 0 && (
+                                <g>
+                                    {!isExporting && (
+                                        <>
+                                            <rect
+                                                x={basePos.x - 2}
+                                                y={basePos.y - 2}
+                                                width={baseWidth + 4}
+                                                height={baseHeight + 4}
+                                                fill="none"
+                                                stroke="#dc2626"
+                                                strokeWidth="2"
+                                                strokeDasharray="4"
+                                                rx="4"
+                                                pointerEvents="none"
+                                            />
+                                            <g
+                                                transform={`translate(${basePos.x + baseWidth / 2 - 12}, ${basePos.y - 28})`}
+                                                onMouseDown={handleBaseMouseDown}
+                                                style={{ cursor: 'grab' }}
+                                            >
+                                                <rect width="24" height="24" rx="12" fill="#dc2626" />
+                                                <path d="M12 6v12M6 12h12" stroke="white" strokeWidth="2" />
+                                            </g>
+                                        </>
+                                    )}
+
+                                    {base64.map((img, index) => (
+                                        <image
+                                            key={index}
+                                            href={img}
+                                            x={basePos.x}
+                                            y={basePos.y}
+                                            width={baseWidth}
+                                            height={baseHeight}
+                                        />
+                                    ))}
+                                </g>
                             )}
-                        </React.Fragment>
-                    ))}
-                </svg>
+
+                            {/* CONEXÃO E IMAGEM DE REFERÊNCIA MOVEL */}
+                            {refImage && (
+                                <g>
+                                    {!isExporting && (
+                                        <>
+                                            <line
+                                                x1={baseTopRight.x}
+                                                y1={baseTopRight.y}
+                                                x2={refPos.x}
+                                                y2={refPos.y}
+                                                stroke="#2563eb"
+                                                strokeWidth="2"
+                                                strokeDasharray="5,5"
+                                            />
+                                            <circle cx={baseTopRight.x} cy={baseTopRight.y} r={5} fill="#2563eb" />
+
+                                            <rect
+                                                x={refPos.x - 2}
+                                                y={refPos.y - 2}
+                                                width={refWidth + 4}
+                                                height={refHeight + 4}
+                                                fill="none"
+                                                stroke="#2563eb"
+                                                strokeWidth="2"
+                                                strokeDasharray="4"
+                                                rx="4"
+                                            />
+
+                                            <g
+                                                transform={`translate(${refPos.x + refWidth / 2 - 12}, ${refPos.y - 28})`}
+                                                onMouseDown={handleRefMouseDown}
+                                                style={{ cursor: 'grab' }}
+                                            >
+                                                <rect width="24" height="24" rx="12" fill="#2563eb" />
+                                                <path d="M12 6v12M6 12h12" stroke="white" strokeWidth="2" />
+                                            </g>
+                                        </>
+                                    )}
+
+                                    <image
+                                        href={refImage}
+                                        x={refPos.x}
+                                        y={refPos.y}
+                                        width={refWidth}
+                                        height={refHeight}
+                                    />
+                                </g>
+                            )}
+
+                            {/* DESENHO RÉGUAS */}
+                            {measurements.map((m, i) => (
+                                <React.Fragment key={`svg-m-${i}`}>
+                                    {m.points.length >= 1 && m.points.map((p, pi) => (
+                                        <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
+                                    ))}
+                                    {m.points.length === 2 && m.labelPos && (
+                                        <>
+                                            <line x1={m.points[0].x} y1={m.points[0].y} x2={m.points[1].x} y2={m.points[1].y} stroke={m.color} strokeWidth={lineWidth} />
+                                            <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5" />
+                                            <g onMouseDown={() => setDraggingIndex({ type: 'line', index: i })} style={{ cursor: 'move' }}>
+                                                <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 8} height={fontSize * 1.2} fill="white" rx="4" />
+                                                <text x={m.labelPos.x + 10} y={m.labelPos.y - (fontSize * 0.2)} fontSize={fontSize} fill={m.color} fontWeight="bold">
+                                                    <tspan fill="black" fontSize={fontSize * 0.45}>{`Med ${i + 1}: `}</tspan>
+                                                    {m.measure[0]?.inputValue ? `${m.measure[0]?.inputValue}mm` : ''}
+                                                </text>
+                                            </g>
+                                        </>
+                                    )}
+                                </React.Fragment>
+                            ))}
+
+                            {/* DESENHO ÂNGULOS */}
+                            {angleMeasurements.map((a, i) => (
+                                <React.Fragment key={`svg-a-${i}`}>
+                                    {a.points.length >= 1 && a.points.map((p, pi) => (
+                                        <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="orange" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
+                                    ))}
+                                    {a.points.length >= 2 && (
+                                        <line x1={a.points[0].x} y1={a.points[0].y} x2={a.points[1].x} y2={a.points[1].y} stroke={a.color} strokeWidth={lineWidth} />
+                                    )}
+                                    {a.points.length === 3 && (
+                                        <>
+                                            <line x1={a.points[1].x} y1={a.points[1].y} x2={a.points[2].x} y2={a.points[2].y} stroke={a.color} strokeWidth={lineWidth} />
+                                            {renderAngleArc(a.points, a.color, lineWidth)}
+                                            {a.labelPos && (
+                                                <g onMouseDown={() => setDraggingIndex({ type: 'angle', index: i })} style={{ cursor: 'move' }}>
+                                                    <rect x={a.labelPos.x} y={a.labelPos.y - fontSize} width={fontSize * 7} height={fontSize * 1.2} fill="white" rx="4" />
+                                                    <text x={a.labelPos.x + 10} y={a.labelPos.y - (fontSize * 0.2)} fontSize={fontSize} fill={a.color} fontWeight="bold">
+                                                        <tspan fill="black" fontSize={fontSize * 0.45}>{`Âng ${i + 1}: `}</tspan>
+                                                        {a.measure[0]?.inputValue ? `${a.measure[0]?.inputValue}°` : ''}
+                                                    </text>
+                                                </g>
+                                            )}
+                                        </>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </svg>
+                    </div>
+                </main>
             </div>
-        </div>
+        </SidebarProvider>
     );
 };
 
