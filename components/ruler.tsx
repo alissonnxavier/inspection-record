@@ -3,69 +3,155 @@
 import { Input } from '@/components/ui/input';
 import React, { useState, useRef, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import Compressor from 'compressorjs';
-import { DoorOpen, ImagePlus, Trash2, ChevronRight, Ruler as RulerIcon } from 'lucide-react'; // Importei RulerIcon para o botão
+import { DoorOpen, ImagePlus, Trash2, ChevronRight, Ruler as RulerIcon, FileSpreadsheet, FileDown, Loader2, Move, ArrowLeft, Plus, Layers } from 'lucide-react';
 import { Tip } from '@/components/ui/tip';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { Slider } from '@/components/ui/slider';
+import { useRouter } from 'next/navigation';
 
-const Ruler = ({ }) => {
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarProvider,
+} from "@/components/ui/sidebar";
 
-    type Measurement = {
-        points: { x: number; y: number }[];
-        measure: { inputValue: number }[];
-        color: string;
-        labelPos?: { x: number; y: number };
-    };
+// Importações para captura e geração de Word
+import { toPng } from 'html-to-image';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType, ImageRun } from 'docx';
+import { saveAs } from 'file-saver';
 
-    const [measurements, setMeasurements] = useState<Measurement[]>([]);
-    const [angleMeasurements, setAngleMeasurements] = useState<Measurement[]>([]);
+type Measurement = {
+    points: { x: number; y: number }[];
+    measure: { inputValue: number }[];
+    color: string;
+    labelPos?: { x: number; y: number };
+};
 
-    const [activeMeasurementIndex, setActiveMeasurementIndex] = useState(-1);
-    const [activeAngleIndex, setActiveAngleIndex] = useState(-1);
+type CanvasItem = {
+    id: string;
+    title: string;
+    base64: string[];
+    baseScale: number[];
+    basePos: { x: number; y: number };
+    refImage: string | null;
+    refScale: number[];
+    refPos: { x: number; y: number };
+    measurements: Measurement[];
+    angleMeasurements: Measurement[];
+    activeMeasurementIndex: number;
+    activeAngleIndex: number;
+};
 
-    const [base64, setBase64] = useState<any[]>([]);
+const Ruler = () => {
+    const router = useRouter();
+
+    // Estado principal contendo múltiplos canvas em fila
+    const [canvases, setCanvases] = useState<CanvasItem[]>([
+        {
+            id: 'medidor-1',
+            title: 'Medidor 1',
+            base64: [],
+            baseScale: [100],
+            basePos: { x: 360, y: 50 },
+            refImage: null,
+            refScale: [100],
+            refPos: { x: 1020, y: 50 },
+            measurements: [],
+            angleMeasurements: [],
+            activeMeasurementIndex: -1,
+            activeAngleIndex: -1,
+        }
+    ]);
+
+    const [activeCanvasIndex, setActiveCanvasIndex] = useState(0);
+
+    // Mapeamento de referências para os SVGs de cada Canvas para exportação
+    const svgRefs = useRef<{ [key: string]: SVGSVGElement | null }>({});
+
+    // Canvas atualmente ativo nas configurações da Sidebar
+    const currentCanvas = canvases[activeCanvasIndex] || canvases[0];
+
+    // Estados Globais de Arraste e Visualização
+    const [isDraggingBase, setIsDraggingBase] = useState(false);
+    const [dragBaseOffset, setDragBaseOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+    const [isDraggingRef, setIsDraggingRef] = useState(false);
+    const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
     const [isLoading, setIsLoading] = useState(false);
-    const [compressedImages, setCompressedImages] = useState([]);
-    const svgRef = useRef<SVGSVGElement>(null);
-    const [markWidth, setMarkWidth] = useState<any>([5]);
-    const [lineWidth, setLineWidth] = useState<any>([1]);
-    const [fontSize, setFontSize] = useState<any>([30]);
+    const [isExporting, setIsExporting] = useState(false);
+
+    const [markWidth, setMarkWidth] = useState<number[]>([5]);
+    const [lineWidth, setLineWidth] = useState<number[]>([1]);
+    const [fontSize, setFontSize] = useState<number[]>([30]);
 
     const [draggingIndex, setDraggingIndex] = useState<{ type: 'line' | 'angle', index: number } | null>(null);
     const [draggingPoint, setDraggingPoint] = useState<{ type: 'line' | 'angle', mIndex: number, pIndex: number } | null>(null);
 
+    // Funções utilitárias para atualizar um Canvas específico por índice
+    const updateCanvasAtIndex = (index: number, updatedFields: Partial<CanvasItem>) => {
+        setCanvases(prev => {
+            const copy = [...prev];
+            copy[index] = { ...copy[index], ...updatedFields };
+            return copy;
+        });
+    };
+
+    const updateCurrentCanvas = (updatedFields: Partial<CanvasItem>) => {
+        updateCanvasAtIndex(activeCanvasIndex, updatedFields);
+    };
+
+    // Adicionar novo Canvas na vertical
+    const handleAddCanvas = () => {
+        const newId = `canvas-${Date.now()}`;
+        const newCanvas: CanvasItem = {
+            id: newId,
+            title: `Medidor ${canvases.length + 1}`,
+            base64: [],
+            baseScale: [100],
+            basePos: { x: 360, y: 50 },
+            refImage: null,
+            refScale: [100],
+            refPos: { x: 1020, y: 50 },
+            measurements: [],
+            angleMeasurements: [],
+            activeMeasurementIndex: -1,
+            activeAngleIndex: -1,
+        };
+        setCanvases(prev => [...prev, newCanvas]);
+        setActiveCanvasIndex(canvases.length);
+    };
+
+    // Remover Canvas
+    const handleRemoveCanvas = (indexToRemove: number) => {
+        if (canvases.length <= 1) return;
+        setCanvases(prev => prev.filter((_, idx) => idx !== indexToRemove));
+        if (activeCanvasIndex >= indexToRemove && activeCanvasIndex > 0) {
+            setActiveCanvasIndex(activeCanvasIndex - 1);
+        }
+    };
+
+    // Dropzone - Imagem Principal
     const handleDrop = useCallback(async (files: any) => {
         let array = [] as any;
-        let compressedImages = [] as any;
         try {
             for (let i = 0; i < files.length; i++) {
-                const readerPreviwe = new FileReader();
-                readerPreviwe.readAsDataURL(files[i]);
-                readerPreviwe.onload = (e) => {
-                    array.push(e?.target?.result)
-                    setBase64([...array]);
-                }
-            };
-            for (let i = 0; i < files.length; i++) {
-                new Compressor(files[i], {
-                    quality: 0.4,
-                    success: async (compressedFile) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(compressedFile);
-                        reader.onload = async (e) => {
-                            compressedImages.push(e?.target?.result)
-                            setCompressedImages(compressedImages);
-                        }
-                    },
-                });
+                const readerPreview = new FileReader();
+                readerPreview.readAsDataURL(files[i]);
+                readerPreview.onload = (e) => {
+                    array.push(e?.target?.result);
+                    updateCurrentCanvas({ base64: [...array] });
+                };
             }
         } catch (error) {
             console.log(error);
         }
-    }, []);
+    }, [activeCanvasIndex]);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop: handleDrop,
@@ -74,149 +160,140 @@ const Ruler = ({ }) => {
         maxFiles: 1,
     });
 
-    // NOVA FUNÇÃO DE ADICIONAR MEDIÇÃO (Agora via botão)
+    // Dropzone - Imagem de Referência
+    const handleDropRef = useCallback((files: any) => {
+        if (files && files[0]) {
+            const reader = new FileReader();
+            reader.readAsDataURL(files[0]);
+            reader.onload = (e) => {
+                updateCurrentCanvas({ refImage: e?.target?.result as string });
+            };
+        }
+    }, [activeCanvasIndex]);
+
+    const { getRootProps: getRefRootProps, getInputProps: getRefInputProps } = useDropzone({
+        onDrop: handleDropRef,
+        accept: { 'image/jpeg': [], 'image/jpg': [], 'image/png': [] },
+        maxFiles: 1,
+    });
+
     const handleAddMeasurement = () => {
-        if (base64.length < 1) return; // Opcional: só permite se houver imagem
-        const newMeasurements: Measurement[] = [...measurements, { points: [], measure: [], color: '#060cbd' }];
-        setMeasurements(newMeasurements);
-        setActiveMeasurementIndex(newMeasurements.length - 1);
-        setActiveAngleIndex(-1);
+        if (currentCanvas.base64.length < 1) return;
+        const newMeasurements: Measurement[] = [
+            ...currentCanvas.measurements,
+            { points: [], measure: [], color: '#060cbd' }
+        ];
+        updateCurrentCanvas({
+            measurements: newMeasurements,
+            activeMeasurementIndex: newMeasurements.length - 1,
+            activeAngleIndex: -1
+        });
     };
 
     const handleAddAngle = () => {
-        if (base64.length < 1) return;
-        const newAngles: Measurement[] = [...angleMeasurements, { points: [], measure: [], color: '#eab308' }];
-        setAngleMeasurements(newAngles);
-        setActiveAngleIndex(newAngles.length - 1);
-        setActiveMeasurementIndex(-1);
-    };
-
-    const updateAngleByInput = (index: number, val: number) => {
-        const newAngles = [...angleMeasurements];
-        const item = newAngles[index];
-
-        if (item.points.length === 3) {
-            const p1 = item.points[0];
-            const p2 = item.points[1];
-            const p3 = item.points[2];
-
-            const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-            const diffRad = (val * Math.PI) / 180;
-            const angle2 = angle1 + diffRad;
-
-            const dist = Math.sqrt(Math.pow(p3.x - p2.x, 2) + Math.pow(p3.y - p2.y, 2));
-
-            item.points[2] = {
-                x: p2.x + dist * Math.cos(angle2),
-                y: p2.y + dist * Math.sin(angle2)
-            };
-        }
-        item.measure = [{ inputValue: val }];
-        setAngleMeasurements(newAngles);
-    };
-
-    const renderAngleArc = (points: { x: number; y: number }[], color: string, strokeWidth: any) => {
-        if (points.length < 3) return null;
-        const p1 = points[0];
-        const p2 = points[1];
-        const p3 = points[2];
-        const radius = 35;
-
-        const ang1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-        const ang2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
-
-        const startX = p2.x + radius * Math.cos(ang1);
-        const startY = p2.y + radius * Math.sin(ang1);
-        const endX = p2.x + radius * Math.cos(ang2);
-        const endY = p2.y + radius * Math.sin(ang2);
-
-        let diff = ang2 - ang1;
-        while (diff < 0) diff += Math.PI * 2;
-        const largeArcFlag = diff > Math.PI ? 1 : 0;
-
-        return (
-            <path
-                d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`}
-                fill="red"
-                stroke={color}
-                strokeWidth={strokeWidth}
-                fillOpacity={0.3}
-            />
-        );
+        if (currentCanvas.base64.length < 1) return;
+        const newAngles: Measurement[] = [
+            ...currentCanvas.angleMeasurements,
+            { points: [], measure: [], color: '#eab308' }
+        ];
+        updateCurrentCanvas({
+            angleMeasurements: newAngles,
+            activeAngleIndex: newAngles.length - 1,
+            activeMeasurementIndex: -1
+        });
     };
 
     const handleDeleteMeasurement = (index: number) => {
-        const newArr = [...measurements];
+        const newArr = [...currentCanvas.measurements];
         newArr.splice(index, 1);
-        setMeasurements(newArr);
-        setActiveMeasurementIndex(-1);
+        updateCurrentCanvas({ measurements: newArr, activeMeasurementIndex: -1 });
     };
 
     const handleDeleteAngle = (index: number) => {
-        const newArr = [...angleMeasurements];
+        const newArr = [...currentCanvas.angleMeasurements];
         newArr.splice(index, 1);
-        setAngleMeasurements(newArr);
-        setActiveAngleIndex(-1);
+        updateCurrentCanvas({ angleMeasurements: newArr, activeAngleIndex: -1 });
     };
 
-    const handleSvgClick = (event: any) => {
-        if (draggingIndex !== null || draggingPoint !== null) return;
-        if (!svgRef.current) return;
-        const svgRect = svgRef.current.getBoundingClientRect();
+    const handleSvgClick = (canvasIdx: number, event: React.MouseEvent<SVGSVGElement>) => {
+        if (draggingIndex !== null || draggingPoint !== null || isDraggingRef || isDraggingBase) return;
+        const svgEl = svgRefs.current[canvases[canvasIdx].id];
+        if (!svgEl) return;
+        const svgRect = svgEl.getBoundingClientRect();
         const x = event.clientX - svgRect.left;
         const y = event.clientY - svgRect.top;
 
-        if (activeMeasurementIndex !== -1) {
-            const newMeasures = [...measurements];
-            const active = newMeasures[activeMeasurementIndex];
+        const canvasObj = canvases[canvasIdx];
+
+        if (canvasObj.activeMeasurementIndex !== -1) {
+            const newMeasures = [...canvasObj.measurements];
+            const active = newMeasures[canvasObj.activeMeasurementIndex];
             if (active.points.length < 2) {
                 active.points.push({ x, y });
                 if (active.points.length === 2) {
                     active.labelPos = { x: (active.points[0].x + active.points[1].x) / 2, y: (active.points[0].y + active.points[1].y) / 2 - 40 };
-                    setActiveMeasurementIndex(-1); // Finaliza a edição após o 2º ponto
+                    updateCanvasAtIndex(canvasIdx, { measurements: newMeasures, activeMeasurementIndex: -1 });
+                } else {
+                    updateCanvasAtIndex(canvasIdx, { measurements: newMeasures });
                 }
-                setMeasurements(newMeasures);
             }
-        }
-        else if (activeAngleIndex !== -1) {
-            const newAngles = [...angleMeasurements];
-            const active = newAngles[activeAngleIndex];
+        } else if (canvasObj.activeAngleIndex !== -1) {
+            const newAngles = [...canvasObj.angleMeasurements];
+            const active = newAngles[canvasObj.activeAngleIndex];
             if (active.points.length < 3) {
                 active.points.push({ x, y });
                 if (active.points.length === 3) {
                     active.labelPos = { x: active.points[1].x + 30, y: active.points[1].y - 40 };
-                    setActiveAngleIndex(-1); // Finaliza a edição após o 3º ponto
+                    updateCanvasAtIndex(canvasIdx, { angleMeasurements: newAngles, activeAngleIndex: -1 });
+                } else {
+                    updateCanvasAtIndex(canvasIdx, { angleMeasurements: newAngles });
                 }
-                setAngleMeasurements(newAngles);
             }
         }
     };
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!svgRef.current) return;
-        const svgRect = svgRef.current.getBoundingClientRect();
+    const handleMouseMove = (canvasIdx: number, e: React.MouseEvent) => {
+        const svgEl = svgRefs.current[canvases[canvasIdx].id];
+        if (!svgEl) return;
+        const svgRect = svgEl.getBoundingClientRect();
         const x = e.clientX - svgRect.left;
         const y = e.clientY - svgRect.top;
 
-        if (draggingIndex) {
+        const canvasObj = canvases[canvasIdx];
+
+        if (isDraggingBase && activeCanvasIndex === canvasIdx) {
+            updateCanvasAtIndex(canvasIdx, {
+                basePos: { x: x - dragBaseOffset.x, y: y - dragBaseOffset.y }
+            });
+            return;
+        }
+
+        if (isDraggingRef && activeCanvasIndex === canvasIdx) {
+            updateCanvasAtIndex(canvasIdx, {
+                refPos: { x: x - dragOffset.x, y: y - dragOffset.y }
+            });
+            return;
+        }
+
+        if (draggingIndex && activeCanvasIndex === canvasIdx) {
             if (draggingIndex.type === 'line') {
-                const newMeasures = [...measurements];
+                const newMeasures = [...canvasObj.measurements];
                 newMeasures[draggingIndex.index].labelPos = { x, y };
-                setMeasurements(newMeasures);
+                updateCanvasAtIndex(canvasIdx, { measurements: newMeasures });
             } else {
-                const newAngles = [...angleMeasurements];
+                const newAngles = [...canvasObj.angleMeasurements];
                 newAngles[draggingIndex.index].labelPos = { x, y };
-                setAngleMeasurements(newAngles);
+                updateCanvasAtIndex(canvasIdx, { angleMeasurements: newAngles });
             }
-        } else if (draggingPoint) {
+        } else if (draggingPoint && activeCanvasIndex === canvasIdx) {
             if (draggingPoint.type === 'line') {
-                const newMeasures = [...measurements];
+                const newMeasures = [...canvasObj.measurements];
                 newMeasures[draggingPoint.mIndex].points[draggingPoint.pIndex] = { x, y };
-                setMeasurements(newMeasures);
+                updateCanvasAtIndex(canvasIdx, { measurements: newMeasures });
             } else {
-                const newAngles = [...angleMeasurements];
+                const newAngles = [...canvasObj.angleMeasurements];
                 newAngles[draggingPoint.mIndex].points[draggingPoint.pIndex] = { x, y };
-                setAngleMeasurements(newAngles);
+                updateCanvasAtIndex(canvasIdx, { angleMeasurements: newAngles });
             }
         }
     };
@@ -224,167 +301,690 @@ const Ruler = ({ }) => {
     const handleMouseUp = () => {
         setDraggingIndex(null);
         setDraggingPoint(null);
+        setIsDraggingRef(false);
+        setIsDraggingBase(false);
+    };
+
+    const handleBaseMouseDown = (canvasIdx: number, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const svgEl = svgRefs.current[canvases[canvasIdx].id];
+        if (!svgEl) return;
+        const svgRect = svgEl.getBoundingClientRect();
+        const mouseX = e.clientX - svgRect.left;
+        const mouseY = e.clientY - svgRect.top;
+
+        setActiveCanvasIndex(canvasIdx);
+        setIsDraggingBase(true);
+        setDragBaseOffset({
+            x: mouseX - canvases[canvasIdx].basePos.x,
+            y: mouseY - canvases[canvasIdx].basePos.y
+        });
+    };
+
+    const handleRefMouseDown = (canvasIdx: number, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const svgEl = svgRefs.current[canvases[canvasIdx].id];
+        if (!svgEl) return;
+        const svgRect = svgEl.getBoundingClientRect();
+        const mouseX = e.clientX - svgRect.left;
+        const mouseY = e.clientY - svgRect.top;
+
+        setActiveCanvasIndex(canvasIdx);
+        setIsDraggingRef(true);
+        setDragOffset({
+            x: mouseX - canvases[canvasIdx].refPos.x,
+            y: mouseY - canvases[canvasIdx].refPos.y
+        });
+    };
+
+    // Exportação de todos os Canvas em sequência para o mesmo documento Word
+    const handleExportDocx = async () => {
+        setIsExporting(true);
+
+        try {
+            const docSectionsChildren: any[] = [
+                new Paragraph({
+                    text: `Relatório de Medições`,
+                    heading: HeadingLevel.HEADING_1,
+                    alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                    text: `Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
+                    alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({ text: "" }),
+            ];
+
+            for (let idx = 0; idx < canvases.length; idx++) {
+                const c = canvases[idx];
+                const svgEl = svgRefs.current[c.id];
+
+                docSectionsChildren.push(
+                    new Paragraph({
+                        text: `${idx + 1}. ${c.title}`,
+                        heading: HeadingLevel.HEADING_2,
+                    })
+                );
+
+                if (svgEl) {
+                    //@ts-ignore
+                    const dataUrl = await toPng(svgEl, { backgroundColor: '#ffffff' });
+                    const imageBytes = Uint8Array.from(
+                        atob(dataUrl.split(',')[1]),
+                        char => char.charCodeAt(0)
+                    );
+
+                    docSectionsChildren.push(
+                        //@ts-ignore
+                        new Paragraph({
+                            children: [
+                                //@ts-ignore
+                                new ImageRun({
+                                    data: imageBytes,
+                                    transformation: {
+                                        width: 600,
+                                        height: 375,
+                                    },
+                                }),
+                            ],
+                            alignment: AlignmentType.CENTER,
+                        })
+                    );
+                }
+
+                docSectionsChildren.push(new Paragraph({ text: "" }));
+
+                const tableRows = [
+                    new TableRow({
+                        children: [
+                            //@ts-ignore
+                            new TableCell({ children: [new Paragraph({ text: "Identificação", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
+                            //@ts-ignore
+                            new TableCell({ children: [new Paragraph({ text: "Valor Registrado", bold: true })], width: { size: 40, type: WidthType.PERCENTAGE } }),
+                        ],
+                    }),
+                ];
+
+                c.measurements.forEach((m, mIdx) => {
+                    tableRows.push(
+                        new TableRow({
+                            children: [
+                                new TableCell({ children: [new Paragraph(`Medição ${mIdx + 1}`)] }),
+                                new TableCell({ children: [new Paragraph(`${m.measure[0]?.inputValue || 0} mm`)] }),
+                            ],
+                        })
+                    );
+                });
+
+                c.angleMeasurements.forEach((a, aIdx) => {
+                    tableRows.push(
+                        new TableRow({
+                            children: [
+                                new TableCell({ children: [new Paragraph(`Ângulo ${aIdx + 1}`)] }),
+                                new TableCell({ children: [new Paragraph(`${a.measure[0]?.inputValue || 0}°`)] }),
+                            ],
+                        })
+                    );
+                });
+
+                docSectionsChildren.push(
+                    new Table({
+                        rows: tableRows,
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                    })
+                );
+
+                docSectionsChildren.push(new Paragraph({ text: "" }));
+                docSectionsChildren.push(new Paragraph({ text: "----------------------------------------------------------------------------------------------------" }));
+                docSectionsChildren.push(new Paragraph({ text: "" }));
+            }
+
+            const doc = new Document({
+                sections: [{
+                    properties: {},
+                    children: docSectionsChildren,
+                }],
+            });
+
+            const buffer = await Packer.toBlob(doc);
+            saveAs(buffer, `Relatorio_Consolidado_${Date.now()}.docx`);
+
+        } catch (error) {
+            console.error("Erro ao gerar o documento Word:", error);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const renderAngleArc = (
+        points: { x: number; y: number }[],
+        color: string,
+        strokeWidth: number
+    ) => {
+        if (points.length !== 3) return null;
+
+        const vertex = points[1];
+        const start = points[0];
+        const end = points[2];
+        const startAngle = Math.atan2(start.y - vertex.y, start.x - vertex.x);
+        const endAngle = Math.atan2(end.y - vertex.y, end.x - vertex.x);
+        const radius = Math.min(
+            35,
+            Math.hypot(start.x - vertex.x, start.y - vertex.y) / 3,
+            Math.hypot(end.x - vertex.x, end.y - vertex.y) / 3
+        );
+        const startPoint = {
+            x: vertex.x + radius * Math.cos(startAngle),
+            y: vertex.y + radius * Math.sin(startAngle),
+        };
+        const endPoint = {
+            x: vertex.x + radius * Math.cos(endAngle),
+            y: vertex.y + radius * Math.sin(endAngle),
+        };
+        const sweep = ((endAngle - startAngle + Math.PI * 2) % (Math.PI * 2)) <= Math.PI ? 1 : 0;
+
+        return (
+            <path
+                d={`M ${startPoint.x} ${startPoint.y} A ${radius} ${radius} 0 0 ${sweep} ${endPoint.x} ${endPoint.y}`}
+                fill="none"
+                stroke={color}
+                strokeWidth={strokeWidth}
+            />
+        );
     };
 
     return (
-        <div
-            className='w-full min-h-screen bg-background flex flex-col items-center'
-            style={{ userSelect: 'none' }}
-        >
-            <div className='w-full flex flex-col sm:flex-row justify-between items-center p-4 gap-4'>
-                <Link href='/' className="sm:ml-4 lg:ml-10">
-                    <DoorOpen size={50} />
-                </Link>
-                <h3 className='text-center text-lg md:text-xl font-medium sm:mr-4 lg:mr-28'>
-                    Medidor
-                </h3>
-                <div className='hidden sm:block'></div>
-            </div>
+        <SidebarProvider>
+            <div className='flex min-h-screen w-full bg-background' style={{ userSelect: 'none' }}>
+                <Sidebar>
+                    <SidebarHeader className="p-4 flex flex-row items-center justify-between border-b">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => router.push('/')}
+                            title="Voltar para a Tela Inicial"
+                        >
+                            <ArrowLeft size={18} />
+                        </Button>
+                        <h3 className='w-full flex justify-center items-center text-lg font-medium'>
+                            Medidor
+                        </h3>
+                    </SidebarHeader>
 
-            <div className='flex flex-wrap w-full justify-center items-center gap-4 p-4'>
-                <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Marca</span>
-                    <Slider value={markWidth} onValueChange={setMarkWidth} min={1} max={10} step={0.1} className="w-full max-w-[200px]" />
-                </div>
-                <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Linha</span>
-                    <Slider value={lineWidth} onValueChange={setLineWidth} min={1} max={10} step={0.1} className="w-full max-w-[200px]" />
-                </div>
-                <div className='flex flex-col items-center min-w-[150px] w-full sm:w-auto'>
-                    <span className="text-sm font-medium mb-2">Font</span>
-                    <Slider value={fontSize} onValueChange={setFontSize} min={1} max={100} step={1} className="w-full max-w-[200px]" />
-                </div>
+                    <SidebarContent className="p-4 space-y-6">
+                        {/* SELETOR DE CANVAS */}
+                        <SidebarGroup>
+                            <SidebarGroupLabel className="flex justify-between items-center">
+                                <span>Lista de medidores</span>
+                                <Button size="sm" variant="ghost" onClick={handleAddCanvas} className="h-6 px-2 text-xs flex gap-1 text-blue-600 hover:text-blue-700">
+                                    <Plus size={14} /> Novo
+                                </Button>
+                            </SidebarGroupLabel>
+                            <SidebarGroupContent className="space-y-1 pt-2">
+                                {canvases.map((c, idx) => (
+                                    <div
+                                        key={c.id}
+                                        onClick={() => setActiveCanvasIndex(idx)}
+                                        className={`flex justify-between items-center p-2 rounded-md cursor-pointer text-sm border transition-all ${activeCanvasIndex === idx
+                                            ? 'bg-red-900 border-red-500 font-semibold text-red-300'
+                                            : 'hover:bg-accent border-transparent'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Layers size={16} />
+                                            <span>{c.title}</span>
+                                        </div>
+                                        {canvases.length > 1 && (
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-6 w-6 text-muted-foreground hover:text-red-600"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemoveCanvas(idx);
+                                                }}
+                                            >
+                                                <Trash2 size={12} />
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                            </SidebarGroupContent>
+                        </SidebarGroup>
 
-                {/* BOTÕES DE AÇÃO */}
-                <div className='flex flex-wrap justify-center items-center w-full sm:w-auto gap-2'>
-                    <Button onClick={handleAddMeasurement} variant="outline" className={`flex gap-2 border-blue-500 text-blue-500 ${activeMeasurementIndex !== -1 ? 'bg-blue-50' : ''}`}>
-                        <RulerIcon size={20} /> + Medição
-                    </Button>
+                        {/* GRUPO DE CONFIGURAÇÕES DE ESTILO */}
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Ajustes de Exibição</SidebarGroupLabel>
+                            <SidebarGroupContent className="space-y-4 pt-2">
+                                <div className='flex flex-col'>
+                                    <span className="text-sm font-medium mb-1">Marca</span>
+                                    <Slider value={markWidth} onValueChange={setMarkWidth} min={1} max={10} step={0.1} />
+                                </div>
+                                <div className='flex flex-col'>
+                                    <span className="text-sm font-medium mb-1">Linha</span>
+                                    <Slider value={lineWidth} onValueChange={setLineWidth} min={1} max={10} step={0.1} />
+                                </div>
+                                <div className='flex flex-col'>
+                                    <span className="text-sm font-medium mb-1">Font</span>
+                                    <Slider value={fontSize} onValueChange={setFontSize} min={1} max={100} step={1} />
+                                </div>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
 
-                    <Button onClick={handleAddAngle} variant="outline" className={`flex gap-2 border-red-500 text-red-500 ${activeAngleIndex !== -1 ? 'bg-red-50' : ''}`}>
-                        <ChevronRight className="rotate-45" size={20} /> + Ângulo
-                    </Button>
+                        {/* GRUPO DE REDIMENSIONAMENTO DE IMAGENS */}
+                        {(currentCanvas.base64.length > 0 || currentCanvas.refImage) && (
+                            <SidebarGroup>
+                                <SidebarGroupLabel>Redimensionamento ({currentCanvas.title})</SidebarGroupLabel>
+                                <SidebarGroupContent className="space-y-4 pt-2">
+                                    {currentCanvas.base64.length > 0 && (
+                                        <div className='flex flex-col'>
+                                            <span className="text-sm font-medium mb-1 text-red-600">Resize Medição ({currentCanvas.baseScale[0]}%)</span>
+                                            <Slider
+                                                value={currentCanvas.baseScale}
+                                                onValueChange={(val) => updateCurrentCanvas({ baseScale: val })}
+                                                min={10} max={200} step={1}
+                                            />
+                                        </div>
+                                    )}
+                                    {currentCanvas.refImage && (
+                                        <div className='flex flex-col'>
+                                            <span className="text-sm font-medium mb-1 text-blue-600">Resize Ref. ({currentCanvas.refScale[0]}%)</span>
+                                            <Slider
+                                                value={currentCanvas.refScale}
+                                                onValueChange={(val) => updateCurrentCanvas({ refScale: val })}
+                                                min={10} max={200} step={1}
+                                            />
+                                        </div>
+                                    )}
+                                </SidebarGroupContent>
+                            </SidebarGroup>
+                        )}
 
-                    <div className='w-full max-w-[12rem]'>
-                        <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-lg shadow-red-900/50 hover:shadow-md hover:shadow-red-300/50">
-                            <div {...getRootProps({ className: 'dropzone' })}>
-                                <input {...getInputProps()} />
-                                <div className='flex justify-center align-middle items-center'>
-                                    <Tip message='Carregar imagem' content={<ImagePlus size={46} />} />
+                        {/* GRUPO DE FERRAMENTAS E AÇÕES */}
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Ferramentas ({currentCanvas.title})</SidebarGroupLabel>
+                            <SidebarGroupContent className="flex flex-col gap-2 pt-2">
+                                <Button onClick={handleAddMeasurement} variant="outline" className={`w-full flex gap-2 border-blue-500 text-blue-500 ${currentCanvas.activeMeasurementIndex !== -1 ? 'bg-blue-50' : ''}`}>
+                                    <RulerIcon size={20} /> + Medição
+                                </Button>
+
+                                <Button onClick={handleAddAngle} variant="outline" className={`w-full flex gap-2 border-red-500 text-red-500 ${currentCanvas.activeAngleIndex !== -1 ? 'bg-red-50' : ''}`}>
+                                    <ChevronRight className="rotate-45" size={20} /> + Ângulo
+                                </Button>
+
+                                <Button
+                                    onClick={handleExportDocx}
+                                    disabled={isExporting}
+                                    className="w-full flex gap-2 bg-blue-700 hover:bg-green-700 text-white"
+                                >
+                                    {isExporting ? <Loader2 className="animate-spin" size={20} /> : <FileDown size={20} />}
+                                    Exportar Relatório Geral
+                                </Button>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+
+                        {/* GRUPO DE UPLOADS */}
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Uploads ({currentCanvas.title})</SidebarGroupLabel>
+                            <SidebarGroupContent className="space-y-3 pt-2">
+                                <div className='w-full'>
+                                    <section className="flex justify-around border-dashed border-2 p-3 border-red-500 rounded-lg shadow-sm hover:shadow-md transition-all">
+                                        <div {...getRootProps({ className: 'dropzone' })}>
+                                            <input {...getInputProps()} />
+                                            <div className='flex justify-center align-middle items-center cursor-pointer'>
+                                                <Tip message='Carregar imagem para medição' content={<ImagePlus size={36} />} />
+                                            </div>
+                                        </div>
+                                        <aside>
+                                            <ul className='flex justify-center align-middle items-center'>
+                                                {currentCanvas.base64.map((img, index) => (
+                                                    <Image className='m-1 aspect-square object-cover rounded hover:scale-150 transition' key={index} src={img} height={38} width={38} alt='uploaded image' />
+                                                ))}
+                                            </ul>
+                                        </aside>
+                                    </section>
+                                </div>
+
+                                <div className='w-full'>
+                                    <section className="flex justify-around border-dashed border-2 p-3 border-blue-500 rounded-lg shadow-sm hover:shadow-md transition-all">
+                                        <div {...getRefRootProps({ className: 'dropzone' })}>
+                                            <input {...getRefInputProps()} />
+                                            <div className='flex justify-center align-middle items-center cursor-pointer'>
+                                                <Tip message='Carregar imagem de referência' content={<FileSpreadsheet size={36} className='text-blue-500' />} />
+                                            </div>
+                                        </div>
+                                        {currentCanvas.refImage && (
+                                            <aside>
+                                                <Image className='m-1 aspect-square object-cover rounded' src={currentCanvas.refImage} height={38} width={38} alt='reference image' />
+                                            </aside>
+                                        )}
+                                    </section>
+                                </div>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+
+                        {/* GRUPO DE ELEMENTOS ATIVOS */}
+                        {(currentCanvas.measurements.length > 0 || currentCanvas.angleMeasurements.length > 0) && (
+                            <SidebarGroup>
+                                <SidebarGroupLabel>Itens Medidos ({currentCanvas.title})</SidebarGroupLabel>
+                                <SidebarGroupContent className="space-y-2 pt-2">
+                                    {currentCanvas.measurements.map((m, i) => (
+                                        <div key={`l-m-${i}`} className={`flex gap-1 justify-between items-center p-2 border rounded-md ${currentCanvas.activeMeasurementIndex === i ? 'border-blue-500' : 'border-border'}`}>
+                                            <span className='text-xs font-bold whitespace-nowrap'>Med {i + 1}:</span>
+                                            <input type="color" value={m.color} onChange={(e) => {
+                                                const next = [...currentCanvas.measurements];
+                                                next[i].color = e.target.value;
+                                                updateCurrentCanvas({ measurements: next });
+                                            }} className="w-5 h-5 cursor-pointer border-none bg-transparent" />
+                                            <Input className='w-16 border h-7 text-xs p-1' type="number" value={m.measure[0]?.inputValue || ''} onChange={(e) => {
+                                                const next = [...currentCanvas.measurements];
+                                                next[i].measure = [{ inputValue: Number(e.target.value) }];
+                                                updateCurrentCanvas({ measurements: next });
+                                            }} />
+                                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleDeleteMeasurement(i)}><Trash2 size={14} /></Button>
+                                        </div>
+                                    ))}
+
+                                    {currentCanvas.angleMeasurements.map((a, i) => (
+                                        <div key={`l-a-${i}`} className={`flex gap-1 justify-between items-center p-2 border rounded-md ${currentCanvas.activeAngleIndex === i ? 'border-yellow-600' : 'border-yellow-500'}`}>
+                                            <span className='text-xs font-bold whitespace-nowrap'>Âng {i + 1}:</span>
+                                            <input type="color" value={a.color} onChange={(e) => {
+                                                const next = [...currentCanvas.angleMeasurements];
+                                                next[i].color = e.target.value;
+                                                updateCurrentCanvas({ angleMeasurements: next });
+                                            }} className="w-5 h-5 cursor-pointer border-none bg-transparent" />
+                                            <Input className='w-16 border h-7 text-xs p-1' type="number" value={a.measure[0]?.inputValue || ''} onChange={(e) => {
+                                                const next = [...currentCanvas.angleMeasurements];
+                                                next[i].measure = [{ inputValue: Number(e.target.value) }];
+                                                updateCurrentCanvas({ angleMeasurements: next });
+                                            }} />
+                                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleDeleteAngle(i)}><Trash2 size={14} /></Button>
+                                        </div>
+                                    ))}
+                                </SidebarGroupContent>
+                            </SidebarGroup>
+                        )}
+                    </SidebarContent>
+                </Sidebar>
+
+                {/* ÁREA DE TRABALHO COM CANVAS EM FILA NA VERTICAL */}
+                <main className="flex-1 p-6 relative overflow-auto bg-gray-50 flex flex-col items-center gap-8">
+                    <div className="w-full flex justify-between items-center">
+
+                    </div>
+
+                    {canvases.map((canvasItem, canvasIdx) => {
+                        const baseWidth = 600 * (canvasItem.baseScale[0] / 100);
+                        const baseHeight = 600 * (canvasItem.baseScale[0] / 100);
+                        const refWidth = 600 * (canvasItem.refScale[0] / 100);
+                        const refHeight = 600 * (canvasItem.refScale[0] / 100);
+
+                        return (
+                            <div
+                                key={canvasItem.id}
+                                onClick={() => setActiveCanvasIndex(canvasIdx)}
+                                className={`w-full flex flex-col gap-2 p-2 rounded-lg transition-all ${activeCanvasIndex === canvasIdx ? 'ring-2 ring-red-500 bg-red-50/20' : ''
+                                    }`}
+                            >
+                                <div className="flex justify-between items-center px-2">
+                                    <span className="font-semibold text-sm text-gray-700">{canvasItem.title}</span>
+                                    {canvases.length > 1 && (
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="text-red-500 hover:text-red-700 flex gap-1 h-7"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRemoveCanvas(canvasIdx);
+                                            }}
+                                        >
+                                            <Trash2 size={14} /> Remover Canvas
+                                        </Button>
+                                    )}
+                                </div>
+
+                                <div className="w-full h-[800px] border bg-white rounded-lg shadow-sm relative overflow-hidden">
+                                    <svg
+                                        ref={(el) => { svgRefs.current[canvasItem.id] = el; }}
+                                        className="w-full h-full cursor-crosshair"
+                                        onClick={(e) => handleSvgClick(canvasIdx, e)}
+                                        onMouseMove={(e) => handleMouseMove(canvasIdx, e)}
+                                        onMouseUp={handleMouseUp}
+                                    >
+                                        {/* Renderização da Imagem Principal */}
+                                        {canvasItem.base64.length > 0 && (
+                                            <g>
+                                                <image
+                                                    href={canvasItem.base64[0]}
+                                                    x={canvasItem.basePos.x}
+                                                    y={canvasItem.basePos.y}
+                                                    width={baseWidth}
+                                                    height={baseHeight}
+                                                    preserveAspectRatio="none"
+                                                />
+                                                <rect
+                                                    x={canvasItem.basePos.x}
+                                                    y={canvasItem.basePos.y}
+                                                    width={baseWidth}
+                                                    height={baseHeight}
+                                                    fill="transparent"
+                                                    stroke="rgba(0,0,255,0.2)"
+                                                    strokeDasharray="4"
+                                                    onMouseDown={(e) => handleBaseMouseDown(canvasIdx, e)}
+                                                    className="cursor-move"
+                                                />
+                                            </g>
+                                        )}
+
+                                        {/* Renderização da Imagem de Referência */}
+                                        {canvasItem.refImage && (
+                                            <g>
+                                                <image
+                                                    href={canvasItem.refImage}
+                                                    x={canvasItem.refPos.x}
+                                                    y={canvasItem.refPos.y}
+                                                    width={refWidth}
+                                                    height={refHeight}
+                                                    preserveAspectRatio="none"
+                                                />
+                                                <rect
+                                                    x={canvasItem.refPos.x}
+                                                    y={canvasItem.refPos.y}
+                                                    width={refWidth}
+                                                    height={refHeight}
+                                                    fill="transparent"
+                                                    stroke="rgba(255,0,0,0.2)"
+                                                    strokeDasharray="4"
+                                                    onMouseDown={(e) => handleRefMouseDown(canvasIdx, e)}
+                                                    className="cursor-move"
+                                                />
+                                            </g>
+                                        )}
+
+                                        {/* Renderização das Medições de Linha */}
+                                        {canvasItem.measurements.map((m, mIndex) => (
+                                            <g key={`line-${mIndex}`}>
+                                                {/* Pontos de controle da linha */}
+                                                {m.points.map((p, pIndex) => (
+                                                    <circle
+                                                        key={`p-${pIndex}`}
+                                                        cx={p.x}
+                                                        cy={p.y}
+                                                        r={markWidth[0]}
+                                                        fill="red"
+                                                        className="cursor-pointer"
+                                                        onMouseDown={(e) => {
+                                                            e.stopPropagation();
+                                                            setActiveCanvasIndex(canvasIdx);
+                                                            setDraggingPoint({ type: 'line', mIndex, pIndex });
+                                                        }}
+                                                    />
+                                                ))}
+
+                                                {m.points.length === 2 && (
+                                                    <>
+                                                        {/* Linha principal */}
+                                                        <line
+                                                            x1={m.points[0].x}
+                                                            y1={m.points[0].y}
+                                                            x2={m.points[1].x}
+                                                            y2={m.points[1].y}
+                                                            stroke={m.color}
+                                                            strokeWidth={lineWidth[0]}
+                                                        />
+
+                                                        {m.labelPos && (
+                                                            <>
+                                                                {/* Linha tracejada indicadora do rótulo */}
+                                                                <line
+                                                                    x1={(m.points[0].x + m.points[1].x) / 2}
+                                                                    y1={(m.points[0].y + m.points[1].y) / 2}
+                                                                    x2={m.labelPos.x + 20}
+                                                                    y2={m.labelPos.y}
+                                                                    stroke={m.color}
+                                                                    strokeWidth="4"
+                                                                    strokeDasharray="5"
+                                                                />
+
+                                                                {/* Grupo do rótulo arrastável com fundo e textos */}
+                                                                <g
+                                                                    className="cursor-move"
+                                                                    onMouseDown={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setActiveCanvasIndex(canvasIdx);
+                                                                        setDraggingIndex({ type: 'line', index: mIndex });
+                                                                    }}
+                                                                >
+                                                                    <rect
+                                                                        x={m.labelPos.x}
+                                                                        y={m.labelPos.y - fontSize[0]}
+                                                                        width={fontSize[0] * 5.5}
+                                                                        height={fontSize[0] * 1.2}
+                                                                        fill="white"
+                                                                        rx="4"
+                                                                    />
+                                                                    <text
+                                                                        x={m.labelPos.x - 55}
+                                                                        y={m.labelPos.y}
+                                                                        fontSize={15}
+                                                                        fill="black"
+                                                                        fontWeight="bold"
+                                                                    >
+                                                                        Med {mIndex + 1}
+                                                                    </text>
+                                                                    <text
+                                                                        x={m.labelPos.x}
+                                                                        y={m.labelPos.y}
+                                                                        fontSize={fontSize[0]}
+                                                                        fill={m.color}
+                                                                        fontWeight="bold"
+                                                                    >
+                                                                        : {m.measure[0]?.inputValue || 0} mm
+                                                                    </text>
+                                                                </g>
+                                                            </>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </g>
+                                        ))}
+
+                                        {/* Renderização das Medições de Ângulo */}
+                                        {canvasItem.angleMeasurements.map((a, aIndex) => (
+                                            <g key={`angle-${aIndex}`}>
+                                                {/* Polyline e arco do ângulo */}
+                                                {a.points.length >= 2 && (
+                                                    <>
+                                                        <polyline
+                                                            points={a.points.map((p) => `${p.x},${p.y}`).join(' ')}
+                                                            fill="none"
+                                                            opacity={0.9}
+                                                            stroke={a.color}
+                                                            strokeWidth={lineWidth[0]}
+                                                        />
+
+                                                        {typeof renderAngleArc === 'function' && renderAngleArc(a.points, a.color, lineWidth[0])}
+                                                    </>
+                                                )}
+
+                                                {/* Linha tracejada e rótulo quando o ângulo está completo */}
+                                                {a.points.length === 3 && a.labelPos && (
+                                                    <>
+                                                        <line
+                                                            x1={a.points[1].x}
+                                                            y1={a.points[1].y}
+                                                            x2={a.labelPos.x + 10}
+                                                            y2={a.labelPos.y - 10}
+                                                            stroke={a.color}
+                                                            strokeWidth="4"
+                                                            strokeDasharray="5,5"
+                                                        />
+                                                        <g
+                                                            className="cursor-move"
+                                                            onMouseDown={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveCanvasIndex(canvasIdx);
+                                                                setDraggingIndex({ type: 'angle', index: aIndex });
+                                                            }}
+                                                        >
+                                                            <rect
+                                                                x={a.labelPos.x}
+                                                                y={a.labelPos.y - fontSize[0]}
+                                                                width={fontSize[0] * 3}
+                                                                height={fontSize[0] * 1.2}
+                                                                fill="white"
+                                                                rx="4"
+                                                                stroke={a.color}
+                                                            />
+                                                            <text
+                                                                x={a.labelPos.x - 55}
+                                                                y={a.labelPos.y}
+                                                                fontSize={15}
+                                                                fill="black"
+                                                                fontWeight="bold"
+                                                            >
+                                                                Âng {aIndex + 1}
+                                                            </text>
+                                                            <text
+                                                                x={a.labelPos.x + 5}
+                                                                y={a.labelPos.y}
+                                                                fontSize={fontSize[0]}
+                                                                fill={a.color}
+                                                                fontWeight="bold"
+                                                            >
+                                                                {a.measure[0]?.inputValue || 0}°
+                                                            </text>
+                                                        </g>
+                                                    </>
+                                                )}
+
+                                                {/* Pontos de controle do ângulo */}
+                                                {a.points.map((p, pIndex) => (
+                                                    <circle
+                                                        key={`ap-${pIndex}`}
+                                                        cx={p.x}
+                                                        cy={p.y}
+                                                        r={markWidth[0]}
+                                                        fill={pIndex === 1 ? 'white' : 'red'}
+                                                        stroke={a.color}
+                                                        className="cursor-pointer"
+                                                        onMouseDown={(e) => {
+                                                            e.stopPropagation();
+                                                            setActiveCanvasIndex(canvasIdx);
+                                                            setDraggingPoint({ type: 'angle', mIndex: aIndex, pIndex });
+                                                        }}
+                                                    />
+                                                ))}
+                                            </g>
+                                        ))}
+                                    </svg>
                                 </div>
                             </div>
-                            <aside>
-                                <ul className='flex justify-center align-middle items-center'>
-                                    {base64.map((img, index) => (
-                                        <Image className='m-1 aspect-square object-cover rounded hover:scale-150 transition' key={index} src={img} height={38} width={38} alt='uploaded image' />
-                                    ))}
-                                </ul>
-                            </aside>
-                        </section>
-                    </div>
-                </div>
+                        );
+                    })}
+                </main>
             </div>
-
-            {/* LISTA DE MEDIÇÕES E ÂNGULOS */}
-            <div className='flex flex-wrap m-auto justify-center items-center gap-2'>
-                {measurements.map((m, i) => (
-                    <div key={`l-m-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeMeasurementIndex === i ? 'border-blue-500 ' : 'border-spacing-2'}`}>
-                        <span className='text-xs font-bold'>Med {i + 1}:</span>
-                        <input type="color" value={m.color} onChange={(e) => {
-                            const next = [...measurements];
-                            next[i].color = e.target.value;
-                            setMeasurements(next);
-                        }} className="w-6 h-6 cursor-pointer border-none bg-transparent" />
-                        <Input className='w-20 border h-8' type="number" value={m.measure[0]?.inputValue || ''} onChange={(e) => {
-                            const next = [...measurements];
-                            next[i].measure = [{ inputValue: Number(e.target.value) }];
-                            setMeasurements(next);
-                        }} />
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteMeasurement(i)}><Trash2 size={16} /></Button>
-                    </div>
-                ))}
-
-                {angleMeasurements.map((a, i) => (
-                    <div key={`l-a-${i}`} className={`flex gap-1 justify-center items-center m-1 p-2 border rounded-md ${activeAngleIndex === i ? 'border-yellow-600 ' : 'border-yellow-500'}`}>
-                        <span className='text-xs font-bold'>Âng {i + 1}:</span>
-                        <input type="color" value={a.color} onChange={(e) => {
-                            const next = [...angleMeasurements];
-                            next[i].color = e.target.value;
-                            setAngleMeasurements(next);
-                        }} className="w-6 h-6 cursor-pointer border-none bg-transparent" />
-                        <Input
-                            className='w-20 border h-8 border-yellow-300'
-                            type="number"
-                            placeholder="°"
-                            value={a.measure[0]?.inputValue || ''}
-                            onChange={(e) => updateAngleByInput(i, Number(e.target.value))}
-                        />
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteAngle(i)}><Trash2 size={16} /></Button>
-                    </div>
-                ))}
-            </div>
-
-            <div className='w-full overflow-auto flex-grow flex justify-center p-4'>
-                <svg ref={svgRef} width="1280" height="1200" style={{ minWidth: '1280px', cursor: (activeMeasurementIndex !== -1 || activeAngleIndex !== -1) ? 'crosshair' : 'default' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-                    <defs>
-                        {[...measurements, ...angleMeasurements].map((m, i) => (
-                            <marker key={`arr-${i}`} id={`arrowhead-${i}`} markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
-                                <polygon points="0 0, 4 3.5, 0 7" fill={m.color} />
-                            </marker>
-                        ))}
-                    </defs>
-
-                    {base64.map((img, index) => (
-                        <image key={index} href={img} x={index < 2 ? index * 602 : (index - 2) * 600} y={index < 2 ? 0 : 602} width={1280} height={600} />
-                    ))}
-
-                    {/* DESENHO RÉGUAS */}
-                    {measurements.map((m, i) => (
-                        <React.Fragment key={`svg-m-${i}`}>
-                            {m.points.length >= 1 && m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="red" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'line', mIndex: i, pIndex: pi }); }} />
-                            ))}
-                            {m.points.length === 2 && m.labelPos && (
-                                <>
-                                    <line x1={m.points[0].x} y1={m.points[0].y} x2={m.points[1].x} y2={m.points[1].y} stroke={m.color} strokeWidth={lineWidth} />
-                                    <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5" />
-                                    <g onMouseDown={() => setDraggingIndex({ type: 'line', index: i })} style={{ cursor: 'move' }}>
-                                        <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 5} height={fontSize * 1.2} fill="white" rx="4" />
-                                        <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Med {i + 1}</text>
-                                        <text x={m.labelPos.x} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">: {m.measure[0]?.inputValue || 0} mm</text>
-                                    </g>
-                                </>
-                            )}
-                        </React.Fragment>
-                    ))}
-
-                    {/* DESENHO ÂNGULOS */}
-                    {angleMeasurements.map((m, i) => (
-                        <React.Fragment key={`svg-a-${i}`}>
-                            {m.points.length >= 2 && (
-                                <>
-                                    <polyline points={m.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" opacity={0.9} stroke={m.color} strokeWidth={lineWidth} />
-                                    {renderAngleArc(m.points, m.color, lineWidth)}
-                                    {m.points.length === 3 && m.labelPos && (
-                                        <>
-                                            <line x1={m.points[1].x} y1={m.points[1].y} x2={m.labelPos.x + 10} y2={m.labelPos.y - 10} stroke={m.color} strokeWidth="4" strokeDasharray="5,5" />
-                                            <g onMouseDown={() => setDraggingIndex({ type: 'angle', index: i })} style={{ cursor: 'move' }}>
-                                                <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 4} height={fontSize * 1.2} fill="white" rx="4" stroke={m.color} />
-                                                <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Âng {i + 1}</text>
-                                                <text x={m.labelPos.x + 5} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">{m.measure[0]?.inputValue || 0}°</text>
-                                            </g>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                            {m.points.map((p, pi) => (
-                                <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
-                            ))}
-                        </React.Fragment>
-                    ))}
-                </svg>
-            </div>
-        </div>
+        </SidebarProvider>
     );
 };
 
