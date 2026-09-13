@@ -588,7 +588,7 @@ const Ruler = ({ }) => {
                     </div>
 
                     <div className='w-full overflow-auto flex-grow flex justify-center p-4'>
-                        <svg ref={svgRef} width="1920" height="1200" style={{ minWidth: '1280px', cursor: (activeMeasurementIndex !== -1 || activeAngleIndex !== -1) ? 'crosshair' : 'default' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+                        <svg className="border-2 rounded" ref={svgRef} width="1320" height="800" style={{ minWidth: '1280px', cursor: (activeMeasurementIndex !== -1 || activeAngleIndex !== -1) ? 'crosshair' : 'default' }} onClick={handleSvgClick} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
                             <defs>
                                 {[...measurements, ...angleMeasurements].map((m, i) => (
                                     <marker key={`arr-${i}`} id={`arrowhead-${i}`} markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
@@ -698,11 +698,9 @@ const Ruler = ({ }) => {
                                             <line x1={m.points[0].x} y1={m.points[0].y} x2={m.points[1].x} y2={m.points[1].y} stroke={m.color} strokeWidth={lineWidth} />
                                             <line x1={(m.points[0].x + m.points[1].x) / 2} y1={(m.points[0].y + m.points[1].y) / 2} x2={m.labelPos.x + 20} y2={m.labelPos.y} stroke={m.color} strokeWidth="4" strokeDasharray="5" />
                                             <g onMouseDown={() => setDraggingIndex({ type: 'line', index: i })} style={{ cursor: 'move' }}>
-                                                <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 8} height={fontSize * 1.2} fill="white" rx="4" />
-                                                <text x={m.labelPos.x + 10} y={m.labelPos.y - (fontSize * 0.2)} fontSize={fontSize} fill={m.color} fontWeight="bold">
-                                                    <tspan fill="black" fontSize={fontSize * 0.45}>{`Med ${i + 1}: `}</tspan>
-                                                    {m.measure[0]?.inputValue ? `${m.measure[0]?.inputValue}mm` : ''}
-                                                </text>
+                                                <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 6} height={fontSize * 1.2} fill="white" rx="4" />
+                                                <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Med {i + 1}</text>
+                                                <text x={m.labelPos.x} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">: {m.measure[0]?.inputValue || 0} mm</text>
                                             </g>
                                         </>
                                     )}
@@ -710,29 +708,27 @@ const Ruler = ({ }) => {
                             ))}
 
                             {/* DESENHO ÂNGULOS */}
-                            {angleMeasurements.map((a, i) => (
+                            {angleMeasurements.map((m, i) => (
                                 <React.Fragment key={`svg-a-${i}`}>
-                                    {a.points.length >= 1 && a.points.map((p, pi) => (
-                                        <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill="orange" cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
-                                    ))}
-                                    {a.points.length >= 2 && (
-                                        <line x1={a.points[0].x} y1={a.points[0].y} x2={a.points[1].x} y2={a.points[1].y} stroke={a.color} strokeWidth={lineWidth} />
-                                    )}
-                                    {a.points.length === 3 && (
+                                    {m.points.length >= 2 && (
                                         <>
-                                            <line x1={a.points[1].x} y1={a.points[1].y} x2={a.points[2].x} y2={a.points[2].y} stroke={a.color} strokeWidth={lineWidth} />
-                                            {renderAngleArc(a.points, a.color, lineWidth)}
-                                            {a.labelPos && (
-                                                <g onMouseDown={() => setDraggingIndex({ type: 'angle', index: i })} style={{ cursor: 'move' }}>
-                                                    <rect x={a.labelPos.x} y={a.labelPos.y - fontSize} width={fontSize * 7} height={fontSize * 1.2} fill="white" rx="4" />
-                                                    <text x={a.labelPos.x + 10} y={a.labelPos.y - (fontSize * 0.2)} fontSize={fontSize} fill={a.color} fontWeight="bold">
-                                                        <tspan fill="black" fontSize={fontSize * 0.45}>{`Âng ${i + 1}: `}</tspan>
-                                                        {a.measure[0]?.inputValue ? `${a.measure[0]?.inputValue}°` : ''}
-                                                    </text>
-                                                </g>
+                                            <polyline points={m.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" opacity={0.9} stroke={m.color} strokeWidth={lineWidth} />
+                                            {renderAngleArc(m.points, m.color, lineWidth)}
+                                            {m.points.length === 3 && m.labelPos && (
+                                                <>
+                                                    <line x1={m.points[1].x} y1={m.points[1].y} x2={m.labelPos.x + 10} y2={m.labelPos.y - 10} stroke={m.color} strokeWidth="4" strokeDasharray="5,5" />
+                                                    <g onMouseDown={() => setDraggingIndex({ type: 'angle', index: i })} style={{ cursor: 'move' }}>
+                                                        <rect x={m.labelPos.x} y={m.labelPos.y - fontSize} width={fontSize * 3} height={fontSize * 1.2} fill="white" rx="4" stroke={m.color} />
+                                                        <text x={m.labelPos.x - 55} y={m.labelPos.y} fontSize={15} fill="black" fontWeight="bold">Âng {i + 1}</text>
+                                                        <text x={m.labelPos.x + 5} y={m.labelPos.y} fontSize={fontSize} fill={m.color} fontWeight="bold">{m.measure[0]?.inputValue || 0}°</text>
+                                                    </g>
+                                                </>
                                             )}
                                         </>
                                     )}
+                                    {m.points.map((p, pi) => (
+                                        <circle key={pi} cx={p.x} cy={p.y} r={markWidth} fill={pi === 1 ? "white" : "red"} stroke={m.color} cursor="move" onMouseDown={(e) => { e.stopPropagation(); setDraggingPoint({ type: 'angle', mIndex: i, pIndex: pi }); }} />
+                                    ))}
                                 </React.Fragment>
                             ))}
                         </svg>
