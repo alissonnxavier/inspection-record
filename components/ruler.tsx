@@ -19,10 +19,12 @@ import {
     SidebarHeader,
     SidebarProvider,
 } from "@/components/ui/sidebar";
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 // Importações para captura e geração de Word
 import { toPng } from 'html-to-image';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType, ImageRun } from 'docx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType, ImageRun, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 
 type Measurement = {
@@ -48,6 +50,14 @@ type CanvasItem = {
 };
 
 const Ruler = () => {
+
+    const [partData, setPartData] = useState({
+        code: '',
+        description: '',
+        revision: '',
+        status: 'APROVADO' as 'APROVADO' | 'REPROVADO',
+    });
+
     const router = useRouter();
 
     // Estado principal contendo múltiplos canvas em fila
@@ -100,6 +110,12 @@ const Ruler = () => {
             copy[index] = { ...copy[index], ...updatedFields };
             return copy;
         });
+    };
+
+    // Manipulador de mudanças dos inputs
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPartData((prev) => ({ ...prev, [name]: value }));
     };
 
     const updateCurrentCanvas = (updatedFields: Partial<CanvasItem>) => {
@@ -342,26 +358,71 @@ const Ruler = () => {
         setIsExporting(true);
 
         try {
+            const isApproved = partData.status === 'APROVADO';
+
             const docSectionsChildren: any[] = [
                 new Paragraph({
-                    text: `Relatório de Medições`,
+                    text: `RELATÓRIO DE INSPEÇÃO DE MEDIÇÕES`,
                     heading: HeadingLevel.HEADING_1,
                     alignment: AlignmentType.CENTER,
                 }),
-                new Paragraph({
-                    text: `Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
-                    alignment: AlignmentType.CENTER,
+                new Paragraph({ text: "" }),
+
+                // TABELA DE CABEÇALHO COM DADOS DO FORMULÁRIO
+                new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    rows: [
+                        new TableRow({
+                            children: [
+                                //@ts-ignore
+                                new TableCell({ children: [new Paragraph({ text: "Código da Peça:", bold: true })] }),
+                                new TableCell({ children: [new Paragraph(partData.code || "N/A")] }),
+                            ],
+                        }),
+                        new TableRow({
+                            children: [
+                                //@ts-ignore
+                                new TableCell({ children: [new Paragraph({ text: "Descrição da Peça:", bold: true })] }),
+                                new TableCell({ children: [new Paragraph(partData.description || "N/A")] }),
+                            ],
+                        }),
+                        new TableRow({
+                            children: [
+                                //@ts-ignore
+                                new TableCell({ children: [new Paragraph({ text: "Revisão:", bold: true })] }),
+                                new TableCell({ children: [new Paragraph(partData.revision || "N/A")] }),
+                            ],
+                        }),
+                        new TableRow({
+                            children: [
+                                //@ts-ignore
+                                new TableCell({ children: [new Paragraph({ text: "Data / Hora:", bold: true })] }),
+                                new TableCell({ children: [new Paragraph(`${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`)] }),
+                            ],
+                        }),
+                        new TableRow({
+                            children: [
+                                //@ts-ignore
+                                new TableCell({ children: [new Paragraph({ text: "Status de Aprovação:", bold: true })] }),
+                                //@ts-ignore
+                                new TableCell({ children: [new Paragraph({ text: partData.status, bold: true })] }),
+                            ],
+                        }),
+                    ],
                 }),
+
+                new Paragraph({ text: "" }),
                 new Paragraph({ text: "" }),
             ];
 
+            // --- RENDERIZAÇÃO DOS CANVASES E MEDIÇÕES ---
             for (let idx = 0; idx < canvases.length; idx++) {
                 const c = canvases[idx];
                 const svgEl = svgRefs.current[c.id];
 
                 docSectionsChildren.push(
                     new Paragraph({
-                        text: `${idx + 1}. ${c.title}`,
+                        text: `${idx + 1}. Medição`,
                         heading: HeadingLevel.HEADING_2,
                     })
                 );
@@ -375,16 +436,12 @@ const Ruler = () => {
                     );
 
                     docSectionsChildren.push(
-                        //@ts-ignore
                         new Paragraph({
                             children: [
                                 //@ts-ignore
                                 new ImageRun({
                                     data: imageBytes,
-                                    transformation: {
-                                        width: 600,
-                                        height: 375,
-                                    },
+                                    transformation: { width: 600, height: 375 },
                                 }),
                             ],
                             alignment: AlignmentType.CENTER,
@@ -440,14 +497,11 @@ const Ruler = () => {
             }
 
             const doc = new Document({
-                sections: [{
-                    properties: {},
-                    children: docSectionsChildren,
-                }],
+                sections: [{ properties: {}, children: docSectionsChildren }],
             });
 
             const buffer = await Packer.toBlob(doc);
-            saveAs(buffer, `Relatorio_Consolidado_${Date.now()}.docx`);
+            saveAs(buffer, `Relatorio_${partData.code || 'Medicao'}_${Date.now()}.docx`);
 
         } catch (error) {
             console.error("Erro ao gerar o documento Word:", error);
@@ -496,6 +550,7 @@ const Ruler = () => {
     return (
         <SidebarProvider>
             <div className='flex min-h-screen w-full bg-background' style={{ userSelect: 'none' }}>
+
                 <Sidebar>
                     <SidebarHeader className="p-4 flex flex-row items-center justify-between border-b">
                         <Button
@@ -707,10 +762,97 @@ const Ruler = () => {
                     </SidebarContent>
                 </Sidebar>
 
+
+
                 {/* ÁREA DE TRABALHO COM CANVAS EM FILA NA VERTICAL */}
                 <main className="flex-1 p-6 relative overflow-auto bg-gray-50 flex flex-col items-center gap-8">
-                    <div className="w-full flex justify-between items-center">
+                    <div className="w-full flex justify-center items-center">
+                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
+                                Informações da Peça
+                            </h2>
 
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                {/* Código da Peça */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Código da Peça
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="code"
+                                        value={partData.code}
+                                        onChange={handleInputChange}
+                                        placeholder="Ex: XX.00000"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                {/* Descrição da Peça */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Descrição da Peça
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="description"
+                                        value={partData.description}
+                                        onChange={handleInputChange}
+                                        placeholder="Ex: Suporte forntal"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                {/* Revisão */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Revisão
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="revision"
+                                        value={partData.revision}
+                                        onChange={handleInputChange}
+                                        placeholder="Ex: 00"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Radio Group - Status de Aprovação */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t pt-4 mt-2">
+                                <div>
+                                    <span className="block text-sm font-semibold text-gray-700 mb-2 sm:mb-0">
+                                        Status de Inspeção:
+                                    </span>
+                                    <div className="flex items-center space-x-6">
+                                        <label className="inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="status"
+                                                value="APROVADO"
+                                                checked={partData.status === 'APROVADO'}
+                                                onChange={handleInputChange}
+                                                className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300"
+                                            />
+                                            <span className="ml-2 text-sm font-medium text-green-700">Aprovado</span>
+                                        </label>
+
+                                        <label className="inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="status"
+                                                value="REPROVADO"
+                                                checked={partData.status === 'REPROVADO'}
+                                                onChange={handleInputChange}
+                                                className="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300"
+                                            />
+                                            <span className="ml-2 text-sm font-medium text-red-700">Reprovado</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {canvases.map((canvasItem, canvasIdx) => {
