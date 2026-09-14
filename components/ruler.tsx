@@ -362,7 +362,7 @@ const Ruler = () => {
 
             const docSectionsChildren: any[] = [
                 new Paragraph({
-                    text: `RELATÓRIO DE INSPEÇÃO DE MEDIÇÕES`,
+                    text: `RELATÓRIO DE MEDIÇÕES`,
                     heading: HeadingLevel.HEADING_1,
                     alignment: AlignmentType.CENTER,
                 }),
@@ -375,44 +375,64 @@ const Ruler = () => {
                         new TableRow({
                             children: [
                                 //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Código da Peça:", bold: true })] }),
-                                new TableCell({ children: [new Paragraph(partData.code || "N/A")] }),
+                                new TableCell({ children: [new Paragraph({ text: "Código da Peça:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
+                                new TableCell({ children: [new Paragraph(partData.code || "N/A")], width: { size: 70, type: WidthType.PERCENTAGE }, }),
                             ],
                         }),
                         new TableRow({
                             children: [
                                 //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Descrição da Peça:", bold: true })] }),
-                                new TableCell({ children: [new Paragraph(partData.description || "N/A")] }),
+                                new TableCell({ children: [new Paragraph({ text: "Descrição da Peça:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
+                                new TableCell({ children: [new Paragraph(partData.description || "N/A")], width: { size: 70, type: WidthType.PERCENTAGE }, }),
                             ],
                         }),
                         new TableRow({
                             children: [
                                 //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Revisão:", bold: true })] }),
-                                new TableCell({ children: [new Paragraph(partData.revision || "N/A")] }),
+                                new TableCell({ children: [new Paragraph({ text: "Revisão:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
+                                new TableCell({ children: [new Paragraph(partData.revision || "N/A")], width: { size: 70, type: WidthType.PERCENTAGE }, }),
                             ],
                         }),
                         new TableRow({
                             children: [
                                 //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Data / Hora:", bold: true })] }),
-                                new TableCell({ children: [new Paragraph(`${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`)] }),
+                                new TableCell({ children: [new Paragraph({ text: "Data / Hora:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
+                                new TableCell({ children: [new Paragraph(`${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`)], width: { size: 70, type: WidthType.PERCENTAGE }, }),
                             ],
                         }),
                         new TableRow({
                             children: [
                                 //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Status de Aprovação:", bold: true })] }),
+                                new TableCell({
+                                    children: [new Paragraph({ children: [new TextRun({ text: "Status de Aprovação:", bold: true })] })],
+                                    width: { size: 30, type: WidthType.PERCENTAGE },
+                                }),
                                 //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: partData.status, bold: true })] }),
+                                new TableCell({
+                                    children: [
+                                        //@ts-ignore
+                                        new Paragraph({
+
+                                            children: [
+                                                new TextRun({
+                                                    text: partData.status == "APROVADO" ? "APROVADO" : "REPROVADO",
+                                                    bold: true,
+                                                    color: partData.status == "APROVADO" ? "008000" : "FF0000",
+                                                })
+                                            ]
+                                        })
+                                    ],
+                                    width: {
+                                        size: 70, type: WidthType.PERCENTAGE
+
+                                    },
+                                }),
                             ],
                         }),
                     ],
                 }),
 
-                new Paragraph({ text: "" }),
-                new Paragraph({ text: "" }),
+
             ];
 
             // --- RENDERIZAÇÃO DOS CANVASES E MEDIÇÕES ---
@@ -441,7 +461,10 @@ const Ruler = () => {
                                 //@ts-ignore
                                 new ImageRun({
                                     data: imageBytes,
-                                    transformation: { width: 600, height: 375 },
+                                    transformation: {
+                                        width: 500, height: 312
+                                    },
+                                    type: "png",
                                 }),
                             ],
                             alignment: AlignmentType.CENTER,
@@ -492,7 +515,6 @@ const Ruler = () => {
                 );
 
                 docSectionsChildren.push(new Paragraph({ text: "" }));
-                docSectionsChildren.push(new Paragraph({ text: "----------------------------------------------------------------------------------------------------" }));
                 docSectionsChildren.push(new Paragraph({ text: "" }));
             }
 

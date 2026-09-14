@@ -492,7 +492,6 @@ const Ruler = () => {
                 );
 
                 docSectionsChildren.push(new Paragraph({ text: "" }));
-                docSectionsChildren.push(new Paragraph({ text: "----------------------------------------------------------------------------------------------------" }));
                 docSectionsChildren.push(new Paragraph({ text: "" }));
             }
 
