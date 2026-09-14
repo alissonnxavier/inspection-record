@@ -10,4 +10,6 @@ const note = () => {
                 enquanto um status "Reprovado" indica que a peça não atendeu aos critérios de qualidade estabelecidos.</p>
         </div>
     )
-}
+};
+
+export default note;
