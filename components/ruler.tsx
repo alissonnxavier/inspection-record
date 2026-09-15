@@ -787,17 +787,17 @@ const Ruler = () => {
 
 
                 {/* ÁREA DE TRABALHO COM CANVAS EM FILA NA VERTICAL */}
-                <main className="flex-1 p-6 relative overflow-auto bg-gray-50 flex flex-col items-center gap-8">
+                <main className="flex-1 p-6 relative overflow-auto flex flex-col items-center gap-8">
                     <div className="w-full flex justify-center items-center">
-                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
+                        <div className=" p-6 rounded-lg shadow-md border ">
+                            <h2 className="text-xl font-bold mb-4 border-b pb-2">
                                 Informações da Peça
                             </h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 {/* Código da Peça */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium mb-1">
                                         Código da Peça
                                     </label>
                                     <input
@@ -806,13 +806,13 @@ const Ruler = () => {
                                         value={partData.code}
                                         onChange={handleInputChange}
                                         placeholder="Ex: XX.00000"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
 
                                 {/* Descrição da Peça */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium  mb-1">
                                         Descrição da Peça
                                     </label>
                                     <input
@@ -821,13 +821,13 @@ const Ruler = () => {
                                         value={partData.description}
                                         onChange={handleInputChange}
                                         placeholder="Ex: Suporte forntal"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
 
                                 {/* Revisão */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium mb-1">
                                         Revisão
                                     </label>
                                     <input
@@ -836,7 +836,7 @@ const Ruler = () => {
                                         value={partData.revision}
                                         onChange={handleInputChange}
                                         placeholder="Ex: 00"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                             </div>
@@ -844,7 +844,7 @@ const Ruler = () => {
                             {/* Radio Group - Status de Aprovação */}
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t pt-4 mt-2">
                                 <div>
-                                    <span className="block text-sm font-semibold text-gray-700 mb-2 sm:mb-0">
+                                    <span className="block text-sm font-semibold  mb-2 sm:mb-0">
                                         Status de Inspeção:
                                     </span>
                                     <div className="flex items-center space-x-6">
@@ -891,7 +891,7 @@ const Ruler = () => {
                                     }`}
                             >
                                 <div className="flex justify-between items-center px-2">
-                                    <span className="font-semibold text-sm text-gray-700">{canvasItem.title}</span>
+                                    <span className="font-semibold text-sm ">{canvasItem.title}</span>
                                     {canvases.length > 1 && (
                                         <Button
                                             size="sm"
@@ -907,7 +907,7 @@ const Ruler = () => {
                                     )}
                                 </div>
 
-                                <div className="w-full h-[800px] border bg-white rounded-lg shadow-sm relative overflow-hidden">
+                                <div className="w-full h-[800px] border rounded-lg shadow-sm relative overflow-hidden">
                                     <svg
                                         ref={(el) => { svgRefs.current[canvasItem.id] = el; }}
                                         className="w-full h-full cursor-crosshair"
