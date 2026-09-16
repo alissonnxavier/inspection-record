@@ -924,7 +924,6 @@ const Ruler = () => {
                                                     y={canvasItem.basePos.y}
                                                     width={baseWidth}
                                                     height={baseHeight}
-                                                    preserveAspectRatio="none"
                                                 />
                                                 <rect
                                                     x={canvasItem.basePos.x}
@@ -949,7 +948,6 @@ const Ruler = () => {
                                                     y={canvasItem.refPos.y}
                                                     width={refWidth}
                                                     height={refHeight}
-                                                    preserveAspectRatio="none"
                                                 />
                                                 <rect
                                                     x={canvasItem.refPos.x}
