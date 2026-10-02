@@ -24,7 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 // Importações para captura e geração de Word
 import { toPng } from 'html-to-image';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType, ImageRun, TextRun } from 'docx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType, ImageRun, TextRun, BorderStyle, VerticalAlign } from 'docx';
 import { saveAs } from 'file-saver';
 
 type Measurement = {
@@ -361,78 +361,224 @@ const Ruler = () => {
             const isApproved = partData.status === 'APROVADO';
 
             const docSectionsChildren: any[] = [
-                new Paragraph({
-                    text: `RELATÓRIO DE MEDIÇÕES`,
-                    heading: HeadingLevel.HEADING_1,
-                    alignment: AlignmentType.CENTER,
-                }),
                 new Paragraph({ text: "" }),
 
-                // TABELA DE CABEÇALHO COM DADOS DO FORMULÁRIO
+
+                // TABELA SUPERIOR: TÍTULO PRINCIPAL E CÓDIGO DE CONTROLE (SEM BORDAS)
                 new Table({
                     width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: {
+                        top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                        bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                        left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                        right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                        insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                        insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                    },
                     rows: [
                         new TableRow({
                             children: [
-                                //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Código da Peça:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
-                                new TableCell({ children: [new Paragraph(partData.code || "N/A")], width: { size: 70, type: WidthType.PERCENTAGE }, }),
-                            ],
-                        }),
-                        new TableRow({
-                            children: [
-                                //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Descrição da Peça:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
-                                new TableCell({ children: [new Paragraph(partData.description || "N/A")], width: { size: 70, type: WidthType.PERCENTAGE }, }),
-                            ],
-                        }),
-                        new TableRow({
-                            children: [
-                                //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Revisão:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
-                                new TableCell({ children: [new Paragraph(partData.revision || "N/A")], width: { size: 70, type: WidthType.PERCENTAGE }, }),
-                            ],
-                        }),
-                        new TableRow({
-                            children: [
-                                //@ts-ignore
-                                new TableCell({ children: [new Paragraph({ text: "Data / Hora:", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
-                                new TableCell({ children: [new Paragraph(`${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`)], width: { size: 70, type: WidthType.PERCENTAGE }, }),
-                            ],
-                        }),
-                        new TableRow({
-                            children: [
-                                //@ts-ignore
                                 new TableCell({
-                                    children: [new Paragraph({ children: [new TextRun({ text: "Status de Aprovação:", bold: true })] })],
-                                    width: { size: 30, type: WidthType.PERCENTAGE },
-                                }),
-                                //@ts-ignore
-                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 120, bottom: 120 },
+                                    borders: {
+                                        top: { style: BorderStyle.NONE },
+                                        bottom: { style: BorderStyle.NONE },
+                                        left: { style: BorderStyle.NONE },
+                                        right: { style: BorderStyle.NONE },
+                                    },
                                     children: [
-                                        //@ts-ignore
                                         new Paragraph({
-
+                                            alignment: AlignmentType.LEFT,
                                             children: [
                                                 new TextRun({
-                                                    text: partData.status == "APROVADO" ? "APROVADO" : "REPROVADO",
+                                                    text: "RELATÓRIO DA QUALIDADE",
                                                     bold: true,
-                                                    color: partData.status == "APROVADO" ? "008000" : "FF0000",
-                                                })
-                                            ]
-                                        })
+                                                    size: 32,
+                                                    color: "555555",
+                                                }),
+                                            ],
+                                        }),
                                     ],
-                                    width: {
-                                        size: 70, type: WidthType.PERCENTAGE
-
+                                    width: { size: 70, type: WidthType.PERCENTAGE },
+                                }),
+                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 120, bottom: 120 },
+                                    borders: {
+                                        top: { style: BorderStyle.NONE },
+                                        bottom: { style: BorderStyle.NONE },
+                                        left: { style: BorderStyle.NONE },
+                                        right: { style: BorderStyle.NONE },
                                     },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.RIGHT,
+                                            children: [new TextRun({ text: "FOR-QUA-076", size: 18, color: "666666" })],
+                                        }),
+                                        new Paragraph({
+                                            alignment: AlignmentType.RIGHT,
+                                            children: [
+                                                new TextRun({ text: "Data: ", bold: true, size: 18, color: "666666" }),
+                                                new TextRun({ text: "16/07/2021", size: 18, color: "666666" }),
+                                            ],
+                                        }),
+                                        new Paragraph({
+                                            alignment: AlignmentType.RIGHT,
+                                            children: [
+                                                new TextRun({ text: "Rev: ", bold: true, size: 18, color: "666666" }),
+                                                new TextRun({ text: partData.revision || "01", size: 18, color: "666666" }),
+                                            ],
+                                        }),
+                                    ],
+                                    width: { size: 30, type: WidthType.PERCENTAGE },
                                 }),
                             ],
                         }),
                     ],
                 }),
 
+                new Paragraph({ text: "" }),
 
+                // Quadro com Título, Autor, Data, Status e Descrição
+                // SEGUNDA TABELA: QUADRO COM TÍTULO, AUTOR, DATA, STATUS E DESCRIÇÃO
+                new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    rows: [
+                        // Linha 1: TÍTULO
+                        new TableRow({
+                            children: [
+                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.LEFT,
+                                            children: [
+                                                new TextRun({ text: "TÍTULO: ", bold: true }),
+                                                new TextRun({ text: `Relatório dimensional ${partData.code || "N/A"} - ${partData.description || ""}` }),
+                                            ],
+                                        }),
+                                    ],
+                                    columnSpan: 4,
+                                    width: { size: 100, type: WidthType.PERCENTAGE },
+                                }),
+                            ],
+                        }),
+                        // Linha 2: AUTOR | DATA | STATUS APROVADO/REPROVADO | Nº
+                        new TableRow({
+                            children: [
+                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.CENTER,
+                                            children: [
+                                                new TextRun({ text: "AUTOR: ", bold: true }),
+                                                new TextRun({ text: "" }),
+                                            ],
+                                        }),
+                                    ],
+                                    width: { size: 35, type: WidthType.PERCENTAGE },
+                                }),
+                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.CENTER,
+                                            children: [
+                                                new TextRun({ text: "DATA: ", bold: true }),
+                                                new TextRun({ text: new Date().toLocaleDateString('pt-BR') }),
+                                            ],
+                                        }),
+                                    ],
+                                    width: { size: 25, type: WidthType.PERCENTAGE },
+                                }),
+                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.LEFT,
+                                            children: [
+                                                new TextRun({
+                                                    text: partData.status == "APROVADO" ? "☒ " : "☐ ",
+                                                    bold: true,
+                                                    size: 24,
+                                                    color: partData.status == "APROVADO" ? "2D5A27" : "888888",
+                                                }),
+                                                new TextRun({
+                                                    text: "APROVADO",
+                                                    bold: true,
+                                                    color: partData.status == "APROVADO" ? "2D5A27" : "888888",
+                                                }),
+                                            ],
+                                        }),
+                                        new Paragraph({
+                                            alignment: AlignmentType.LEFT,
+                                            children: [
+                                                new TextRun({
+                                                    text: partData.status != "APROVADO" ? "☒ " : "☐ ",
+                                                    bold: true,
+                                                    size: 24,
+                                                    color: partData.status != "APROVADO" ? "C00000" : "888888",
+                                                }),
+                                                new TextRun({
+                                                    text: "REPROVADO",
+                                                    bold: true,
+                                                    color: partData.status != "APROVADO" ? "C00000" : "888888",
+                                                }),
+                                            ],
+                                        }),
+                                    ],
+                                    width: { size: 25, type: WidthType.PERCENTAGE },
+                                }),
+                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.CENTER,
+                                            children: [
+                                                new TextRun({ text: "Nº: ", bold: true }),
+                                                new TextRun({
+                                                    // Gera um número único usando os últimos 6 dígitos do Timestamp + 2 dígitos aleatórios
+                                                    text: `${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`
+                                                }),
+                                            ],
+                                        }),
+                                    ],
+                                    width: { size: 15, type: WidthType.PERCENTAGE },
+                                })
+                            ],
+                        }),
+                        // Linha 3: DESCRIÇÃO
+                        new TableRow({
+                            children: [
+                                new TableCell({
+                                    verticalAlign: VerticalAlign.CENTER,
+                                    margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.LEFT,
+                                            children: [
+                                                new TextRun({ text: "DESCRIÇÃO: ", bold: true }),
+                                                new TextRun({
+                                                    text: `Este relatório apresenta resultados da inspeção dimensional realizada na peça ${partData.code || "N/A"}, após o processo de corte e dobra. As medições foram realizadas seguindo as especificações do desenho técnico.`,
+                                                }),
+                                            ],
+                                        }),
+                                    ],
+                                    columnSpan: 4,
+                                    width: { size: 100, type: WidthType.PERCENTAGE },
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                new Paragraph({ text: "" }),
             ];
 
             // --- RENDERIZAÇÃO DOS CANVASES E MEDIÇÕES ---
