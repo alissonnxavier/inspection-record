@@ -140,7 +140,6 @@ export default function Page() {
         return fullName.replace(/BRANCO\s*,\s*/gi, '').trim().toUpperCase();
     };
 
-    // Formata a atenuação para exibir apenas "0." e duas casas decimais (ex: 0.19)
     const formatAttenuation = (val: number) => {
         if (isNaN(val)) return '';
         return val.toFixed(2);
@@ -351,38 +350,38 @@ export default function Page() {
 
             </div>
 
-            {/* Seção de Impressão (Atenuação formatada com 2 casas decimais) */}
+            {/* Seção de Impressão com Letras Maiores e Mais Legíveis */}
             <div id="print-section" className="hidden print:block w-full p-4 bg-white text-black">
                 <div className="border-2 border-black rounded-lg p-4 max-w-4xl mx-auto">
 
-                    <div className="grid grid-cols-4 border-b-2 border-black pb-2 mb-2 text-xs font-bold text-center">
-                        <div className="border-r border-black pr-2">CÓDIGO: {minLength1550 !== Infinity ? `${minLength1550}m` : ''}</div>
+                    <div className="grid grid-cols-4 border-b-2 border-black pb-3 mb-3 text-sm font-bold text-center">
+                        <div className="border-r border-black pr-2">MENOR: {minLength1550 !== Infinity ? `${minLength1550}m` : ''}</div>
                         <div className="border-r border-black pr-2">DATA: {new Date().toLocaleDateString()}</div>
                         <div className="border-r border-black pr-2">LOTE: {cableId}</div>
                         <div>LANCE: {enteredLength}m</div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 text-xs">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
 
                         {/* Coluna 1 */}
                         <table className="w-full border-collapse border border-black">
                             <thead>
-                                <tr className="bg-slate-200 text-black border-b border-black text-[10px]">
-                                    <th className="border border-black p-1">FIBRA</th>
-                                    <th className="border border-black p-1">METRAGEM</th>
-                                    <th className="border border-black p-1">ATENUAÇÃO</th>
+                                <tr className="bg-slate-200 text-black border-b border-black text-xs font-bold">
+                                    <th className="border border-black p-1.5">FIBRA</th>
+                                    <th className="border border-black p-1.5">METRAGEM</th>
+                                    <th className="border border-black p-1.5">ATENUAÇÃO</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {Array.from({ length: 12 }).map((_, idx) => {
                                     const item = column1[idx];
                                     return (
-                                        <tr key={idx} className="border-b border-black h-6">
-                                            <td className="border border-black p-1 font-semibold text-[10px] text-center">
+                                        <tr key={idx} className="border-b border-black h-8">
+                                            <td className="border border-black p-1.5 font-bold text-xs text-center">
                                                 {item ? formatFiberName(item.fiber) : ''}
                                             </td>
-                                            <td className="border border-black p-1 text-center">{item ? item.length : ''}</td>
-                                            <td className="border border-black p-1 text-center font-bold">
+                                            <td className="border border-black p-1.5 text-center text-xs font-semibold">{item ? item.length : ''}</td>
+                                            <td className="border border-black p-1.5 text-center text-xs font-bold">
                                                 {item ? formatAttenuation(item.attenuation) : ''}
                                             </td>
                                         </tr>
@@ -394,22 +393,22 @@ export default function Page() {
                         {/* Coluna 2 */}
                         <table className="w-full border-collapse border border-black">
                             <thead>
-                                <tr className="bg-slate-200 text-black border-b border-black text-[10px]">
-                                    <th className="border border-black p-1">FIBRA</th>
-                                    <th className="border border-black p-1">METRAGEM</th>
-                                    <th className="border border-black p-1">ATENUAÇÃO</th>
+                                <tr className="bg-slate-200 text-black border-b border-black text-xs font-bold">
+                                    <th className="border border-black p-1.5">FIBRA</th>
+                                    <th className="border border-black p-1.5">METRAGEM</th>
+                                    <th className="border border-black p-1.5">ATENUAÇÃO</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {Array.from({ length: 12 }).map((_, idx) => {
                                     const item = column2[idx];
                                     return (
-                                        <tr key={idx} className="border-b border-black h-6">
-                                            <td className="border border-black p-1 font-semibold text-[10px] text-center">
+                                        <tr key={idx} className="border-b border-black h-8">
+                                            <td className="border border-black p-1.5 font-bold text-xs text-center">
                                                 {item ? formatFiberName(item.fiber) : ''}
                                             </td>
-                                            <td className="border border-black p-1 text-center">{item ? item.length : ''}</td>
-                                            <td className="border border-black p-1 text-center font-bold">
+                                            <td className="border border-black p-1.5 text-center text-xs font-semibold">{item ? item.length : ''}</td>
+                                            <td className="border border-black p-1.5 text-center text-xs font-bold">
                                                 {item ? formatAttenuation(item.attenuation) : ''}
                                             </td>
                                         </tr>
@@ -421,22 +420,22 @@ export default function Page() {
                         {/* Coluna 3 */}
                         <table className="w-full border-collapse border border-black">
                             <thead>
-                                <tr className="bg-slate-200 text-black border-b border-black text-[10px]">
-                                    <th className="border border-black p-1">FIBRA</th>
-                                    <th className="border border-black p-1">METRAGEM</th>
-                                    <th className="border border-black p-1">ATENUAÇÃO</th>
+                                <tr className="bg-slate-200 text-black border-b border-black text-xs font-bold">
+                                    <th className="border border-black p-1.5">FIBRA</th>
+                                    <th className="border border-black p-1.5">METRAGEM</th>
+                                    <th className="border border-black p-1.5">ATENUAÇÃO</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {Array.from({ length: 12 }).map((_, idx) => {
                                     const item = column3[idx];
                                     return (
-                                        <tr key={idx} className="border-b border-black h-6">
-                                            <td className="border border-black p-1 font-semibold text-[10px] text-center">
+                                        <tr key={idx} className="border-b border-black h-8">
+                                            <td className="border border-black p-1.5 font-bold text-xs text-center">
                                                 {item ? formatFiberName(item.fiber) : ''}
                                             </td>
-                                            <td className="border border-black p-1 text-center">{item ? item.length : ''}</td>
-                                            <td className="border border-black p-1 text-center font-bold">
+                                            <td className="border border-black p-1.5 text-center text-xs font-semibold">{item ? item.length : ''}</td>
+                                            <td className="border border-black p-1.5 text-center text-xs font-bold">
                                                 {item ? formatAttenuation(item.attenuation) : ''}
                                             </td>
                                         </tr>
@@ -447,7 +446,7 @@ export default function Page() {
 
                     </div>
 
-                    <div className="text-right text-[10px] font-bold mt-2 tracking-widest">
+                    <div className="text-right text-xs font-bold mt-2 tracking-widest">
                         FIBRACEM
                     </div>
 

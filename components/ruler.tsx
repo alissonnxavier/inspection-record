@@ -619,47 +619,6 @@ const Ruler = () => {
                 }
 
                 docSectionsChildren.push(new Paragraph({ text: "" }));
-
-                const tableRows = [
-                    new TableRow({
-                        children: [
-                            //@ts-ignore
-                            new TableCell({ children: [new Paragraph({ text: "Identificação", bold: true })], width: { size: 30, type: WidthType.PERCENTAGE } }),
-                            //@ts-ignore
-                            new TableCell({ children: [new Paragraph({ text: "Valor Registrado", bold: true })], width: { size: 40, type: WidthType.PERCENTAGE } }),
-                        ],
-                    }),
-                ];
-
-                c.measurements.forEach((m, mIdx) => {
-                    tableRows.push(
-                        new TableRow({
-                            children: [
-                                new TableCell({ children: [new Paragraph(`Medição ${mIdx + 1}`)] }),
-                                new TableCell({ children: [new Paragraph(`${m.measure[0]?.inputValue || 0} mm`)] }),
-                            ],
-                        })
-                    );
-                });
-
-                c.angleMeasurements.forEach((a, aIdx) => {
-                    tableRows.push(
-                        new TableRow({
-                            children: [
-                                new TableCell({ children: [new Paragraph(`Ângulo ${aIdx + 1}`)] }),
-                                new TableCell({ children: [new Paragraph(`${a.measure[0]?.inputValue || 0}°`)] }),
-                            ],
-                        })
-                    );
-                });
-
-                docSectionsChildren.push(
-                    new Table({
-                        rows: tableRows,
-                        width: { size: 100, type: WidthType.PERCENTAGE },
-                    })
-                );
-
                 docSectionsChildren.push(new Paragraph({ text: "" }));
                 docSectionsChildren.push(new Paragraph({ text: "" }));
             }
