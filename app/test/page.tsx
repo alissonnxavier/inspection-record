@@ -358,7 +358,7 @@ export default function Page() {
                         <div className="border-r border-black pr-2">MENOR M: {minLength1550 !== Infinity ? `${minLength1550}m` : ''}</div>
                         <div className="border-r border-black pr-2">DATA: {new Date().toLocaleDateString()}</div>
                         <div className="border-r border-black pr-2">LOTE: {cableId}</div>
-                        <div>LANCE: {enteredLength}m</div>
+                        <div>CAPA: {enteredLength}m</div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 text-sm">
